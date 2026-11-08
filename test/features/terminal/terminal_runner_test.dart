@@ -15,6 +15,9 @@ import '../../support/fakes.dart';
 class FakeEmulator implements TerminalEmulator {
   final fed = <int>[];
   final notices = <String>[];
+  var resets = 0;
+  @override
+  void reset() => resets++;
   final inputCtrl = StreamController<String>.broadcast();
   final resizeCtrl = StreamController<(int, int)>.broadcast();
   @override
@@ -89,19 +92,32 @@ void main() {
       attachCommand: "herdr session attach 'main'",
       backoff: BackoffPolicy(random: () => 0),
       sleep: (d) async => sleeps.add(d),
+      attachFallback: const Duration(milliseconds: 10),
     );
   });
 
   tearDown(() => runner.dispose());
 
-  test('connects, attaches the session and streams output', () async {
+  test('connects, attaches the session once the shell prints, and streams output', () async {
     unawaited(runner.start());
     await pump();
     expect(runner.phase, TerminalPhase.connected);
+    expect(shells.single.written, isEmpty, reason: 'waits for the shell prompt');
+    shells.single.out.add(Uint8List.fromList(utf8.encode('\$ ')));
+    await pump();
     expect(shells.single.written.first, "herdr session attach 'main'\r");
     shells.single.out.add(Uint8List.fromList(utf8.encode('hello')));
     await pump();
-    expect(utf8.decode(emu.fed), 'hello');
+    expect(utf8.decode(emu.fed), r'$ hello');
+  });
+
+  test('a silent shell still gets the attach command after a short wait', () async {
+    unawaited(runner.start());
+    await pump();
+    expect(shells.single.written, isEmpty);
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    expect(shells.single.written.first, "herdr session attach 'main'\r");
+    expect(emu.resets, 0, reason: 'the first connection keeps the screen');
   });
 
   test('input and resizes are forwarded to the shell', () async {
@@ -122,6 +138,10 @@ void main() {
     await pump();
     await pump();
     expect(shells.length, 2);
+    expect(emu.resets, 1, reason: "the old session's screen is cleared before re-attaching");
+    expect(shells.last.written, isEmpty);
+    shells.last.out.add(Uint8List.fromList(utf8.encode('\$ ')));
+    await pump();
     expect(shells.last.written.first, "herdr session attach 'main'\r");
     expect(sleeps.first, const Duration(milliseconds: 500));
     expect(vault.unlocks, 2, reason: 'a new connection unlocks the key again');

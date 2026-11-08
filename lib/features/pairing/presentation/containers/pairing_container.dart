@@ -17,6 +17,16 @@ class PairingContainer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(pairingProvider);
     final ctrl = ref.read(pairingProvider.notifier);
+    // Once paired, go straight to the new host's page.
+    ref.listen(pairingProvider, (prev, next) {
+      final host = next.step == PairStep.done ? next.host : null;
+      if (host == null || prev?.step == PairStep.done) return;
+      final l = context.l10n;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(host.pushEnabled ? l.pairedWith(host.alias) : l.pairedWithoutPush)),
+      );
+      context.go('/hosts/${host.id}');
+    });
     final paired = state.step == PairStep.done ? state.host : null;
     final body = switch (state.step) {
       PairStep.done when paired != null => PairSuccessView(

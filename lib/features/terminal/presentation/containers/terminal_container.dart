@@ -353,6 +353,9 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
         onPinchStart: () => _pinchStart(settings),
         onPinchUpdate: _pinchUpdate,
         onPinchEnd: () => _pinchEnd(settings),
+        onTwoFingerDoubleTap: () {
+          if (!_keyboardOpen) _toggleKeyboard();
+        },
         selectionBar: _selection.selection == null
             ? null
             : _SelectionBar(onCopy: _copySelection, onClear: _selection.clearSelection),

@@ -36,6 +36,10 @@ class XtermEmulator implements TerminalEmulator {
   @override
   void notice(String text) => terminal.write('\r\n\x1b[2m$text\x1b[0m\r\n');
 
+  /// RIS: full reset (main screen, mouse modes off, cleared).
+  @override
+  void reset() => terminal.write('\x1bc');
+
   @override
   Stream<String> get input => _input.stream;
   @override
@@ -69,6 +73,8 @@ class XtermProxy implements TerminalEmulator {
   void feed(List<int> bytes) => inner.feed(bytes);
   @override
   void notice(String text) => inner.notice(text);
+  @override
+  void reset() => inner.reset();
   @override
   Stream<String> get input => inner.input;
   @override

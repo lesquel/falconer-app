@@ -11,6 +11,10 @@ abstract interface class TerminalEmulator {
   /// Local status line written by the app, never sent to the host.
   void notice(String text);
 
+  /// Clears the screen and modes a previous session left (alternate
+  /// screen, mouse reporting), before a reconnect re-attaches.
+  void reset();
+
   /// Keystrokes typed into the emulator.
   Stream<String> get input;
   Stream<(int, int)> get resizes;

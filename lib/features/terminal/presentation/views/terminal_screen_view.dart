@@ -21,6 +21,7 @@ class TerminalScreenView extends StatelessWidget {
     this.onPinchStart,
     this.onPinchUpdate,
     this.onPinchEnd,
+    this.onTwoFingerDoubleTap,
     this.selectionBar,
     this.corner,
   });
@@ -43,6 +44,9 @@ class TerminalScreenView extends StatelessWidget {
   final VoidCallback? onPinchStart;
   final ValueChanged<double>? onPinchUpdate;
   final VoidCallback? onPinchEnd;
+
+  /// Two quick taps with two fingers (opens the keyboard).
+  final VoidCallback? onTwoFingerDoubleTap;
 
   /// Actions for selected text (copy), shown over the terminal.
   final Widget? selectionBar;
@@ -104,6 +108,7 @@ class TerminalScreenView extends StatelessWidget {
                             onStart: onPinchStart,
                             onUpdate: onPinchUpdate,
                             onEnd: onPinchEnd,
+                            onTwoFingerDoubleTap: onTwoFingerDoubleTap,
                             child: Padding(
                               padding: const EdgeInsets.fromLTRB(8, 10, 8, 4),
                               child: TerminalView(
@@ -142,11 +147,18 @@ class TerminalScreenView extends StatelessWidget {
 /// Reports two-finger pinches without joining the gesture arena, so the
 /// terminal keeps its own taps, scrolls and selection.
 class _Pinch extends StatefulWidget {
-  const _Pinch({required this.child, this.onStart, this.onUpdate, this.onEnd});
+  const _Pinch({
+    required this.child,
+    this.onStart,
+    this.onUpdate,
+    this.onEnd,
+    this.onTwoFingerDoubleTap,
+  });
   final Widget child;
   final VoidCallback? onStart;
   final ValueChanged<double>? onUpdate;
   final VoidCallback? onEnd;
+  final VoidCallback? onTwoFingerDoubleTap;
 
   @override
   State<_Pinch> createState() => _PinchState();
@@ -155,6 +167,15 @@ class _Pinch extends StatefulWidget {
 class _PinchState extends State<_Pinch> {
   final _points = <int, Offset>{};
   double? _startDistance;
+
+  // Two-finger tap tracking: when the second finger landed, how far the
+  // fingers moved, and when the previous two-finger tap ended.
+  DateTime? _twoDownAt;
+  double _moved = 0;
+  DateTime? _lastTwoTap;
+  static const _tapTime = Duration(milliseconds: 300);
+  static const _doubleGap = Duration(milliseconds: 400);
+  static const _slop = 20.0;
 
   double get _distance {
     final p = _points.values.take(2).toList();
@@ -165,12 +186,18 @@ class _PinchState extends State<_Pinch> {
     _points[e.pointer] = e.localPosition;
     if (_points.length == 2) {
       _startDistance = _distance;
+      _twoDownAt = DateTime.now();
+      _moved = 0;
       widget.onStart?.call();
+    } else if (_points.length > 2) {
+      _twoDownAt = null;
     }
   }
 
   void _move(PointerMoveEvent e) {
-    if (!_points.containsKey(e.pointer)) return;
+    final before = _points[e.pointer];
+    if (before == null) return;
+    _moved += (e.localPosition - before).distance;
     _points[e.pointer] = e.localPosition;
     final start = _startDistance;
     if (start != null && start > 0 && _points.length >= 2) {
@@ -179,7 +206,23 @@ class _PinchState extends State<_Pinch> {
   }
 
   void _up(PointerEvent e) {
+    final wasTwo = _points.length == 2 && _points.containsKey(e.pointer);
     _points.remove(e.pointer);
+    final downAt = _twoDownAt;
+    if (wasTwo && downAt != null) {
+      _twoDownAt = null;
+      final now = DateTime.now();
+      final quick = now.difference(downAt) <= _tapTime && _moved <= _slop;
+      if (quick && e is PointerUpEvent) {
+        final last = _lastTwoTap;
+        if (last != null && now.difference(last) <= _doubleGap) {
+          _lastTwoTap = null;
+          widget.onTwoFingerDoubleTap?.call();
+        } else {
+          _lastTwoTap = now;
+        }
+      }
+    }
     if (_startDistance != null && _points.length < 2) {
       _startDistance = null;
       widget.onEnd?.call();

@@ -115,38 +115,41 @@ void main() {
     expect(find.text('Cancelar'), findsOneWidget);
   });
 
-  testWidgets('the arrow cross is always visible, sends arrows and repeats while held', (t) async {
-    final sent = <String>[];
-    await t.pumpWidget(
-      _app(
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: ExtraKeysBar(
-            base: KeyPresets.base,
-            preset: const [],
-            modifiers: const ModifierState(),
-            onKey: sent.add,
-            onModifier: (_) {},
-            onModifierLock: (_) {},
-            expanded: true,
-            onToggleExpanded: () {},
+  testWidgets(
+    'on a tablet the arrow cross is always visible, sends arrows and repeats while held',
+    (t) async {
+      final sent = <String>[];
+      await t.pumpWidget(
+        _app(
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: ExtraKeysBar(
+              base: KeyPresets.base,
+              preset: const [],
+              modifiers: const ModifierState(),
+              onKey: sent.add,
+              onModifier: (_) {},
+              onModifierLock: (_) {},
+              expanded: true,
+              onToggleExpanded: () {},
+            ),
           ),
         ),
-      ),
-    );
-    expect(find.text('←'), findsNothing, reason: 'arrows left the scrolling rows');
-    await t.tap(find.bySemanticsLabel('Up'));
-    await t.tap(find.bySemanticsLabel('Left'));
-    expect(sent, ['\x1b[A', '\x1b[D']);
-    sent.clear();
-    final g = await t.startGesture(t.getCenter(find.bySemanticsLabel('Down')));
-    await t.pump(const Duration(milliseconds: 600));
-    await t.pump(const Duration(milliseconds: 400));
-    await g.up();
-    await t.pump(const Duration(milliseconds: 300));
-    expect(sent.length, greaterThan(2));
-    expect(sent.toSet(), {'\x1b[B'});
-  });
+      );
+      expect(find.text('←'), findsNothing, reason: 'arrows left the scrolling rows');
+      await t.tap(find.bySemanticsLabel('Up'));
+      await t.tap(find.bySemanticsLabel('Left'));
+      expect(sent, ['\x1b[A', '\x1b[D']);
+      sent.clear();
+      final g = await t.startGesture(t.getCenter(find.bySemanticsLabel('Down')));
+      await t.pump(const Duration(milliseconds: 600));
+      await t.pump(const Duration(milliseconds: 400));
+      await g.up();
+      await t.pump(const Duration(milliseconds: 300));
+      expect(sent.length, greaterThan(2));
+      expect(sent.toSet(), {'\x1b[B'});
+    },
+  );
 
   testWidgets('chat Paste inserts the phone clipboard into the message', (t) async {
     t.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
@@ -179,5 +182,68 @@ void main() {
     await t.tap(find.byKey(const Key('chat-paste')));
     await t.pump();
     expect(changes.last, 'run npm test');
+  });
+
+  testWidgets('on a phone the bar is one row; arrows appear with more keys', (t) async {
+    t.view.physicalSize = const Size(1080, 2340);
+    t.view.devicePixelRatio = 3;
+    addTearDown(t.view.reset);
+    Widget bar(bool expanded) => _app(
+      Align(
+        alignment: Alignment.bottomCenter,
+        child: ExtraKeysBar(
+          base: KeyPresets.base,
+          preset: const [],
+          modifiers: const ModifierState(),
+          onKey: (_) {},
+          onModifier: (_) {},
+          onModifierLock: (_) {},
+          expanded: expanded,
+          onToggleExpanded: () {},
+          pinned: [
+            KeyGridButton(tooltip: 'Chat', icon: Icons.chat_bubble_outline, onPressed: () {}),
+            KeyGridButton(tooltip: 'Keyboard', icon: Icons.keyboard, onPressed: () {}),
+          ],
+        ),
+      ),
+    );
+    await t.pumpWidget(bar(false));
+    expect(find.byType(ArrowCross), findsNothing);
+    final esc = t.getCenter(find.text('Esc'));
+    final kb = t.getCenter(find.byIcon(Icons.keyboard));
+    expect(kb.dy, closeTo(esc.dy, 1), reason: 'one row of keys');
+    await t.pumpWidget(bar(true));
+    expect(find.byType(ArrowCross), findsOneWidget);
+    expect(t.takeException(), isNull);
+  });
+
+  testWidgets('a two-finger double tap asks for the keyboard; one tap does not', (t) async {
+    var taps = 0;
+    await t.pumpWidget(
+      _app(
+        TerminalScreenView(
+          terminal: Terminal(),
+          phase: TerminalPhase.connected,
+          fontSize: 14,
+          keysBar: const SizedBox.shrink(),
+          onTwoFingerDoubleTap: () => taps++,
+        ),
+      ),
+    );
+    final c = t.getCenter(find.byType(TerminalView));
+    Future<void> twoFingerTap() async {
+      final a = await t.startGesture(c - const Offset(30, 0));
+      final b = await t.startGesture(c + const Offset(30, 0), pointer: 2);
+      await t.pump(const Duration(milliseconds: 50));
+      await a.up();
+      await b.up();
+    }
+
+    await twoFingerTap();
+    await t.pump(const Duration(milliseconds: 100));
+    expect(taps, 0);
+    await twoFingerTap();
+    await t.pump(const Duration(milliseconds: 500));
+    expect(taps, 1);
   });
 }

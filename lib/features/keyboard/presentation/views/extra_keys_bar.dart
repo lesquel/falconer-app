@@ -105,6 +105,10 @@ class ExtraKeysBar extends StatelessWidget {
         ),
       ...pinned,
     ];
+    // Phones keep one compact row of keys; the arrows and extra rows show
+    // with "more keys". Tablets get a 2x3 grid with the cross beside it.
+    final wide = MediaQuery.sizeOf(context).width >= 600;
+    final perRow = wide ? 3 : cells.length;
     return Material(
       color: c.background,
       child: SafeArea(
@@ -114,30 +118,43 @@ class ExtraKeysBar extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (expanded) ...[
-                if (shortcuts.isNotEmpty || shortcutExtras.isNotEmpty)
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 7),
-                    child: Row(
-                      children: [
-                        for (var i = 0; i < shortcuts.length; i++)
-                          KeyCap(
-                            key: Key('shortcut_$i'),
-                            label: shortcuts[i].label,
-                            onTap: () => onKey(shortcuts[i].sequence!),
-                            onLongPress: onShortcutLongPress == null
-                                ? null
-                                : () => onShortcutLongPress!(i),
-                          ),
-                        ...shortcutExtras,
-                      ],
+              if (expanded)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (shortcuts.isNotEmpty || shortcutExtras.isNotEmpty)
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(horizontal: 7),
+                              child: Row(
+                                children: [
+                                  for (var i = 0; i < shortcuts.length; i++)
+                                    KeyCap(
+                                      key: Key('shortcut_$i'),
+                                      label: shortcuts[i].label,
+                                      onTap: () => onKey(shortcuts[i].sequence!),
+                                      onLongPress: onShortcutLongPress == null
+                                          ? null
+                                          : () => onShortcutLongPress!(i),
+                                    ),
+                                  ...shortcutExtras,
+                                ],
+                              ),
+                            ),
+                          _row(rest, extra: trailing),
+                          if (preset.isNotEmpty) _row(preset),
+                        ],
+                      ),
                     ),
-                  ),
-                _row(rest, extra: trailing),
-                if (preset.isNotEmpty) _row(preset),
-                const SizedBox(height: 4),
-              ],
+                    // On a phone the arrows live with the extra rows.
+                    if (!wide) ...[ArrowCross(onKey: onKey), const SizedBox(width: 10)],
+                  ],
+                ),
+              if (expanded) const SizedBox(height: 4),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
@@ -146,12 +163,16 @@ class ExtraKeysBar extends StatelessWidget {
                     Expanded(
                       child: Column(
                         children: [
-                          for (var r = 0; r * 3 < cells.length; r++) ...[
+                          for (var r = 0; r * perRow < cells.length; r++) ...[
                             if (r > 0) const SizedBox(height: 8),
                             Row(
                               children: [
-                                for (var i = r * 3; i < cells.length && i < r * 3 + 3; i++) ...[
-                                  if (i > r * 3) const SizedBox(width: 8),
+                                for (
+                                  var i = r * perRow;
+                                  i < cells.length && i < (r + 1) * perRow;
+                                  i++
+                                ) ...[
+                                  if (i > r * perRow) const SizedBox(width: 8),
                                   Expanded(child: SizedBox(height: 52, child: cells[i])),
                                 ],
                               ],
@@ -160,8 +181,8 @@ class ExtraKeysBar extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    ArrowCross(onKey: onKey),
+                    // On a tablet the cross is always beside the grid.
+                    if (wide) ...[const SizedBox(width: 10), ArrowCross(onKey: onKey)],
                   ],
                 ),
               ),

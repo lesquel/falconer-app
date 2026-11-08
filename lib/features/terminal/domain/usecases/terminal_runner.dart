@@ -25,6 +25,7 @@ final class TerminalRunner {
     this.attachCommand,
     BackoffPolicy? backoff,
     Sleep? sleep,
+    this.attachFallback = const Duration(milliseconds: 1500),
   }) : _backoff = backoff ?? BackoffPolicy(),
        _sleep = sleep ?? ((d) => Future<void>.delayed(d));
 
@@ -32,6 +33,11 @@ final class TerminalRunner {
   final HostConnections connections;
   final TerminalEmulator emulator;
   final String? attachCommand;
+
+  /// How long to wait for the shell to print (its prompt) before typing the
+  /// attach command anyway. Typing before the prompt can be swallowed by a
+  /// login shell, which left a reconnect in a plain shell.
+  final Duration attachFallback;
   final BackoffPolicy _backoff;
   final Sleep _sleep;
 
@@ -63,6 +69,7 @@ final class TerminalRunner {
       );
     }
     var attempt = 0;
+    var reconnect = false;
     failure = null;
     while (!_disposed) {
       _set(attempt == 0 ? TerminalPhase.connecting : TerminalPhase.reconnecting);
@@ -72,11 +79,29 @@ final class TerminalRunner {
         _conn = conn;
         _shell = shell;
         attempt = 0;
+        // A reconnect starts from a clean screen: the dropped session left
+        // its alternate screen and mouse modes behind.
+        if (reconnect) emulator.reset();
+        reconnect = true;
         _set(TerminalPhase.connected);
         final attach = attachCommand;
-        if (attach != null) await shell.write(utf8.encode('$attach\r'));
-        await for (final chunk in shell.output) {
-          emulator.feed(chunk);
+        var attached = attach == null;
+        Timer? fallback;
+        void sendAttach() {
+          if (attached) return;
+          attached = true;
+          fallback?.cancel();
+          unawaited(shell.write(utf8.encode('$attach\r')).catchError((Object _) {}));
+        }
+
+        if (!attached) fallback = Timer(attachFallback, sendAttach);
+        try {
+          await for (final chunk in shell.output) {
+            emulator.feed(chunk);
+            sendAttach();
+          }
+        } finally {
+          fallback?.cancel();
         }
         _shell = null;
         if (_disposed) break;
