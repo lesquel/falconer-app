@@ -61,7 +61,11 @@ class SecureKeyVault implements KeyVault {
   @override
   Future<SshKeyInfo> ensureDeviceKey({required String comment}) async {
     final existing = await byId(SshKeyInfo.deviceKeyId);
-    if (existing != null && await _storage.readSshPrivate(existing.id) != null) return existing;
+    if (existing != null &&
+        (await _storage.hasBoundSshPrivate(existing.id) ||
+            await _storage.hasLegacySshPrivate(existing.id))) {
+      return existing;
+    }
     return _store(
       SshKeyInfo.deviceKeyId,
       'This device',
@@ -84,11 +88,22 @@ class SecureKeyVault implements KeyVault {
     await (_db.delete(_db.keyRows)..where((t) => t.id.equals(id))).go();
   }
 
+  static const _missing = ValidationFailure('This key is missing. Pair the host again.');
+
+  /// Bound keys: the storage read itself shows the hardware-enforced prompt.
+  /// v0.1 keys (not auth-bound): app-level prompt, then re-wrapped into the
+  /// bound namespace and removed from the old one, so this happens once.
   @override
   Future<String> unlockPrivate(String id, {required String reason}) async {
+    if (await _storage.hasBoundSshPrivate(id)) {
+      return await _storage.readSshPrivate(id) ?? (throw _missing);
+    }
+    if (!await _storage.hasLegacySshPrivate(id)) throw _missing;
     if (!await _auth.authenticate(reason)) throw const UserCancelledFailure();
-    final v = await _storage.readSshPrivate(id);
-    if (v == null) throw const ValidationFailure('This key is missing. Pair the host again.');
+    final v = await _storage.readLegacySshPrivate(id);
+    if (v == null) throw _missing;
+    await _storage.writeSshPrivate(id, v);
+    await _storage.deleteLegacySshPrivate(id);
     return v;
   }
 }

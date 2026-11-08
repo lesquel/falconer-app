@@ -65,7 +65,8 @@ QR code ─► PairPayload.parse (version, expiry, tailnet IP, field sizes)
         ─► TcpPairingGateway: one sealed JSON line to ip:port, one reply line
         ─► Host saved with pinned ssh_fp, hpk, device_id
 
-HostConnections.connection(host) ─► KeyVault.unlockPrivate (biometric) ─► Rust connect(pin)
+HostConnections.connection(host) ─► KeyVault.unlockPrivate (Keystore auth-bound read: hardware prompt;
+        v0.1 keys: app prompt, then re-wrapped once) ─► Rust connect(pin)
         ─► post-connect: resolve hook path, re-send rotated push endpoint
 
 UnifiedPush message ─► kid → host ─► PushCrypto.open ─► InboxEvent merge ─► notification

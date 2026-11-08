@@ -10,9 +10,9 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
 ## What it does
 
 - **Hosts and keys** — add, edit and delete hosts; generate an Ed25519 key on the phone or import
-  an existing unencrypted `ssh-ed25519` key; copy the public key. Private keys live in
-  Keystore-backed storage and every new SSH connection asks for biometrics or the device
-  credential.
+  an existing unencrypted `ssh-ed25519` key; copy the public key. Private keys are encrypted
+  under an auth-bound Android Keystore key: every new SSH connection asks for biometrics or the
+  device credential, enforced by the hardware. Requires Android 9+ and a screen lock.
 - **QR pairing** — scan the code printed by `openmosh-hook pair` (or paste the `openmosh://pair`
   link). The phone creates its keys, registers for UnifiedPush and pairs over a one-shot
   encrypted exchange inside the tailnet. The host's SSH key fingerprint from the code is pinned.
@@ -32,7 +32,7 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
 | Property | How |
 |---|---|
 | Host key pinning, no override | The Rust core aborts the handshake unless the server key matches the pinned `SHA256:` fingerprint. The mismatch screen has no "continue" button. |
-| Keys | Ed25519 generated on the device; stored with `flutter_secure_storage` (AES-GCM key wrapped by Android Keystore); unlock with biometrics/device credential before each new connection. The private key is never displayed or copied. |
+| Keys | Ed25519 generated on the device. SSH private keys are encrypted under an Android Keystore key created with user authentication required (`flutter_secure_storage` `AndroidOptions.biometric`, `enforceBiometrics`, `requireBiometricsPerOperation`): the hardware refuses to decrypt them without a fresh biometric or screen-lock prompt, on every new connection. A screen lock is therefore required, and Android 9+. Keys stored by v0.1 (Keystore-wrapped but not auth-bound) are moved to the bound store on their first successful unlock. The push key is not auth-bound because the background engine decrypts notifications without a prompt; it can only read notifications. The private key is never displayed or copied. |
 | Push E2EE | X25519 + HKDF-SHA256 + XChaCha20-Poly1305, decrypted in pure Dart. Bodies with a wrong `kid`, version or tag are discarded. Verified against the hook's shared test vectors. |
 | Lock screen | Previews off by default: notifications say only `<host>: <agent> needs you`. With previews on, notifications are `VISIBILITY_PRIVATE`. |
 | Screens | `FLAG_SECURE` on the whole app, always: `MainActivity.onCreate` sets it before the first frame and no screen clears it (no screenshots, screen recording or recents thumbnail of the terminal, keys, pairing, inbox or answer screens). |

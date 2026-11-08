@@ -18,8 +18,9 @@ android {
 
     defaultConfig {
         applicationId = "dev.openmosh.openmosh"
-        // Android 8.0+: Keystore-backed AES-GCM and notification channels.
-        minSdk = 26
+        // Android 9+: SSH keys are stored under an auth-bound Keystore key
+        // (flutter_secure_storage AndroidOptions.biometric requires API 28).
+        minSdk = 28
         targetSdk = flutter.targetSdkVersion
         // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
         // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)
