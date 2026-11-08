@@ -71,10 +71,11 @@ jobs:
         env:
           MINISIGN_SECRET_KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
         run: |
-          sudo apt-get install -y minisign >/dev/null
+          # rsign2 is minisign-compatible; Ubuntu's minisign cannot read unencrypted keys.
+          cargo install rsign2 --version 0.6.7 --locked
           umask 077
           printf '%s\n' "$MINISIGN_SECRET_KEY" > "$RUNNER_TEMP/minisign.key"
-          minisign -S -s "$RUNNER_TEMP/minisign.key" -m dist/SHA256SUMS
+          rsign sign -W -s "$RUNNER_TEMP/minisign.key" -t "openmosh-app $GITHUB_REF_NAME" dist/SHA256SUMS < /dev/null
           rm -f "$RUNNER_TEMP/minisign.key"
       - name: Publish
         env:
