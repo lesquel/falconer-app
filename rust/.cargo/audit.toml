@@ -1,0 +1,6 @@
+# cargo-audit configuration; keep in sync with deny.toml [advisories].ignore.
+[advisories]
+ignore = [
+    # adler: unmaintained notice only, transitive via flutter_rust_bridge.
+    "RUSTSEC-2025-0056",
+]

@@ -58,9 +58,14 @@ flutter_rust_bridge_codegen generate   # after changing rust/src/api/**
 dart run build_runner build            # after changing lib/shared/data/app_database.dart
 flutter analyze
 flutter test
-(cd rust && cargo test && cargo clippy -- -D warnings)
+(cd rust && cargo test && cargo clippy -- -D warnings && cargo deny check)
 flutter build apk --debug              # build/app/outputs/flutter-apk/app-debug.apk
 ```
+
+CI (`.github/workflows/ci.yml`) runs the same steps plus `dart format --set-exit-if-changed`
+(100 columns, generated files excluded), `cargo fmt --check` and `cargo audit`. The supply-chain
+policy is `rust/deny.toml` (GPL-3.0-compatible license allowlist, crates.io only); ignored
+advisories are listed with their reason there and in `rust/.cargo/audit.toml`.
 
 Generated files are committed: `lib/shared/bridge/**`, `rust/src/frb_generated.rs`,
 `lib/shared/data/app_database.g.dart`.
