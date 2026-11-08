@@ -50,3 +50,4 @@ app.*.map.json
 # Rust core
 /rust/target/
 /rust_builder/cargokit/build_tool/.dart_tool/
+android/.kotlin/
