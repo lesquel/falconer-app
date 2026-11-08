@@ -1,7 +1,10 @@
-/// QR pairing code (`openmosh://pair?d=<b64u(JSON)>`, TRD §6.3 step 4).
+/// QR pairing code, wire version 2 (TRD §6.3 step 4):
+/// `openmosh://pair?v=2&n=<alias>&i=<ip>&s=<ssh_port>&u=<ssh_user>&f=<fp>&k=<hpk>&p=<port>&t=<tok>&e=<exp>`.
+///
+/// `f` is the SHA256 host key fingerprint without its `SHA256:` prefix, in the
+/// b64url alphabet. Every parameter appears exactly once; unknown ones are refused.
 library;
 
-import 'dart:convert';
 import 'dart:typed_data';
 
 import '../../../../shared/domain/b64u.dart';
@@ -23,13 +26,14 @@ final class PairCodeFailure extends AppFailure {
   };
 }
 
-final _fingerprint = RegExp(r'^SHA256:[A-Za-z0-9+/]{43}$');
+final _fingerprint = RegExp(r'^[A-Za-z0-9_-]{43}$');
+final _decimal = RegExp(r'^[1-9][0-9]{0,15}$');
+const _keys = {'v', 'n', 'i', 's', 'u', 'f', 'k', 'p', 't', 'e'};
 final _user = RegExp(r'^[A-Za-z0-9._][A-Za-z0-9._-]{0,63}$');
 
 final class PairPayload {
   const PairPayload({
     required this.alias,
-    required this.address,
     required this.ip,
     required this.sshPort,
     required this.sshUser,
@@ -40,13 +44,12 @@ final class PairPayload {
     required this.expiresAt,
   });
 
-  static const version = 1;
+  static const version = 2;
 
   /// Codes live 5 minutes; anything claiming to live longer than a day is not ours.
   static const maxLifetimeSecs = 86400;
 
   final String alias;
-  final String address;
   final String ip;
   final int sshPort;
   final String sshUser;
@@ -61,34 +64,40 @@ final class PairPayload {
     if (uri == null || uri.scheme != 'openmosh' || uri.host != 'pair') {
       throw PairCodeFailure(PairCodeError.malformed);
     }
-    final d = uri.queryParameters['d'];
-    if (d == null || d.isEmpty) throw PairCodeFailure(PairCodeError.malformed);
-    final Object? json;
+    final Map<String, List<String>> all;
     try {
-      json = jsonDecode(utf8.decode(b64uDecode(d)));
+      all = uri.queryParametersAll;
     } on FormatException {
       throw PairCodeFailure(PairCodeError.malformed);
     }
-    if (json is! Map<String, Object?>) throw PairCodeFailure(PairCodeError.malformed);
-    if (json['v'] != version) throw PairCodeFailure(PairCodeError.unsupportedVersion);
-
-    final alias = sanitizeLabel(_str(json, 'alias', max: 64));
-    if (alias == null || alias.isEmpty) throw PairCodeFailure(PairCodeError.malformed);
-    final address = _str(json, 'addr', max: 253);
-    final ip = _str(json, 'ip', max: 15);
-    final sshUser = _str(json, 'ssh_user', max: 64);
-    if (!_user.hasMatch(sshUser)) throw PairCodeFailure(PairCodeError.malformed);
-    final fp = _str(json, 'ssh_fp', max: 64);
-    if (!_fingerprint.hasMatch(fp)) throw PairCodeFailure(PairCodeError.malformed);
-    final hpk = _bytes(json, 'hpk', 32);
-    final tok = _bytes(json, 'tok', 32);
-    final sshPort = _port(json, 'ssh_port');
-    final pairPort = _port(json, 'port');
-    final exp = json['exp'];
-    final nowSecs = now.millisecondsSinceEpoch ~/ 1000;
-    if (exp is! int || exp <= 0 || exp > nowSecs + maxLifetimeSecs) {
+    if (all.isEmpty) throw PairCodeFailure(PairCodeError.malformed);
+    if (all['v']?.length != 1) {
+      // v1 codes carried the whole offer in `d` and had no `v` parameter.
+      if (all.containsKey('d') || !all.containsKey('v')) {
+        throw PairCodeFailure(PairCodeError.unsupportedVersion);
+      }
       throw PairCodeFailure(PairCodeError.malformed);
     }
+    if (all['v']!.single != '$version') throw PairCodeFailure(PairCodeError.unsupportedVersion);
+    if (all.keys.any((k) => !_keys.contains(k)) || all.values.any((v) => v.length != 1)) {
+      throw PairCodeFailure(PairCodeError.malformed);
+    }
+    final q = {for (final e in all.entries) e.key: e.value.single};
+
+    final alias = sanitizeLabel(_str(q, 'n', max: 64));
+    if (alias == null || alias.isEmpty) throw PairCodeFailure(PairCodeError.malformed);
+    final ip = _str(q, 'i', max: 15);
+    final sshUser = _str(q, 'u', max: 64);
+    if (!_user.hasMatch(sshUser)) throw PairCodeFailure(PairCodeError.malformed);
+    final fp = _str(q, 'f', max: 43);
+    if (!_fingerprint.hasMatch(fp)) throw PairCodeFailure(PairCodeError.malformed);
+    final hpk = _bytes(q, 'k', 32);
+    final tok = _bytes(q, 't', 32);
+    final sshPort = _port(q, 's');
+    final pairPort = _port(q, 'p');
+    final exp = _int(q, 'e');
+    final nowSecs = now.millisecondsSinceEpoch ~/ 1000;
+    if (exp > nowSecs + maxLifetimeSecs) throw PairCodeFailure(PairCodeError.malformed);
 
     if (!isTailnetIpv4(ip)) throw PairCodeFailure(PairCodeError.notTailnet);
     final expiresAt = DateTime.fromMillisecondsSinceEpoch(exp * 1000, isUtc: true);
@@ -96,11 +105,10 @@ final class PairPayload {
 
     return PairPayload(
       alias: alias,
-      address: address,
       ip: ip,
       sshPort: sshPort,
       sshUser: sshUser,
-      sshFingerprint: fp,
+      sshFingerprint: 'SHA256:${fp.replaceAll('-', '+').replaceAll('_', '/')}',
       hostPublicKey: hpk,
       pairPort: pairPort,
       token: tok,
@@ -108,17 +116,17 @@ final class PairPayload {
     );
   }
 
-  static String _str(Map<String, Object?> j, String k, {required int max}) {
-    final v = j[k];
-    if (v is! String || v.isEmpty || v.length > max || v.contains(RegExp(r'[\x00-\x1f\x7f]'))) {
+  static String _str(Map<String, String> q, String k, {required int max}) {
+    final v = q[k];
+    if (v == null || v.isEmpty || v.length > max || v.contains(RegExp(r'[\x00-\x1f\x7f]'))) {
       throw PairCodeFailure(PairCodeError.malformed);
     }
     return v;
   }
 
-  static Uint8List _bytes(Map<String, Object?> j, String k, int len) {
-    final v = j[k];
-    if (v is! String) throw PairCodeFailure(PairCodeError.malformed);
+  static Uint8List _bytes(Map<String, String> q, String k, int len) {
+    final v = q[k];
+    if (v == null) throw PairCodeFailure(PairCodeError.malformed);
     try {
       final b = b64uDecode(v);
       if (b.length != len) throw PairCodeFailure(PairCodeError.malformed);
@@ -128,9 +136,16 @@ final class PairPayload {
     }
   }
 
-  static int _port(Map<String, Object?> j, String k) {
-    final v = j[k];
-    if (v is! int || v < 1 || v > 65535) throw PairCodeFailure(PairCodeError.malformed);
+  /// Positive decimal integer without sign, spaces or leading zeros.
+  static int _int(Map<String, String> q, String k) {
+    final v = q[k];
+    if (v == null || !_decimal.hasMatch(v)) throw PairCodeFailure(PairCodeError.malformed);
+    return int.parse(v);
+  }
+
+  static int _port(Map<String, String> q, String k) {
+    final v = _int(q, k);
+    if (v > 65535) throw PairCodeFailure(PairCodeError.malformed);
     return v;
   }
 }

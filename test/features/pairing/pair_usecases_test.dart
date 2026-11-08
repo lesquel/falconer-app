@@ -35,20 +35,10 @@ class FakeEndpoints implements PushEndpointSource {
 }
 
 String code({int exp = 2000, String ip = '100.101.102.103'}) {
-  final json = {
-    'v': 1,
-    'alias': 'ws',
-    'addr': 'ws.tail.ts.net',
-    'ip': ip,
-    'ssh_port': 2222,
-    'ssh_user': 'me',
-    'ssh_fp': 'SHA256:i2cBF5DBtTy5/U7Y27668/2F1HhY/qwC4eALG8QAiQM',
-    'hpk': b64uEncode(List.filled(32, 7)),
-    'port': 41000,
-    'tok': b64uEncode(List.filled(32, 9)),
-    'exp': exp,
-  };
-  return 'openmosh://pair?d=${b64uEncode(utf8.encode(jsonEncode(json)))}';
+  final hpk = b64uEncode(List.filled(32, 7));
+  final tok = b64uEncode(List.filled(32, 9));
+  return 'openmosh://pair?v=2&n=ws&i=$ip&s=2222&u=me'
+      '&f=i2cBF5DBtTy5_U7Y27668_2F1HhY_qwC4eALG8QAiQM&k=$hpk&p=41000&t=$tok&e=$exp';
 }
 
 void main() {

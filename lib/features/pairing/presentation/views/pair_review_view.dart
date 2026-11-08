@@ -38,7 +38,7 @@ class _PairReviewViewState extends State<PairReviewView> {
       children: [
         Text('Pair with ${c.alias}', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 8),
-        Text('${c.sshUser}@${c.ip}:${c.sshPort}  (${c.address})'),
+        Text('${c.sshUser}@${c.ip}:${c.sshPort}'),
         const SizedBox(height: 12),
         FingerprintCard(label: 'SSH host key that will be pinned', fingerprint: c.sshFingerprint),
         const SizedBox(height: 12),

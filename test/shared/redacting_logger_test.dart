@@ -7,7 +7,7 @@ void main() {
         '-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjEAAAAA\n-----END OPENSSH PRIVATE KEY-----';
     final out = redact(
       'key=$pem pub=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDRX tok=gIGCg4SFhoeIiYqLjI2Oj5CRkpOU '
-      'link=openmosh://pair?d=eyJ2IjoxfQ url=https://ntfy.sh/upSecretTopic',
+      'link=openmosh://pair?v=2&t=eyJ2IjoxfQ url=https://ntfy.sh/upSecretTopic',
     );
     for (final leak in [
       'BEGIN OPENSSH',
