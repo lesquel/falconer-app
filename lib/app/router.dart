@@ -11,6 +11,7 @@ import '../features/pairing/presentation/containers/pairing_container.dart';
 import '../features/settings/presentation/containers/colors_container.dart';
 import '../features/settings/presentation/containers/settings_container.dart';
 import '../features/terminal/presentation/containers/terminal_container.dart';
+import '../l10n/l10n.dart';
 import 'home_shell.dart';
 
 final _id = RegExp(r'^[A-Za-z0-9_-]{1,128}$');
@@ -25,7 +26,7 @@ String? _guardIds(GoRouterState s) {
 GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
   initialLocation: initialLocation,
   redirect: (_, s) => _guardIds(s),
-  errorBuilder: (_, _) => const Scaffold(body: Center(child: Text('Not found'))),
+  errorBuilder: (context, _) => Scaffold(body: Center(child: Text(context.l10n.notFound))),
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (_, _, shell) => HomeShell(shell: shell),

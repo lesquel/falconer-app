@@ -6,7 +6,9 @@ import 'package:openmosh/features/settings/domain/entities/appearance.dart';
 import 'package:openmosh/features/settings/presentation/views/colors_view.dart';
 import 'package:openmosh/features/settings/presentation/views/settings_view.dart';
 
-Widget app(Widget child, {Brightness brightness = Brightness.dark}) => MaterialApp(
+import '../support/l10n_app.dart';
+
+Widget app(Widget child, {Brightness brightness = Brightness.dark}) => l10nApp(
   theme: buildTheme(brightness),
   home: Scaffold(body: child),
 );

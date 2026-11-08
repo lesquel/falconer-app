@@ -1,0 +1,533 @@
+{
+  "@@locale": "en",
+  "back": "Back",
+  "close": "Close",
+  "cancel": "Cancel",
+  "retry": "Retry",
+  "save": "Save",
+  "continueAction": "Continue",
+  "delete": "Delete",
+  "dismiss": "Dismiss",
+  "notFound": "Not found",
+  "moleSemanticLabel": "OpenMosh mole",
+  "@moleSemanticLabel": {
+    "description": "Accessibility label of the mascot."
+  },
+  "somethingWentWrong": "Something went wrong.",
+  "navHosts": "Hosts",
+  "@navHosts": {
+    "description": "Bottom dock tab."
+  },
+  "navInbox": "Inbox",
+  "@navInbox": {
+    "description": "Bottom dock tab."
+  },
+  "navKeys": "Keys",
+  "@navKeys": {
+    "description": "Bottom dock tab."
+  },
+  "navSettings": "Settings",
+  "@navSettings": {
+    "description": "Bottom dock tab."
+  },
+  "timeJustNow": "just now",
+  "timeSecondsAgo": "{count} s ago",
+  "@timeSecondsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeMinutesAgo": "{count} min ago",
+  "@timeMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHoursAgo": "{count} h ago",
+  "@timeHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeDaysAgo": "{count} d ago",
+  "@timeDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "greetingMorning": "Good morning",
+  "greetingAfternoon": "Good afternoon",
+  "greetingEvening": "Good evening",
+  "hostKeyChangedTitle": "Host key changed",
+  "hostKeyChangedBody": "The server presented a different key than the one pinned at pairing. This can mean someone is intercepting the connection. The connection was blocked. If you reinstalled the host on purpose, delete this host and pair it again.",
+  "fingerprintPinned": "Pinned",
+  "@fingerprintPinned": {
+    "description": "Label of the pinned host key fingerprint."
+  },
+  "fingerprintPresented": "Presented",
+  "@fingerprintPresented": {
+    "description": "Label of the presented host key fingerprint."
+  },
+  "noComputersTitle": "No computers yet",
+  "noComputersBody": "Run `openmosh-hook pair` on your computer, then scan the code.",
+  "scanPairingCode": "Scan pairing code",
+  "addHostManually": "Add host manually",
+  "allQuiet": "All quiet.",
+  "allGoodExcept": "{more, plural, =0{All good,\nexcept {alias}.} other{All good,\nexcept {alias} and {more} more.}}",
+  "@allGoodExcept": {
+    "description": "Home headline; {alias} is highlighted.",
+    "placeholders": {
+      "alias": {
+        "type": "String"
+      },
+      "more": {
+        "type": "int"
+      }
+    }
+  },
+  "computersPairedNothingWaiting": "{count, plural, =1{1 computer paired. Nothing is waiting for you.} other{{count} computers paired. Nothing is waiting for you.}}",
+  "@computersPairedNothingWaiting": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agentWaitingForAnswer": "{agent} is waiting for your answer.",
+  "@agentWaitingForAnswer": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "inboxTileSemantics": "Inbox, {today} events today, {waiting} waiting",
+  "@inboxTileSemantics": {
+    "placeholders": {
+      "today": {
+        "type": "int"
+      },
+      "waiting": {
+        "type": "int"
+      }
+    }
+  },
+  "today": "Today",
+  "eventCount": "{count, plural, =1{1 event} other{{count} events}}",
+  "@eventCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "waitingCount": "{count} waiting",
+  "@waitingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pairTileSemantics": "Pair a computer with a QR code",
+  "addTile": "Add",
+  "pairWithQr": "Pair with QR",
+  "yourComputers": "Your computers",
+  "aHost": "a host",
+  "@aHost": {
+    "description": "Fallback when the host of an event is unknown."
+  },
+  "host": "host",
+  "@host": {
+    "description": "Fallback host name."
+  },
+  "needsYou": "Needs you",
+  "reviewRequestSemantics": "Review request from {alias}, {agent}: {what}",
+  "@reviewRequestSemantics": {
+    "placeholders": {
+      "alias": {
+        "type": "String"
+      },
+      "agent": {
+        "type": "String"
+      },
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "badgePush": "push",
+  "badgeNoPush": "no push",
+  "waitingForYou": "{count} waiting for you",
+  "@waitingForYou": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "terminal": "Terminal",
+  "sessions": "Sessions",
+  "editHost": "Edit host",
+  "deleteHost": "Delete host",
+  "addHost": "Add host",
+  "notificationsOn": "Notifications on",
+  "notificationsOff": "Notifications off",
+  "agentStateWaiting": "waiting",
+  "agentStateWorking": "working",
+  "agentStateDone": "done",
+  "agentStateIdle": "idle",
+  "agentStateUnknown": "unknown",
+  "shell": "Shell",
+  "loadSessions": "Load sessions",
+  "refresh": "Refresh",
+  "enableNotifications": "Enable notifications",
+  "noSessions": "No Herdr or tmux sessions",
+  "sessionAttached": "{kind} · attached",
+  "@sessionAttached": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "agents": "Agents",
+  "noAgents": "No agents running",
+  "pinnedHostKey": "Pinned host key",
+  "openingHost": "Opening host",
+  "deleteHostTitle": "Delete host?",
+  "deleteHostBody": "Removes the host, its pinned key and its inbox from this phone. To also remove this phone from the host, revoke it under Paired devices first.",
+  "revokeThisPhoneTitle": "Revoke this phone?",
+  "revokeDeviceTitle": "Revoke {name}?",
+  "@revokeDeviceTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "revokeThisPhoneBody": "This is the phone you are using. OpenMosh will lose access to {alias}: the host removes its SSH key and push key. Pair again to get access back.",
+  "@revokeThisPhoneBody": {
+    "placeholders": {
+      "alias": {
+        "type": "String"
+      }
+    }
+  },
+  "revokeDeviceBody": "Removes its SSH key and push key from {alias}. It can no longer connect or get notifications.",
+  "@revokeDeviceBody": {
+    "placeholders": {
+      "alias": {
+        "type": "String"
+      }
+    }
+  },
+  "revoke": "Revoke",
+  "deviceRevoked": "{name} was revoked.",
+  "@deviceRevoked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "thisPhoneRevoked": "This phone was revoked from {alias}. Pair again or delete the host.",
+  "@thisPhoneRevoked": {
+    "placeholders": {
+      "alias": {
+        "type": "String"
+      }
+    }
+  },
+  "pairedDevices": "Paired devices",
+  "showPairedDevices": "Show paired devices",
+  "noPairedDevices": "No devices are paired with this host.",
+  "badgeThisPhone": "this phone",
+  "pairedOn": "Paired {date}",
+  "@pairedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "pairedOnStale": "Paired {date} · endpoint stale",
+  "@pairedOnStale": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "revokeDeviceTooltip": "Revoke {name}",
+  "@revokeDeviceTooltip": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldName": "Name",
+  "fieldAddress": "Hostname or Tailscale IP",
+  "fieldPort": "Port",
+  "fieldUser": "User",
+  "fieldKey": "Key",
+  "thisDeviceKey": "This device (Ed25519)",
+  "checkingHostKey": "Checking host key…",
+  "verifyHostKeyOf": "Verify the host key of {address}",
+  "@verifyHostKeyOf": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "verifyHostKeyHelp": "On the host run:\n  ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub\nTrust it only if the fingerprint is identical. It will be pinned, and any later change will block the connection.",
+  "presentedHostKey": "Presented host key",
+  "trustAndSave": "It matches — trust and save",
+  "eventNotFound": "Event not found",
+  "eventMayBeCleared": "It may have been cleared.",
+  "badgeQuestion": "question",
+  "badgeNeedsApproval": "needs approval",
+  "badgeSending": "sending…",
+  "badgeFailed": "failed",
+  "badgeResolved": "resolved",
+  "badgeDone": "done",
+  "responseAllow": "allow",
+  "@responseAllow": {
+    "description": "Answer kind sent to the agent."
+  },
+  "responseDeny": "deny",
+  "@responseDeny": {
+    "description": "Answer kind sent to the agent."
+  },
+  "responseText": "text",
+  "@responseText": {
+    "description": "Answer kind sent to the agent."
+  },
+  "noAgentEventsTitle": "No agent events yet.",
+  "noAgentEventsBody": "When an agent on a paired computer needs you, it shows up here.",
+  "nothingWaiting": "Nothing waiting for you.",
+  "requestsWaiting": "{count, plural, =1{1 request waits for you.} other{{count} requests wait for you.}}",
+  "@requestsWaiting": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agentOnHost": "{agent} on {alias}",
+  "@agentOnHost": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      },
+      "alias": {
+        "type": "String"
+      }
+    }
+  },
+  "agentAsks": "{agent} asks",
+  "@agentAsks": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentNeedsYou": "Agent needs you",
+  "alreadyAnswered": "Already answered.",
+  "nothingToAnswer": "Nothing to answer.",
+  "youPickedInNotification": "You picked \"{action}\" in the notification. Confirm below.",
+  "@youPickedInNotification": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "approve": "Approve",
+  "deny": "Deny",
+  "reply": "Reply",
+  "replyToAgent": "Reply to the agent",
+  "openTerminal": "Open terminal",
+  "sendReply": "Send reply",
+  "asksVerificationBeforeSending": "Asks for your fingerprint or screen lock before sending.",
+  "confirmAnswerReason": "Confirm your answer to the agent",
+  "@confirmAnswerReason": {
+    "description": "Reason shown in the biometric prompt."
+  },
+  "pairAHost": "Pair a host",
+  "cameraPermissionDenied": "OpenMosh cannot use the camera. Allow it in Android Settings > Apps > OpenMosh > Permissions > Camera, then tap Retry.",
+  "cameraUnavailable": "The camera could not start. Close other apps using it and tap Retry.",
+  "newComputer": "New computer",
+  "pairWith": "Pair with {ip}",
+  "@pairWith": {
+    "placeholders": {
+      "ip": {
+        "type": "String"
+      }
+    }
+  },
+  "pairReviewSubtitle": "The host proves itself with the key in the code; its name and SSH host key fingerprint are pinned from its encrypted reply.",
+  "nameForThisPhone": "Name for this phone",
+  "defaultDeviceName": "Android phone",
+  "@defaultDeviceName": {
+    "description": "Default name of this phone on the host."
+  },
+  "pairReviewNote": "This creates an SSH key on this phone, authorizes it on the host only from your tailnet, and registers encrypted notifications.",
+  "pairing": "Pairing…",
+  "pair": "Pair",
+  "pasteLinkLabel": "Or paste the openmosh://pair link",
+  "pasteLinkHelper": "Print it on the host with: openmosh-hook pair --uri",
+  "pairedWith": "Paired with {alias}",
+  "@pairedWith": {
+    "placeholders": {
+      "alias": {
+        "type": "String"
+      }
+    }
+  },
+  "pairedBody": "Its SSH host key is pinned and notifications are encrypted end to end.",
+  "openHost": "Open host",
+  "settingsTitle": "Settings",
+  "colors": "Colors",
+  "colorsSummary": "{accent} accent · {theme} · {scheme} terminal",
+  "@colorsSummary": {
+    "placeholders": {
+      "accent": {
+        "type": "String"
+      },
+      "theme": {
+        "type": "String"
+      },
+      "scheme": {
+        "type": "String"
+      }
+    }
+  },
+  "themeSummarySystem": "system theme",
+  "themeSummaryLight": "light theme",
+  "themeSummaryDark": "dark theme",
+  "notificationPreviews": "Notification previews",
+  "notificationPreviewsBody": "Off: notifications only say \"<host>: <agent> needs you\". On: they show the request text, hidden on the lock screen.",
+  "keepConnected": "Keep sessions connected",
+  "keepConnectedBody": "Terminals stay open and keep reconnecting after you leave them, until you disconnect or close the app.",
+  "lockApp": "Lock OpenMosh",
+  "lockAppBody": "Ask for your fingerprint, face or screen lock when OpenMosh opens and after a minute in the background. Turning it on or off asks for it too.",
+  "terminalFontSize": "Terminal font size · {size}",
+  "@terminalFontSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "shortcutRow": "Shortcut row",
+  "presetNone": "None",
+  "herdrPrefix": "Herdr prefix",
+  "language": "Language",
+  "languageSystem": "System",
+  "languageEnglish": "English",
+  "@languageEnglish": {
+    "description": "Always the endonym."
+  },
+  "languageSpanish": "Español",
+  "@languageSpanish": {
+    "description": "Always the endonym."
+  },
+  "privacy": "Privacy",
+  "privacyBody": "No accounts, analytics or crash reporting. The app only talks to your hosts over Tailscale and to your UnifiedPush server, which sees ciphertext only.",
+  "colorsCaption": "Settings › Colors",
+  "sectionAccent": "Accent",
+  "sectionApp": "App",
+  "sectionTerminal": "Terminal",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "contrastNote": "Every accent is checked for 4.5:1 contrast in the light and dark themes.",
+  "preview": "Preview",
+  "accentSemantics": "{accent} accent",
+  "@accentSemantics": {
+    "placeholders": {
+      "accent": {
+        "type": "String"
+      }
+    }
+  },
+  "schemeSemantics": "{scheme} terminal",
+  "@schemeSemantics": {
+    "placeholders": {
+      "scheme": {
+        "type": "String"
+      }
+    }
+  },
+  "accentBlue": "Blue",
+  "accentGreen": "Green",
+  "accentViolet": "Violet",
+  "accentAmber": "Amber",
+  "accentCoral": "Coral",
+  "accentWhite": "White",
+  "schemeBlack": "Black",
+  "schemePaper": "Paper",
+  "schemeSepia": "Sepia",
+  "schemeHighContrast": "High contrast",
+  "schemeHighContrastShort": "High",
+  "@schemeHighContrastShort": {
+    "description": "Short label on the scheme button."
+  },
+  "errHostKeyChanged": "Host key changed. The connection was blocked.",
+  "errAuthRejected": "The host rejected this device key.",
+  "errCannotReachHost": "Could not reach the host.",
+  "errUnlockCancelled": "Unlock was cancelled.",
+  "errAddressNeedsNewCheck": "Changing address or port needs a new host key check. Add the host again.",
+  "errNoDistributor": "No UnifiedPush distributor found. Install ntfy (F-Droid or GitHub) and try again.",
+  "errNeedsScreenLock": "Set a screen lock (PIN, pattern, password or biometrics) to store SSH keys.",
+  "errKeyInvalidated": "The screen lock or biometrics changed, so this key can no longer be unlocked. Pair the host again.",
+  "errPairingRejected": "The host rejected pairing. Check that both devices use the same Tailscale account and that the code is still valid.",
+  "errPairingUnreachable": "Could not reach the host. Check that Tailscale is on and openmosh-hook pair is still running.",
+  "errInvalidPush": "Discarded an invalid push message.",
+  "errEnterAddress": "Enter a hostname or IP address.",
+  "errEnterUser": "Enter a valid user name.",
+  "errEventNotFound": "Event not found.",
+  "errFileTooLarge": "Files are limited to 50 MB.",
+  "errNotPairedForPush": "Host is not paired for push.",
+  "errInvalidFingerprint": "Invalid host key fingerprint.",
+  "errInvalidIdentifier": "Invalid identifier.",
+  "errMessageTooLong": "Message is longer than 4 KiB.",
+  "errNameLength": "Name must be 1–64 characters.",
+  "errPairingReplyTooLarge": "Pairing reply is too large.",
+  "errPairingRequestTooLarge": "Pairing request is too large.",
+  "errPortRange": "Port must be 1–65535.",
+  "errHostClosed": "The host closed the connection.",
+  "errHostTimeout": "The host did not answer in time.",
+  "errInvalidPairingResponse": "The host sent an invalid pairing response.",
+  "errPairingFailed": "The pairing connection failed.",
+  "errDistributorNoAnswer": "The push distributor did not answer. Open ntfy and retry.",
+  "errDistributorRefused": "The push distributor refused the registration.",
+  "errEndpointHttps": "The push endpoint must use https.",
+  "errKeyMissing": "This key is missing. Pair the host again.",
+  "errUnexpectedPairingReply": "Unexpected pairing reply.",
+  "errUnknownHost": "Unknown host.",
+  "errUnreadableFileSize": "Unreadable file size.",
+  "errWriteMessageFirst": "Write a message first.",
+  "errHostCommandFailed": "Host command failed.",
+  "errHookMissing": "openmosh-hook is not installed on this host.",
+  "errHookUnexpectedOutput": "openmosh-hook returned unexpected output.",
+  "errUploadFailed": "Upload failed.",
+  "errDataTooLarge": "The data is too large.",
+  "errNotUnencryptedKey": "That is not an unencrypted ssh-ed25519 private key.",
+  "errNotUsableKey": "That is not a usable ssh-ed25519 private key.",
+  "errLockStaysOff": "Could not verify you, so the lock stays off. Set up a fingerprint, face or screen lock on this phone, then try again.",
+  "errLockStaysOn": "Could not verify you, so the lock stays on.",
+  "errAlreadyAnswered": "This event was already answered."
+}

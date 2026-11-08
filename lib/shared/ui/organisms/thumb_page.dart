@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/l10n.dart';
 import '../atoms/circle_icon_button.dart';
 import '../tokens/mosh_colors.dart';
 
@@ -14,7 +15,7 @@ class ThumbPage extends StatelessWidget {
     this.subtitle,
     this.onBack,
     this.backIcon = Icons.chevron_left,
-    this.backTooltip = 'Back',
+    this.backTooltip,
     this.caption,
     this.actions = const [],
     this.children = const [],
@@ -27,7 +28,9 @@ class ThumbPage extends StatelessWidget {
   final String? subtitle;
   final VoidCallback? onBack;
   final IconData backIcon;
-  final String backTooltip;
+
+  /// Defaults to the localized "Back".
+  final String? backTooltip;
 
   /// Small text on the right of the top bar.
   final String? caption;
@@ -45,7 +48,11 @@ class ThumbPage extends StatelessWidget {
       child: Row(
         children: [
           if (onBack != null)
-            CircleIconButton(icon: backIcon, tooltip: backTooltip, onPressed: onBack),
+            CircleIconButton(
+              icon: backIcon,
+              tooltip: backTooltip ?? context.l10n.back,
+              onPressed: onBack,
+            ),
           const Spacer(),
           if (caption != null)
             Flexible(

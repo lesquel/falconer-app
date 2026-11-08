@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/molecules/mosh_tile.dart';
 import '../../../../shared/ui/organisms/thumb_page.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
@@ -19,23 +20,18 @@ class ColorsView extends StatelessWidget {
   final ValueChanged<AppSettings> onChanged;
   final VoidCallback onBack;
 
-  static const _themeLabels = {
-    ThemePreference.system: 'System',
-    ThemePreference.light: 'Light',
-    ThemePreference.dark: 'Dark',
-  };
-
   @override
   Widget build(BuildContext context) {
     final s = settings;
     final c = MoshColors.of(context);
+    final l = context.l10n;
     return ThumbPage(
       onBack: onBack,
-      caption: 'Settings › Colors',
-      title: const Text('Colors'),
+      caption: l.colorsCaption,
+      title: Text(l.colors),
       children: [
         _Preview(accent: c.accent, onAccent: c.onAccent, scheme: s.terminalScheme),
-        const SectionLabel('Accent'),
+        SectionLabel(l.sectionAccent),
         _Grid(
           children: [
             for (final a in AccentColor.values)
@@ -48,19 +44,19 @@ class ColorsView extends StatelessWidget {
               ),
           ],
         ),
-        const SectionLabel('App'),
+        SectionLabel(l.sectionApp),
         _Grid(
           children: [
             for (final p in ThemePreference.values)
               _Choice(
                 key: Key('theme_${p.name}'),
-                label: _themeLabels[p]!,
+                label: l.themeName(p),
                 selected: p == s.themePreference,
                 onTap: () => onChanged(s.copyWith(themePreference: p)),
               ),
           ],
         ),
-        const SectionLabel('Terminal'),
+        SectionLabel(l.sectionTerminal),
         _Grid(
           children: [
             for (final t in TerminalScheme.values)
@@ -75,7 +71,7 @@ class ColorsView extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(8, 14, 8, 0),
           child: Text(
-            'Every accent is checked for 4.5:1 contrast in the light and dark themes.',
+            l.contrastNote,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(color: c.muted),
           ),
         ),
@@ -108,6 +104,7 @@ class _Preview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = MoshColors.of(context);
+    final l = context.l10n;
     final p = scheme.palette;
     final mono = TextStyle(fontFamily: 'monospace', fontSize: 13, color: Color(p.foreground));
     return MoshTile(
@@ -116,7 +113,7 @@ class _Preview extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Preview', style: TextStyle(fontSize: 12, color: c.muted)),
+          Text(l.preview, style: TextStyle(fontSize: 12, color: c.muted)),
           const SizedBox(height: 10),
           ExcludeSemantics(
             child: Container(
@@ -131,7 +128,7 @@ class _Preview extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Approve',
+                      l.approve,
                       style: TextStyle(color: onAccent, fontWeight: FontWeight.w800, fontSize: 18),
                     ),
                   ),
@@ -209,7 +206,7 @@ class _Swatch extends StatelessWidget {
     final fill = Color(accent.forDark(isDark));
     final on = Color(accent.onAccent(isDark));
     return Semantics(
-      label: '${accent.label} accent',
+      label: context.l10n.accentSemantics(context.l10n.accentName(accent)),
       selected: selected,
       button: true,
       inMutuallyExclusiveGroup: true,
@@ -290,9 +287,12 @@ class _SchemeChoice extends StatelessWidget {
     final c = MoshColors.of(context);
     final p = scheme.palette;
     final fg = Color(p.foreground);
-    final short = scheme == TerminalScheme.highContrast ? 'High' : scheme.label;
+    final l = context.l10n;
+    final short = scheme == TerminalScheme.highContrast
+        ? l.schemeHighContrastShort
+        : l.schemeName(scheme);
     return Semantics(
-      label: '${scheme.label} terminal',
+      label: l.schemeSemantics(l.schemeName(scheme)),
       selected: selected,
       button: true,
       inMutuallyExclusiveGroup: true,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/atoms/status_badge.dart';
 import '../../../../shared/ui/molecules/mosh_tile.dart';
 import '../../../../shared/ui/organisms/thumb_page.dart';
@@ -32,16 +33,17 @@ class PairedDevicesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = MoshColors.of(context);
+    final l = context.l10n;
     final list = devices;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionLabel('Paired devices'),
+        SectionLabel(l.pairedDevices),
         if (list == null)
           OutlinedButton.icon(
             onPressed: loading ? null : onLoad,
             icon: const Icon(Icons.devices_outlined),
-            label: const Text('Show paired devices'),
+            label: Text(l.showPairedDevices),
           ),
         if (loading)
           const Padding(
@@ -49,8 +51,7 @@ class PairedDevicesView extends StatelessWidget {
             child: Center(child: CircularProgressIndicator()),
           ),
         ?error,
-        if (list != null && list.isEmpty)
-          Text('No devices are paired with this host.', style: TextStyle(color: c.muted)),
+        if (list != null && list.isEmpty) Text(l.noPairedDevices, style: TextStyle(color: c.muted)),
         for (final d in list ?? const <PairedDevice>[])
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
@@ -70,15 +71,17 @@ class PairedDevicesView extends StatelessWidget {
                     ),
                     if (d.isThisPhone) ...[
                       const SizedBox(width: 8),
-                      const StatusBadge(label: 'this phone', tone: BadgeTone.success),
+                      StatusBadge(label: l.badgeThisPhone, tone: BadgeTone.success),
                     ],
                   ],
                 ),
                 subtitle: Text(
-                  'Paired ${_date(d.pairedAt)}${d.endpointStale ? ' · endpoint stale' : ''}',
+                  d.endpointStale
+                      ? l.pairedOnStale(_date(d.pairedAt))
+                      : l.pairedOn(_date(d.pairedAt)),
                 ),
                 trailing: IconButton(
-                  tooltip: 'Revoke ${d.name}',
+                  tooltip: l.revokeDeviceTooltip(d.name),
                   icon: Icon(Icons.link_off, color: c.danger),
                   onPressed: loading ? null : () => onRevoke(d),
                 ),

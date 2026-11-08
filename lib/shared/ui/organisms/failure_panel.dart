@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../domain/failure.dart';
 import '../molecules/fingerprint_card.dart';
 
@@ -16,6 +17,7 @@ class FailurePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final f = failure;
     final theme = Theme.of(context);
+    final l = context.l10n;
     if (f is HostKeyMismatchFailure) {
       return ListView(
         padding: const EdgeInsets.all(24),
@@ -23,28 +25,23 @@ class FailurePanel extends StatelessWidget {
           Icon(Icons.gpp_bad, size: 56, color: theme.colorScheme.error),
           const SizedBox(height: 16),
           Text(
-            'Host key changed',
+            l.hostKeyChangedTitle,
             style: theme.textTheme.headlineSmall,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          const Text(
-            'The server presented a different key than the one pinned at pairing. '
-            'This can mean someone is intercepting the connection. The connection was blocked. '
-            'If you reinstalled the host on purpose, delete this host and pair it again.',
-            textAlign: TextAlign.center,
-          ),
+          Text(l.hostKeyChangedBody, textAlign: TextAlign.center),
           const SizedBox(height: 16),
-          FingerprintCard(label: 'Pinned', fingerprint: f.expected),
-          FingerprintCard(label: 'Presented', fingerprint: f.actual),
+          FingerprintCard(label: l.fingerprintPinned, fingerprint: f.expected),
+          FingerprintCard(label: l.fingerprintPresented, fingerprint: f.actual),
           if (onBack != null) ...[
             const SizedBox(height: 16),
-            OutlinedButton(onPressed: onBack, child: const Text('Back')),
+            OutlinedButton(onPressed: onBack, child: Text(l.back)),
           ],
         ],
       );
     }
-    final message = f is AppFailure ? f.message : 'Something went wrong.';
+    final message = l.failureText(f);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -56,7 +53,7 @@ class FailurePanel extends StatelessWidget {
             Text(message, textAlign: TextAlign.center),
             if (onRetry != null) ...[
               const SizedBox(height: 12),
-              FilledButton.tonal(onPressed: onRetry, child: const Text('Retry')),
+              FilledButton.tonal(onPressed: onRetry, child: Text(l.retry)),
             ],
           ],
         ),

@@ -4,7 +4,9 @@ import 'package:openmosh/features/inbox/domain/entities/inbox_event.dart';
 import 'package:openmosh/features/inbox/presentation/views/event_confirm_view.dart';
 import 'package:openmosh/features/inbox/presentation/views/inbox_view.dart';
 
-Widget app(Widget child) => MaterialApp(home: Scaffold(body: child));
+import '../support/l10n_app.dart';
+
+Widget app(Widget child) => l10nApp(home: Scaffold(body: child));
 
 InboxEvent event({InboxStatus? status}) {
   final e = InboxEvent.received(

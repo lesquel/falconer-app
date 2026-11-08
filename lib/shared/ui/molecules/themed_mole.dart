@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/l10n.dart';
 import '../atoms/mole_logo.dart';
 import '../tokens/mosh_colors.dart';
 
 /// [MoleLogo] colored from the current theme: goggles follow the accent.
 class ThemedMole extends StatelessWidget {
-  const ThemedMole({super.key, this.size = 160, this.semanticLabel = 'OpenMosh mole'});
+  const ThemedMole({super.key, this.size = 160, this.semanticLabel = defaultLabel});
+
+  /// Replaced by the localized mascot label; pass `null` to hide it.
+  static const defaultLabel = 'OpenMosh mole';
 
   final double size;
   final String? semanticLabel;
@@ -20,7 +24,7 @@ class ThemedMole extends StatelessWidget {
       ground: c.surfaceHigh,
       bubble: c.isDark ? c.inverse : c.surfaceHigh,
       bubbleInk: c.isDark ? const Color(0xFF1F4FD8) : c.accent,
-      semanticLabel: semanticLabel,
+      semanticLabel: semanticLabel == defaultLabel ? context.l10n.moleSemanticLabel : semanticLabel,
     );
   }
 }

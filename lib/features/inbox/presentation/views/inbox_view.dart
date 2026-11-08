@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/atoms/status_badge.dart';
 import '../../../../shared/ui/atoms/time_ago.dart';
 import '../../../../shared/ui/molecules/mosh_tile.dart';
@@ -22,33 +23,38 @@ class InboxView extends StatelessWidget {
   final ValueChanged<InboxEvent> onOpen;
   final DateTime? now;
 
-  static (String, BadgeTone) badge(InboxEvent e) => switch (e.status) {
+  static String responseLabel(AppLocalizations l, ResponseKind r) => switch (r) {
+    ResponseKind.allow => l.responseAllow,
+    ResponseKind.deny => l.responseDeny,
+    ResponseKind.text => l.responseText,
+  };
+
+  static (String, BadgeTone) badge(AppLocalizations l, InboxEvent e) => switch (e.status) {
     InboxStatus.pending => (
-      e.kind == EventKind.question ? 'question' : 'needs approval',
+      e.kind == EventKind.question ? l.badgeQuestion : l.badgeNeedsApproval,
       BadgeTone.attention,
     ),
-    InboxStatus.responding => ('sending…', BadgeTone.neutral),
-    InboxStatus.failed => ('failed', BadgeTone.danger),
-    InboxStatus.resolved => (e.response?.name ?? 'resolved', BadgeTone.success),
-    InboxStatus.info => ('done', BadgeTone.neutral),
+    InboxStatus.responding => (l.badgeSending, BadgeTone.neutral),
+    InboxStatus.failed => (l.badgeFailed, BadgeTone.danger),
+    InboxStatus.resolved => (
+      e.response == null ? l.badgeResolved : responseLabel(l, e.response!),
+      BadgeTone.success,
+    ),
+    InboxStatus.info => (l.badgeDone, BadgeTone.neutral),
   };
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     if (events.isEmpty) {
-      return const MoleMessage(
-        title: 'No agent events yet.',
-        message: 'When an agent on a paired computer needs you, it shows up here.',
-      );
+      return MoleMessage(title: l.noAgentEventsTitle, message: l.noAgentEventsBody);
     }
     final c = MoshColors.of(context);
     final clock = now ?? DateTime.now();
     final waiting = events.where((e) => e.needsAction).length;
     return ThumbPage(
-      title: const Text('Inbox'),
-      subtitle: waiting == 0
-          ? 'Nothing waiting for you.'
-          : '$waiting ${waiting == 1 ? 'request waits' : 'requests wait'} for you.',
+      title: Text(l.navInbox),
+      subtitle: waiting == 0 ? l.nothingWaiting : l.requestsWaiting(waiting),
       children: [
         for (final e in events)
           Padding(
@@ -56,7 +62,7 @@ class InboxView extends StatelessWidget {
             child: _EventTile(
               event: e,
               alias: hostAlias(e.hostId),
-              when: timeAgo(e.at, clock),
+              when: timeAgo(l, e.at, clock),
               onTap: () => onOpen(e),
               muted: c.muted,
             ),
@@ -84,7 +90,8 @@ class _EventTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final e = event;
-    final (label, tone) = InboxView.badge(e);
+    final l = context.l10n;
+    final (label, tone) = InboxView.badge(l, e);
     return MoshTile(
       radius: MoshRadii.card,
       padding: const EdgeInsets.fromLTRB(18, 14, 14, 14),
@@ -107,7 +114,7 @@ class _EventTile extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            e.title.isEmpty ? '${e.agent} on $alias' : e.title,
+            e.title.isEmpty ? l.agentOnHost(e.agent, alias) : e.title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),

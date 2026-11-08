@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/di.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/atoms/time_ago.dart';
 import '../../../../shared/ui/molecules/themed_mole.dart';
 import '../../domain/entities/inbox_event.dart';
@@ -29,9 +30,10 @@ class EventConfirmContainer extends ConsumerWidget {
     final state = ref.watch(eventConfirmProvider(key));
     final ctrl = ref.read(eventConfirmProvider(key).notifier);
     final suggested = ResponseKind.values.where((k) => k.name == action).firstOrNull;
+    final l = context.l10n;
 
     Future<void> run(ResponseKind k, [String? text]) async {
-      final ok = await ctrl.answer(k, text: text);
+      final ok = await ctrl.answer(k, text: text, reason: l.confirmAnswerReason);
       if (ok && context.mounted) context.pop();
     }
 
@@ -40,22 +42,22 @@ class EventConfirmContainer extends ConsumerWidget {
     return Scaffold(
       body: event == null
           ? MoleMessage(
-              title: 'Event not found',
-              message: 'It may have been cleared.',
-              actions: [TextButton(onPressed: close, child: const Text('Back'))],
+              title: l.eventNotFound,
+              message: l.eventMayBeCleared,
+              actions: [TextButton(onPressed: close, child: Text(l.back))],
             )
           : EventConfirmView(
               event: event,
-              hostAlias: host?.alias ?? 'host',
+              hostAlias: host?.alias ?? l.host,
               busy: state.busy,
-              error: state.error,
+              error: state.error == null ? null : l.failureMessage(state.error!),
               suggested: suggested,
               onAllow: () => run(ResponseKind.allow),
               onDeny: () => run(ResponseKind.deny),
               onText: (t) => run(ResponseKind.text, t),
               onOpenTerminal: () => context.push('/terminal/$hostId'),
               onClose: close,
-              when: timeAgo(event.at, DateTime.now()),
+              when: timeAgo(l, event.at, DateTime.now()),
             ),
     );
   }

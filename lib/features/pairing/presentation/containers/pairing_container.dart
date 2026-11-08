@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../controllers/pairing_controller.dart';
 import '../views/camera_unavailable_view.dart';
 import '../views/pair_review_view.dart';
@@ -29,14 +30,14 @@ class PairingContainer extends ConsumerWidget {
         onCancel: ctrl.reset,
       ),
       _ => PairScanView(
-        error: state.error,
+        error: state.error == null ? null : context.l10n.failureMessage(state.error!),
         onDismissError: ctrl.reset,
         onSubmit: ctrl.scanned,
         scanner: _QrScanner(onCode: ctrl.scanned),
       ),
     };
     return Scaffold(
-      appBar: AppBar(title: const Text('Pair a host')),
+      appBar: AppBar(title: Text(context.l10n.pairAHost)),
       body: body,
     );
   }

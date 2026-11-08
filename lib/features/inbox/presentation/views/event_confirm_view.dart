@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/atoms/mono_text.dart';
+import 'inbox_view.dart';
 import '../../../../shared/ui/molecules/mosh_tile.dart';
 import '../../../../shared/ui/organisms/thumb_page.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
@@ -62,15 +64,16 @@ class _EventConfirmViewState extends State<EventConfirmView> {
     final e = widget.event;
     final t = Theme.of(context).textTheme;
     final c = MoshColors.of(context);
+    final l = context.l10n;
     final canAnswer = e.needsAction && !widget.busy;
     final caption = [widget.hostAlias, e.agent, ?widget.when].join(' · ');
     return ThumbPage(
       onBack: widget.onClose,
       backIcon: Icons.close,
-      backTooltip: 'Close',
+      backTooltip: l.close,
       caption: caption,
-      eyebrow: '${e.agent} asks',
-      title: Text(e.title.isEmpty ? 'Agent needs you' : e.title),
+      eyebrow: l.agentAsks(e.agent),
+      title: Text(e.title.isEmpty ? l.agentNeedsYou : e.title),
       children: [
         if (e.summary.isNotEmpty)
           MoshTile(
@@ -86,7 +89,7 @@ class _EventConfirmViewState extends State<EventConfirmView> {
                 Icon(Icons.check_circle_outline, size: 18, color: c.muted),
                 const SizedBox(width: 6),
                 Text(
-                  e.status == InboxStatus.resolved ? 'Already answered.' : 'Nothing to answer.',
+                  e.status == InboxStatus.resolved ? l.alreadyAnswered : l.nothingToAnswer,
                   style: TextStyle(color: c.muted),
                 ),
               ],
@@ -110,7 +113,7 @@ class _EventConfirmViewState extends State<EventConfirmView> {
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 12, 8, 0),
             child: Text(
-              'You picked "${widget.suggested!.name}" in the notification. Confirm below.',
+              l.youPickedInNotification(InboxView.responseLabel(l, widget.suggested!)),
               style: t.bodySmall?.copyWith(color: c.muted),
             ),
           ),
@@ -122,13 +125,13 @@ class _EventConfirmViewState extends State<EventConfirmView> {
           height: 120,
           padding: const EdgeInsets.all(20),
           onTap: canAnswer ? widget.onAllow : null,
-          semanticLabel: 'Approve',
+          semanticLabel: l.approve,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
                 child: Text(
-                  'Approve',
+                  l.approve,
                   style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.w800,
@@ -154,7 +157,7 @@ class _EventConfirmViewState extends State<EventConfirmView> {
             Expanded(
               child: _Choice(
                 key: const Key('deny'),
-                label: 'Deny',
+                label: l.deny,
                 icon: Icons.block,
                 onTap: canAnswer ? widget.onDeny : null,
               ),
@@ -163,7 +166,7 @@ class _EventConfirmViewState extends State<EventConfirmView> {
             Expanded(
               child: _Choice(
                 key: const Key('reply'),
-                label: 'Reply',
+                label: l.reply,
                 icon: Icons.reply,
                 onTap: canAnswer ? _replyFocus.requestFocus : null,
               ),
@@ -178,7 +181,7 @@ class _EventConfirmViewState extends State<EventConfirmView> {
           minLines: 1,
           maxLines: 5,
           maxLength: 4096,
-          decoration: const InputDecoration(labelText: 'Reply to the agent'),
+          decoration: InputDecoration(labelText: l.replyToAgent),
         ),
         Wrap(
           alignment: WrapAlignment.spaceBetween,
@@ -186,11 +189,11 @@ class _EventConfirmViewState extends State<EventConfirmView> {
             TextButton.icon(
               onPressed: widget.onOpenTerminal,
               icon: const Icon(Icons.terminal),
-              label: const Text('Open terminal'),
+              label: Text(l.openTerminal),
             ),
             TextButton(
               onPressed: canAnswer ? () => widget.onText(_text.text) : null,
-              child: const Text('Send reply'),
+              child: Text(l.sendReply),
             ),
           ],
         ),
@@ -198,7 +201,7 @@ class _EventConfirmViewState extends State<EventConfirmView> {
         Padding(
           padding: const EdgeInsets.only(top: 6),
           child: Text(
-            'Asks for your fingerprint or screen lock before sending.',
+            l.asksVerificationBeforeSending,
             textAlign: TextAlign.center,
             style: t.bodySmall?.copyWith(color: c.muted),
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../l10n/l10n.dart';
 import '../shared/ui/tokens/mosh_colors.dart';
 
 /// Bottom dock of big rounded tiles (UI-G). The selected tile is inverted and
@@ -9,12 +10,10 @@ class HomeShell extends StatelessWidget {
   const HomeShell({super.key, required this.shell});
   final StatefulNavigationShell shell;
 
-  static const destinations = [
-    (Icons.computer, 'Hosts'),
-    (Icons.inbox_outlined, 'Inbox'),
-    (Icons.key, 'Keys'),
-    (Icons.tune, 'Settings'),
-  ];
+  static const destinations = [Icons.computer, Icons.inbox_outlined, Icons.key, Icons.tune];
+
+  static String label(AppLocalizations l, int index) =>
+      [l.navHosts, l.navInbox, l.navKeys, l.navSettings][index];
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -65,7 +64,8 @@ class _DockTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = MoshColors.of(context);
-    final (icon, label) = HomeShell.destinations[index];
+    final icon = HomeShell.destinations[index];
+    final label = HomeShell.label(context.l10n, index);
     final fg = selected ? c.onInverse : c.foreground;
     return Semantics(
       label: label,

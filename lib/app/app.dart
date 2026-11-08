@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/lock/presentation/app_lock_gate.dart';
 import '../features/settings/domain/entities/app_settings.dart';
+import '../l10n/l10n.dart';
 import 'di.dart';
 import 'theme.dart';
 
@@ -23,6 +24,10 @@ class OpenMoshApp extends ConsumerWidget {
       theme: buildTheme(Brightness.light, accent: s.accent),
       darkTheme: buildTheme(Brightness.dark, accent: s.accent),
       themeMode: themeModeFor(s.themePreference),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: supportedAppLocales,
+      // `system` leaves it null: the phone decides, English when unsupported.
+      locale: localeFor(s.language),
       routerConfig: router,
       builder: (context, child) => AppLockGate(
         lock: ref.watch(appLockProvider),

@@ -21,14 +21,16 @@ class EventConfirmController extends Notifier<ConfirmState> {
 
   /// Every answer is preceded by exactly one user verification: either
   /// here (connection already open) or by the key vault when a new SSH
-  /// connection must be opened.
-  Future<bool> answer(ResponseKind kind, {String? text}) async {
+  /// connection must be opened. [reason] is shown in the verification prompt.
+  Future<bool> answer(
+    ResponseKind kind, {
+    String? text,
+    String reason = 'Confirm your answer to the agent',
+  }) async {
     state = const ConfirmState(busy: true);
     try {
       if (ref.read(hostConnectionsProvider).isConnected(key.hostId)) {
-        final ok = await ref
-            .read(authenticatorProvider)
-            .authenticate('Confirm your answer to the agent');
+        final ok = await ref.read(authenticatorProvider).authenticate(reason);
         if (!ok) throw const UserCancelledFailure();
       }
       await ref.read(respondProvider)(key.hostId, key.eventId, kind, text: text);

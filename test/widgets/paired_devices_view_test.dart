@@ -3,7 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openmosh/features/hosts/domain/entities/paired_device.dart';
 import 'package:openmosh/features/hosts/presentation/views/paired_devices_view.dart';
 
-Widget app(Widget child) => MaterialApp(
+import '../support/l10n_app.dart';
+
+Widget app(Widget child) => l10nApp(
   home: Scaffold(body: ListView(children: [child])),
 );
 
