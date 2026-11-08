@@ -9,6 +9,33 @@ import 'chat_attachment.dart';
 
 /// One terminal: emulator, connection runner and sticky modifier state.
 /// Lives in the session pool so it can outlive its screen.
+/// Time an agent needs to turn a pasted image path into an attachment
+/// before Enter. Claude Code reads the file asynchronously; an Enter that
+/// arrives first submits the text and leaves the image for the next message.
+const attachSettle = Duration(milliseconds: 700);
+const attachSettleEach = Duration(milliseconds: 250);
+
+/// Paste [files] (each followed by a space), wait for the agent to attach
+/// them, paste [text] and, when [submit], press Enter.
+Future<void> sendComposed({
+  required List<String> files,
+  required String text,
+  required void Function(String) paste,
+  required Future<void> Function(String) send,
+  bool submit = true,
+  Future<void> Function(Duration) wait = Future<void>.delayed,
+}) async {
+  for (final p in files) {
+    paste(p);
+    await send(' ');
+  }
+  if (files.isNotEmpty && submit) {
+    await wait(attachSettle + attachSettleEach * (files.length - 1));
+  }
+  if (text.isNotEmpty) paste(text);
+  if (submit) await send('\r');
+}
+
 final class TerminalSession {
   TerminalSession._(this.emulator, this.runner, this.modifiers);
 
@@ -44,22 +71,26 @@ final class TerminalSession {
 
   /// Pastes uploaded paths one by one, each as its own paste, so agents that
   /// accept dropped files (Claude Code shows `[Image #1]`) recognise them.
-  Future<void> pastePaths(Iterable<String> paths) async {
-    for (final p in paths) {
-      emulator.terminal.paste(p);
-      await runner.send(' ');
-    }
-  }
+  Future<void> pastePaths(Iterable<String> paths) => sendComposed(
+    files: paths.toList(),
+    text: '',
+    paste: emulator.terminal.paste,
+    send: runner.send,
+    submit: false,
+  );
 
   /// Sends a composed message: its attachments, then the text as one paste
   /// (bracketed when the app asks for it, so newlines do not submit early),
   /// then Enter.
-  Future<void> sendMessage(String text) async {
+  Future<void> sendMessage(String text) {
     final files = [for (final a in attachments) a.remotePath];
     attachments.clear();
-    await pastePaths(files);
-    if (text.isNotEmpty) emulator.terminal.paste(text);
-    await runner.send('\r');
+    return sendComposed(
+      files: files,
+      text: text,
+      paste: emulator.terminal.paste,
+      send: runner.send,
+    );
   }
 
   Future<void> dispose() async {

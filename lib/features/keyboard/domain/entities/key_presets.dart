@@ -47,6 +47,14 @@ abstract final class KeyPresets {
         }),
       };
 
+  /// Herdr and tmux sessions get their own keys; a plain shell uses the
+  /// preset chosen in Settings.
+  static PresetName forSession(String? kind, PresetName fallback) => switch (kind) {
+    'herdr' => PresetName.herdr,
+    'tmux' => PresetName.tmux,
+    _ => fallback,
+  };
+
   static List<ExtraKey> _prefixed(String prefix, Map<String, String> keys) => [
     for (final e in keys.entries) ExtraKey.send(e.key, '$prefix${e.value}'),
   ];

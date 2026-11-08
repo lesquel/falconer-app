@@ -22,6 +22,9 @@ class ExtraKeysBar extends StatelessWidget {
     this.expanded = true,
     this.onToggleExpanded,
     this.gridKeys = 3,
+    this.shortcuts = const [],
+    this.onShortcutLongPress,
+    this.shortcutExtras = const [],
   });
 
   final List<ExtraKey> base;
@@ -43,6 +46,15 @@ class ExtraKeysBar extends StatelessWidget {
   /// When null there is no toggle and the rows follow [expanded].
   final VoidCallback? onToggleExpanded;
   final int gridKeys;
+
+  /// The user's saved shortcut keys, first row of the expanded bar.
+  final List<ExtraKey> shortcuts;
+
+  /// Long press on saved shortcut `i` (edit or delete it).
+  final ValueChanged<int>? onShortcutLongPress;
+
+  /// Controls after the saved shortcuts (paste, add).
+  final List<Widget> shortcutExtras;
 
   bool _active(Modifier m) => m == Modifier.ctrl ? modifiers.ctrl : modifiers.alt;
   bool _locked(Modifier m) => m == Modifier.ctrl ? modifiers.ctrlLocked : modifiers.altLocked;
@@ -97,6 +109,25 @@ class ExtraKeysBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (expanded) ...[
+                if (shortcuts.isNotEmpty || shortcutExtras.isNotEmpty)
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 7),
+                    child: Row(
+                      children: [
+                        for (var i = 0; i < shortcuts.length; i++)
+                          KeyCap(
+                            key: Key('shortcut_$i'),
+                            label: shortcuts[i].label,
+                            onTap: () => onKey(shortcuts[i].sequence!),
+                            onLongPress: onShortcutLongPress == null
+                                ? null
+                                : () => onShortcutLongPress!(i),
+                          ),
+                        ...shortcutExtras,
+                      ],
+                    ),
+                  ),
                 _row(rest, extra: trailing),
                 if (preset.isNotEmpty) _row(preset),
                 const SizedBox(height: 4),

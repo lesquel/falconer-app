@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:xterm/xterm.dart';
 
 import '../../../../app/di.dart';
 import '../../../../shared/domain/failure.dart';
@@ -19,6 +20,7 @@ import '../../domain/usecases/terminal_runner.dart';
 import '../controllers/chat_attachment.dart';
 import '../controllers/terminal_session.dart';
 import '../controllers/terminal_session_pool.dart';
+import '../views/shortcut_dialog.dart';
 import '../views/chat_composer.dart';
 import '../views/session_ended_panel.dart';
 import '../views/terminal_palette.dart';
@@ -42,6 +44,13 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
   late final TerminalSession _session;
   late final TerminalSessionPool<TerminalSession> _pool;
   final _focus = FocusNode();
+  final _termKey = GlobalKey<TerminalViewState>();
+  final _selection = TerminalController();
+
+  /// Font size while a pinch is in progress; saved when the fingers lift.
+  double? _pinchFont;
+  double _pinchBase = 14;
+  bool _fullScreen = false;
   StreamSubscription<void>? _net;
   StreamSubscription<TerminalPhase>? _phaseSub;
   late TerminalPhase _phase;
@@ -67,6 +76,7 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     );
     _phase = _runner.phase;
     _session.modifiers.addListener(_onMods);
+    _selection.addListener(_onMods);
     _phaseSub = _runner.phases.listen((p) => setState(() => _phase = p));
     _net = networkRegained().listen((_) => _runner.wake());
     if (fresh) {
@@ -89,19 +99,96 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     unawaited(_net?.cancel());
     unawaited(_phaseSub?.cancel());
     _session.modifiers.removeListener(_onMods);
+    _selection.removeListener(_onMods);
+    _selection.dispose();
     _focus.dispose();
+    if (_fullScreen) {
+      unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
+    }
     final keep = ref.read(settingsProvider).value?.keepConnected ?? true;
     if (!keep) unawaited(_pool.release(_key));
     super.dispose();
   }
 
+  bool get _keyboardOpen => _focus.hasFocus && MediaQuery.viewInsetsOf(context).bottom > 0;
+
   void _toggleKeyboard() {
-    if (_focus.hasFocus) {
+    final view = _termKey.currentState;
+    if (_keyboardOpen) {
+      view?.closeKeyboard();
       _focus.unfocus();
-    } else {
-      _focus.requestFocus();
-      unawaited(SystemChannels.textInput.invokeMethod<void>('TextInput.show'));
+      return;
     }
+    if (_session.chatOpen) setState(() => _session.chatOpen = false);
+    // Opens the input connection directly: focusing first and asking the
+    // platform to show the keyboard later raced and needed a second tap.
+    view?.requestKeyboard();
+  }
+
+  void _pinchStart(AppSettings s) => _pinchBase = s.fontSize;
+
+  void _pinchUpdate(double scale) =>
+      setState(() => _pinchFont = (_pinchBase * scale).clamp(8, 32).toDouble());
+
+  void _pinchEnd(AppSettings s) {
+    final f = _pinchFont;
+    if (f == null) return;
+    final rounded = (f * 2).round() / 2;
+    unawaited(
+      ref
+          .read(settingsRepositoryProvider)
+          .save(s.copyWith(fontSize: rounded))
+          .whenComplete(() => mounted ? setState(() => _pinchFont = null) : null),
+    );
+  }
+
+  void _toggleFullScreen() {
+    setState(() => _fullScreen = !_fullScreen);
+    unawaited(
+      SystemChrome.setEnabledSystemUIMode(
+        _fullScreen ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge,
+      ),
+    );
+  }
+
+  Future<void> _copySelection() async {
+    final range = _selection.selection;
+    if (range == null) return;
+    final text = _session.emulator.terminal.buffer.getText(range).trimRight();
+    _selection.clearSelection();
+    await Clipboard.setData(ClipboardData(text: text));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Copied')));
+    }
+  }
+
+  Future<void> _pasteClipboard() async {
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    final text = data?.text;
+    if (text != null && text.isNotEmpty) _session.emulator.terminal.paste(text);
+  }
+
+  Future<void> _addShortcut(AppSettings s) async {
+    final key = await showShortcutDialog(context);
+    if (key == null) return;
+    await ref.read(settingsRepositoryProvider).save(s.copyWith(customKeys: [...s.customKeys, key]));
+  }
+
+  Future<void> _removeShortcut(AppSettings s, int i) async {
+    final label = s.customKeys[i].label;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text('Remove "$label"?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(d).pop(false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.of(d).pop(true), child: const Text('Remove')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    final keys = [...s.customKeys]..removeAt(i);
+    await ref.read(settingsRepositoryProvider).save(s.copyWith(customKeys: keys));
   }
 
   void _zoom(AppSettings s, double delta) => unawaited(
@@ -147,11 +234,6 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     }
   }
 
-  Future<void> _upload(bool images) async {
-    final files = await _uploadFiles(images);
-    await _session.pastePaths(files.map((f) => f.remotePath));
-  }
-
   Future<void> _attachToChat() async {
     final images = await showModalBottomSheet<bool>(
       context: context,
@@ -189,7 +271,7 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     final settings = ref.watch(settingsProvider).value ?? const AppSettings();
     final host = ref.watch(hostProvider(widget.hostId)).value;
     final preset = KeyPresets.forName(
-      settings.keyPreset,
+      KeyPresets.forSession(widget.kind, settings.keyPreset),
       herdrPrefix: settings.herdrPrefixSequence,
     );
     final mods = _session.modifiers.value;
@@ -208,61 +290,77 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
         ? (host == null ? 'shell' : '${host.alias} · shell')
         : '${host?.alias ?? 'host'} · ${widget.kind ?? 'session'}';
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(68),
-        child: SafeArea(
-          bottom: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
-            child: Row(
-              children: [
-                CircleIconButton(icon: Icons.chevron_left, tooltip: 'Back', onPressed: _leave),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
+      appBar: _fullScreen
+          ? null
+          : PreferredSize(
+              preferredSize: const Size.fromHeight(68),
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
+                  child: Row(
                     children: [
-                      Text(
-                        widget.session ?? host?.alias ?? 'Terminal',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
+                      CircleIconButton(
+                        icon: Icons.chevron_left,
+                        tooltip: 'Back',
+                        onPressed: _leave,
                       ),
-                      Text(
-                        subtitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 12, color: c.muted),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              widget.session ?? host?.alias ?? 'Terminal',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
+                            ),
+                            Text(
+                              subtitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 12, color: c.muted),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Full screen',
+                        icon: const Icon(Icons.fullscreen),
+                        onPressed: _toggleFullScreen,
+                      ),
+                      IconButton(
+                        tooltip: 'Disconnect',
+                        icon: const Icon(Icons.link_off),
+                        onPressed: _disconnect,
                       ),
                     ],
                   ),
                 ),
-                IconButton(
-                  tooltip: 'Upload image',
-                  icon: const Icon(Icons.image_outlined),
-                  onPressed: _uploading ? null : () => _upload(true),
-                ),
-                IconButton(
-                  tooltip: 'Upload file',
-                  icon: const Icon(Icons.attach_file),
-                  onPressed: _uploading ? null : () => _upload(false),
-                ),
-                IconButton(
-                  tooltip: 'Disconnect',
-                  icon: const Icon(Icons.link_off),
-                  onPressed: _disconnect,
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
-      ),
       body: TerminalScreenView(
         terminal: _session.emulator.terminal,
         focusNode: _focus,
         phase: _phase,
-        fontSize: settings.fontSize,
+        fontSize: _pinchFont ?? settings.fontSize,
+        terminalKey: _termKey,
+        controller: _selection,
+        onPinchStart: () => _pinchStart(settings),
+        onPinchUpdate: _pinchUpdate,
+        onPinchEnd: () => _pinchEnd(settings),
+        selectionBar: _selection.selection == null
+            ? null
+            : _SelectionBar(onCopy: _copySelection, onClear: _selection.clearSelection),
+        corner: _fullScreen
+            ? IconButton.filledTonal(
+                tooltip: 'Exit full screen',
+                icon: const Icon(Icons.fullscreen_exit),
+                onPressed: _toggleFullScreen,
+              )
+            : null,
         theme: terminalThemeFor(settings.terminalScheme),
         overlay: overlay,
         composer: _session.chatOpen
@@ -289,6 +387,20 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
           onModifierLock: (m) => _session.modifiers.value = mods.lock(m),
           expanded: _session.moreKeys,
           onToggleExpanded: () => setState(() => _session.moreKeys = !_session.moreKeys),
+          shortcuts: settings.customKeys,
+          onShortcutLongPress: (i) => unawaited(_removeShortcut(settings, i)),
+          shortcutExtras: [
+            IconButton(
+              tooltip: 'Paste',
+              icon: const Icon(Icons.content_paste),
+              onPressed: () => unawaited(_pasteClipboard()),
+            ),
+            IconButton(
+              tooltip: 'Add shortcut',
+              icon: const Icon(Icons.add),
+              onPressed: () => unawaited(_addShortcut(settings)),
+            ),
+          ],
           pinned: [
             KeyGridButton(
               tooltip: _session.chatOpen ? 'Type in the terminal' : 'Chat',
@@ -309,6 +421,42 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
               tooltip: 'Larger text',
               icon: const Icon(Icons.text_increase),
               onPressed: settings.fontSize >= 32 ? null : () => _zoom(settings, 1),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SelectionBar extends StatelessWidget {
+  const _SelectionBar({required this.onCopy, required this.onClear});
+  final VoidCallback onCopy;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = MoshColors.of(context);
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Material(
+        color: c.inverse,
+        borderRadius: BorderRadius.circular(MoshRadii.key),
+        elevation: 2,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextButton.icon(
+              style: TextButton.styleFrom(foregroundColor: c.onInverse),
+              icon: const Icon(Icons.copy, size: 18),
+              label: const Text('Copy'),
+              onPressed: onCopy,
+            ),
+            IconButton(
+              tooltip: 'Clear selection',
+              color: c.onInverse,
+              icon: const Icon(Icons.close, size: 18),
+              onPressed: onClear,
             ),
           ],
         ),
