@@ -1,7 +1,8 @@
 name: release
 
 # Builds signed per-ABI release APKs for a `v*` tag and attaches them, with
-# SHA256SUMS, to the GitHub release of that tag.
+# SHA256SUMS and its minisign signature (public key RWTiZ1vxHn/jWfqAEjobeqloI9cL9pOA0/in+ayyCgPqT0gYDRKR1Ox5),
+# to the GitHub release of that tag.
 on:
   push:
     tags: ["v*"]
@@ -64,6 +65,15 @@ jobs:
           done
           (cd dist && sha256sum *.apk > SHA256SUMS)
           rm -f "$RUNNER_TEMP/release.jks"
+      - name: Sign checksums (minisign, key id 59E37F1EF15B67E2)
+        env:
+          MINISIGN_SECRET_KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
+        run: |
+          sudo apt-get install -y minisign >/dev/null
+          umask 077
+          printf '%s\n' "$MINISIGN_SECRET_KEY" > "$RUNNER_TEMP/minisign.key"
+          minisign -S -s "$RUNNER_TEMP/minisign.key" -m dist/SHA256SUMS
+          rm -f "$RUNNER_TEMP/minisign.key"
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
