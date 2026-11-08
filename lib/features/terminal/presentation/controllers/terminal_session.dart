@@ -15,24 +15,40 @@ import 'chat_attachment.dart';
 const attachSettle = Duration(milliseconds: 700);
 const attachSettleEach = Duration(milliseconds: 250);
 
+/// Pause between the pasted text and Enter, so the agent treats Enter as a
+/// submit, not as part of the paste.
+const submitPause = Duration(milliseconds: 80);
+
 /// Paste [files] (each followed by a space), wait for the agent to attach
 /// them, paste [text] and, when [submit], press Enter.
+///
+/// Every byte goes through [send], in order. Pasting through the emulator
+/// went through an async queue while Enter went straight to the shell, so
+/// Enter could arrive before the text and send the image alone.
 Future<void> sendComposed({
   required List<String> files,
   required String text,
-  required void Function(String) paste,
+  required bool bracketed,
   required Future<void> Function(String) send,
   bool submit = true,
   Future<void> Function(Duration) wait = Future<void>.delayed,
 }) async {
+  Future<void> paste(String s) {
+    final clean = s.replaceAll('\x1b[201~', '');
+    return send(bracketed ? '\x1b[200~$clean\x1b[201~' : clean);
+  }
+
   for (final p in files) {
-    paste(p);
+    await paste(p);
     await send(' ');
   }
   if (files.isNotEmpty && submit) {
     await wait(attachSettle + attachSettleEach * (files.length - 1));
   }
-  if (text.isNotEmpty) paste(text);
+  if (text.isNotEmpty) {
+    await paste(text);
+    if (submit) await wait(submitPause);
+  }
   if (submit) await send('\r');
 }
 
@@ -74,7 +90,7 @@ final class TerminalSession {
   Future<void> pastePaths(Iterable<String> paths) => sendComposed(
     files: paths.toList(),
     text: '',
-    paste: emulator.terminal.paste,
+    bracketed: emulator.terminal.bracketedPasteMode,
     send: runner.send,
     submit: false,
   );
@@ -88,7 +104,7 @@ final class TerminalSession {
     return sendComposed(
       files: files,
       text: text,
-      paste: emulator.terminal.paste,
+      bracketed: emulator.terminal.bracketedPasteMode,
       send: runner.send,
     );
   }

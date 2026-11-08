@@ -2,35 +2,48 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openmosh/features/terminal/presentation/controllers/terminal_session.dart';
 
 void main() {
-  test('images get time to attach before Enter, all in one send', () async {
+  test('everything goes through one ordered channel: images, then text, then Enter', () async {
     final log = <String>[];
     await sendComposed(
       files: ['/u/a.jpg', '/u/b.jpg'],
       text: 'look at these',
-      paste: (s) => log.add('paste $s'),
+      bracketed: true,
       send: (s) async => log.add('send ${s == '\r' ? 'enter' : s}'),
       wait: (d) async => log.add('wait ${d.inMilliseconds}'),
     );
     expect(log, [
-      'paste /u/a.jpg',
+      'send \x1b[200~/u/a.jpg\x1b[201~',
       'send  ',
-      'paste /u/b.jpg',
+      'send \x1b[200~/u/b.jpg\x1b[201~',
       'send  ',
       'wait 950',
-      'paste look at these',
+      'send \x1b[200~look at these\x1b[201~',
+      'wait 80',
       'send enter',
     ]);
   });
 
-  test('text alone is sent at once', () async {
+  test('text alone is pasted, then Enter after a short pause', () async {
     final log = <String>[];
     await sendComposed(
       files: const [],
       text: 'hi',
-      paste: (s) => log.add('paste $s'),
-      send: (s) async => log.add('send'),
+      bracketed: false,
+      send: (s) async => log.add(s),
       wait: (d) async => log.add('wait'),
     );
-    expect(log, ['paste hi', 'send']);
+    expect(log, ['hi', 'wait', '\r']);
+  });
+
+  test('a paste cannot end the bracket early', () async {
+    final log = <String>[];
+    await sendComposed(
+      files: const [],
+      text: 'a\x1b[201~b',
+      bracketed: true,
+      send: (s) async => log.add(s),
+      wait: (_) async {},
+    );
+    expect(log.first, '\x1b[200~ab\x1b[201~');
   });
 }
