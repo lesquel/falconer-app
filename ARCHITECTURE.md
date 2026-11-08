@@ -45,15 +45,16 @@ UnifiedPush connector starts without the Rust library loaded.
 
 | Feature | Responsibility | Main ports / use cases |
 |---|---|---|
-| `hosts` | CRUD of pinned hosts, connection pool | `HostRepository`, `HostConnections`, `ManageHosts` |
-| `keys` | Ed25519 keys, biometric unlock, push key | `KeyVault`, `UserAuthenticator`, `PushKeyStore` |
+| `hosts` | CRUD of pinned hosts, connection pool, paired devices (list/revoke) | `HostRepository`, `HostConnections`, `ManageHosts`, `PairedDevices` |
+| `keys` | Ed25519 keys, biometric unlock, push key, eager v0.1 key move | `KeyVault`, `UserAuthenticator`, `PushKeyStore`, `MigratingAuthenticator` |
+| `lock` | Optional app lock (cold start, > 60 s in background) | `AppLock`, `AppLockGate` |
 | `terminal` | PTY session, reconnect/backoff, re-attach | `TerminalEmulator`, `TerminalRunner`, `BackoffPolicy` |
 | `keyboard` | Extra keys, sticky modifiers, tmux/Herdr presets | `KeyPresets`, `ModifierState` |
 | `sessions` | Herdr/tmux sessions and agents via the hook | `SessionCatalog` |
-| `inbox` | Push receive/decrypt, inbox state machine, answers | `PushEndpointSource`, `PushOpener`, `InboxRepository`, `EventNotifier`, `HandlePushMessage`, `RespondToEvent`, `SyncInbox` |
+| `inbox` | Push receive/decrypt, freshness and replay guard, inbox state machine, answers | `PushEndpointSource`, `PushOpener`, `PushSeqStore`, `InboxRepository`, `EventNotifier`, `HandlePushMessage`, `RespondToEvent`, `SyncInbox` |
 | `pairing` | QR pairing (TCP, v1 wire contract) and SSH pairing | `PairingGateway`, `PairWithQr`, `PairOverSsh`, `SyncPushEndpoint` |
 | `uploads` | Pick file, SFTP upload, paste path | `FileSource`, `UploadFile` |
-| `settings` | Previews, app theme, accent, terminal scheme, font, presets | `SettingsRepository`, `AccentColor`, `TerminalScheme` |
+| `settings` | Previews, app lock, app theme, accent, terminal scheme, font, presets | `SettingsRepository`, `AccentColor`, `TerminalScheme` |
 
 Cross-feature use goes through domain types only (for example `pairing` uses `hosts`, `keys` and
 `inbox` ports; every feature that talks to a host uses `HostConnections`).
@@ -70,7 +71,11 @@ HostConnections.connection(host) ─► KeyVault.unlockPrivate (Keystore auth-bo
         v0.1 keys: app prompt, then re-wrapped once) ─► Rust connect(pin)
         ─► post-connect: resolve hook path, re-send rotated push endpoint
 
-UnifiedPush message ─► kid → host ─► PushCrypto.open ─► InboxEvent merge ─► notification
+UnifiedPush message ─► kid → host ─► PushCrypto.open ─► ts within 24 h / +5 min, seq > highest
+        ─► InboxEvent merge ─► notification
+Host screen ─► devices list ─► Revoke ─► confirm ─► verify user ─► hook devices revoke
+Startup ─► KeyVault.hasLegacyKeys ─► next successful verification ─► migrateLegacyKeys (once)
+App start / resume after > 60 s ─► AppLock (if on) ─► LockView ─► verify user
 Notification action ─► /inbox/<host>/<event>?action= ─► confirm ─► verify user ─► hook respond
 
 TerminalRunner: connect ─► openShell ─► write attach command ─► stream output
@@ -84,7 +89,8 @@ TerminalRunner: connect ─► openShell ─► write attach command ─► stre
 `settings/domain/entities/appearance.dart`); widgets read `MoshColors.of(context)`. Appearance
 choices are ARGB integers in the domain, so contrast is unit-tested without Flutter
 (`shared/domain/contrast.dart`). The terminal maps `TerminalScheme` to xterm's `TerminalTheme` in
-`terminal/presentation/views/terminal_palette.dart`. Settings are key/value rows; the `theme` key
+`terminal/presentation/views/terminal_palette.dart`. Settings are key/value rows (the push replay
+guard also keeps one `push_seq:<device id>` row per paired host); the `theme` key
 replaced the boolean `dark` key, which is still read (migration) and still written (so an older
 build installed over a newer one keeps the choice). The Android launcher icon and splash are
 vector drawables under `android/app/src/main/res/` (`ic_launcher_foreground`,

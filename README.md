@@ -26,6 +26,14 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
   with backoff on network change or app resume, re-attaching the Herdr/tmux session; sessions
   stay connected in the background unless disabled in Settings.
 - **Sessions** — lists Herdr/tmux sessions and agents through the hook and attaches to one.
+- **Paired devices** — the host screen lists every device paired with that host
+  (`openmosh-hook devices list`): name, paired date, a stale push endpoint and which one is
+  *this phone*. *Revoke* asks for confirmation, then for your fingerprint, face or screen lock,
+  and runs `openmosh-hook devices revoke`. Revoking this phone warns first that OpenMosh loses
+  access to that host.
+- **App lock** — optional, off by default (*Settings → Lock OpenMosh*). When on, OpenMosh asks
+  for user verification when it opens and after more than 60 s in the background; until then
+  the screen shows only the mole.
 - **Inbox** — encrypted pushes are decrypted on the phone; approve, deny or reply from the inbox
   or from a notification (which opens a confirm screen; nothing is sent from the lock screen).
 - **Uploads** — pick an image or file, upload it over SFTP to `~/.openmosh/uploads/` and paste
@@ -62,8 +70,11 @@ downloaded at runtime.
 | Property | How |
 |---|---|
 | Host key pinning, no override | The Rust core aborts the handshake unless the server key matches the pinned `SHA256:` fingerprint. The mismatch screen has no "continue" button. |
-| Keys | Ed25519 generated on the device. SSH private keys are encrypted under an Android Keystore key created with user authentication required (`flutter_secure_storage` `AndroidOptions.biometric`, `enforceBiometrics`, `requireBiometricsPerOperation`): the hardware refuses to decrypt them without a fresh biometric or screen-lock prompt, on every new connection. A screen lock is therefore required, and Android 9+. Keys stored by v0.1 (Keystore-wrapped but not auth-bound) are moved to the bound store on their first successful unlock. The push key is not auth-bound because the background engine decrypts notifications without a prompt; it can only read notifications. The private key is never displayed or copied; the clipboard is cleared when the import dialog closes, whether the key was imported or the dialog was cancelled. |
+| Keys | Ed25519 generated on the device. SSH private keys are encrypted under an Android Keystore key created with user authentication required (`flutter_secure_storage` `AndroidOptions.biometric`, `enforceBiometrics`, `requireBiometricsPerOperation`): the hardware refuses to decrypt them without a fresh biometric or screen-lock prompt, on every new connection. A screen lock is therefore required, and Android 9+. Keys stored by earlier builds (Keystore-wrapped but not auth-bound) are found at startup and moved to the bound store right after the next successful user verification (or on their first unlock, whichever comes first); new keys are only ever written to the bound store. The push key is not auth-bound because the background engine decrypts notifications without a prompt; it can only read notifications. The private key is never displayed or copied; the clipboard is cleared when the import dialog closes, whether the key was imported or the dialog was cancelled. |
 | Push E2EE | X25519 + HKDF-SHA256 + XChaCha20-Poly1305, decrypted in pure Dart. Bodies with a wrong `kid`, version or tag are discarded. Verified against the hook's shared test vectors. |
+| Push replay | A decrypted push is dropped when its `ts` is more than 24 h old or more than 5 min in the future, or when its `seq` is not above the highest `seq` already accepted from that host's device id (kept in the settings table). Resolved pushes reuse the event id with a new `seq`. The inbox sync over SSH still brings in anything dropped. |
+| Device revocation | Paired devices are listed and revoked in the app (SEC-11); the hook removes the `authorized_keys` line and the push key together. Revoking needs a confirmation and a user verification. |
+| App lock | Optional: user verification on a cold start and after more than 60 s in the background. While locked the app content is offstage (not painted, not in accessibility) and `FLAG_SECURE` still blocks screenshots. |
 | Lock screen | Previews off by default: notifications say only `<host>: <agent> needs you`. With previews on, notifications are `VISIBILITY_PRIVATE`. |
 | Screens | `FLAG_SECURE` on the whole app, always: `MainActivity.onCreate` sets it before the first frame and no screen clears it (no screenshots, screen recording or recents thumbnail of the terminal, keys, pairing, inbox or answer screens). |
 | Backups | `allowBackup="false"`, backup and data-extraction rules exclude everything. |
