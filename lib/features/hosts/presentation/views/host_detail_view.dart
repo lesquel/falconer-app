@@ -25,6 +25,7 @@ class HostDetailView extends StatelessWidget {
     this.onBack,
     this.onEdit,
     this.onDelete,
+    this.onUsage,
   });
 
   final Host host;
@@ -42,6 +43,9 @@ class HostDetailView extends StatelessWidget {
   final VoidCallback? onBack;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+
+  /// Opens the "Agent usage" screen.
+  final VoidCallback? onUsage;
 
   BadgeTone _tone(AgentState s) => switch (s) {
     AgentState.blocked => BadgeTone.attention,
@@ -133,6 +137,14 @@ class HostDetailView extends StatelessWidget {
             ),
           ],
         ),
+        if (onUsage != null) ...[
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: onUsage,
+            icon: const Icon(Icons.insights_outlined),
+            label: Text(l.agentUsage),
+          ),
+        ],
         if (!host.pushEnabled) ...[
           const SizedBox(height: 8),
           OutlinedButton.icon(

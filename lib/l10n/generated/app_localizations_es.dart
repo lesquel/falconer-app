@@ -1041,4 +1041,82 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get arrowRight => 'Derecha';
+
+  @override
+  String get agentUsage => 'Uso de agentes';
+
+  @override
+  String get usageSubtitle => 'Tokens que registraron tus agentes en este equipo.';
+
+  @override
+  String get usagePeriod => 'Periodo';
+
+  @override
+  String usageDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count días',
+      one: '1 día',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String usagePeriodTotal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Últimos $count días',
+      one: 'Último día',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String usageBreakdown(String input, String output, String cache) {
+    return 'Entrada $input · Salida $output · Caché $cache';
+  }
+
+  @override
+  String get usagePlanLimits => 'Límites del plan';
+
+  @override
+  String usagePercentUsed(String percent) {
+    return '$percent% usado';
+  }
+
+  @override
+  String usageResetsIn(String time) {
+    return 'Se reinicia en $time';
+  }
+
+  @override
+  String get usageResetsSoon => 'Se reinicia pronto';
+
+  @override
+  String get usageProjects => 'Proyectos';
+
+  @override
+  String get usageModels => 'Modelos';
+
+  @override
+  String usageNotRecorded(int count) {
+    return 'Sin registros ($count)';
+  }
+
+  @override
+  String get usageNotRecordedHint => 'Estos agentes no dejan registros de uso locales para leer.';
+
+  @override
+  String get usageEmpty => 'No hay uso de agentes registrado en este periodo.';
+
+  @override
+  String get usageLoading => 'Leyendo el uso…';
+
+  @override
+  String get errHookOutdatedUsage => 'Actualiza openmosh-hook en este equipo para ver el uso.';
+
+  @override
+  String get errUsagePeriod => 'El periodo debe ser de 1 a 31 días.';
 }

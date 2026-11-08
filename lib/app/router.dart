@@ -11,6 +11,7 @@ import '../features/pairing/presentation/containers/pairing_container.dart';
 import '../features/settings/presentation/containers/colors_container.dart';
 import '../features/settings/presentation/containers/settings_container.dart';
 import '../features/terminal/presentation/containers/terminal_container.dart';
+import '../features/usage/presentation/containers/usage_container.dart';
 import '../l10n/l10n.dart';
 import 'home_shell.dart';
 
@@ -48,6 +49,10 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
                     GoRoute(
                       path: 'edit',
                       builder: (_, s) => HostFormContainer(hostId: s.pathParameters['id']!),
+                    ),
+                    GoRoute(
+                      path: 'usage',
+                      builder: (_, s) => UsageContainer(hostId: s.pathParameters['id']!),
                     ),
                   ],
                 ),

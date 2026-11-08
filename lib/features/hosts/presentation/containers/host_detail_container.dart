@@ -116,6 +116,7 @@ class HostDetailContainer extends ConsumerWidget {
         onEnablePush: () => ctrl.enablePush('Android phone'),
         onBack: () => context.canPop() ? context.pop() : context.go('/'),
         onEdit: () => context.push('/hosts/$hostId/edit'),
+        onUsage: () => context.push('/hosts/$hostId/usage'),
         onDelete: () => _delete(context, ref),
       ),
     );

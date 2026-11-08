@@ -1898,6 +1898,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Right'**
   String get arrowRight;
+
+  /// Host screen button and title of the screen with token usage per agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent usage'**
+  String get agentUsage;
+
+  /// No description provided for @usageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens your agents recorded on this computer.'**
+  String get usageSubtitle;
+
+  /// No description provided for @usagePeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get usagePeriod;
+
+  /// No description provided for @usageDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String usageDays(int count);
+
+  /// No description provided for @usagePeriodTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Last day} other{Last {count} days}}'**
+  String usagePeriodTotal(int count);
+
+  /// Token breakdown; values are compact numbers like 1.2M.
+  ///
+  /// In en, this message translates to:
+  /// **'In {input} · Out {output} · Cache {cache}'**
+  String usageBreakdown(String input, String output, String cache);
+
+  /// No description provided for @usagePlanLimits.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan limits'**
+  String get usagePlanLimits;
+
+  /// No description provided for @usagePercentUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% used'**
+  String usagePercentUsed(String percent);
+
+  /// {time} is a short duration like 2h 10m.
+  ///
+  /// In en, this message translates to:
+  /// **'Resets in {time}'**
+  String usageResetsIn(String time);
+
+  /// No description provided for @usageResetsSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Resets soon'**
+  String get usageResetsSoon;
+
+  /// No description provided for @usageProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects'**
+  String get usageProjects;
+
+  /// No description provided for @usageModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Models'**
+  String get usageModels;
+
+  /// No description provided for @usageNotRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Not recorded ({count})'**
+  String usageNotRecorded(int count);
+
+  /// No description provided for @usageNotRecordedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'These agents leave no local usage logs to read.'**
+  String get usageNotRecordedHint;
+
+  /// No description provided for @usageEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No agent usage recorded in this period.'**
+  String get usageEmpty;
+
+  /// No description provided for @usageLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading usage…'**
+  String get usageLoading;
+
+  /// No description provided for @errHookOutdatedUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Update openmosh-hook on this computer to see usage.'**
+  String get errHookOutdatedUsage;
+
+  /// No description provided for @errUsagePeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'The period must be 1–31 days.'**
+  String get errUsagePeriod;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

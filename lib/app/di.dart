@@ -38,6 +38,7 @@ import '../features/uploads/data/datasources/file_picker_source.dart';
 import '../features/uploads/domain/repositories/file_source.dart';
 import '../features/uploads/domain/usecases/upload_file.dart';
 import '../shared/data/app_database.dart';
+import '../features/usage/domain/usecases/load_agent_usage.dart';
 import '../shared/hook/domain/hook_client.dart';
 import '../shared/ssh/data/datasources/ssh_bridge.dart';
 import '../shared/ssh/domain/ssh_ports.dart';
@@ -190,6 +191,10 @@ final pairedDevicesProvider = Provider<PairedDevices>(
 
 final sessionCatalogProvider = Provider<SessionCatalog>(
   (ref) => SessionCatalog(ref.watch(hostConnectionsProvider)),
+);
+
+final loadAgentUsageProvider = Provider<LoadAgentUsage>(
+  (ref) => LoadAgentUsage(ref.watch(hostConnectionsProvider)),
 );
 
 final uploadFileProvider = Provider<UploadFile>(

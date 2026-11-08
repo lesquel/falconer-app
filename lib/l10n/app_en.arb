@@ -790,5 +790,76 @@
   "arrowRight": "Right",
   "@arrowRight": {
     "description": "Accessibility label of an arrow key on the arrow cross."
-  }
+  },
+  "agentUsage": "Agent usage",
+  "@agentUsage": {
+    "description": "Host screen button and title of the screen with token usage per agent."
+  },
+  "usageSubtitle": "Tokens your agents recorded on this computer.",
+  "usagePeriod": "Period",
+  "usageDays": "{count, plural, =1{1 day} other{{count} days}}",
+  "@usageDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "usagePeriodTotal": "{count, plural, =1{Last day} other{Last {count} days}}",
+  "@usagePeriodTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "usageBreakdown": "In {input} · Out {output} · Cache {cache}",
+  "@usageBreakdown": {
+    "description": "Token breakdown; values are compact numbers like 1.2M.",
+    "placeholders": {
+      "input": {
+        "type": "String"
+      },
+      "output": {
+        "type": "String"
+      },
+      "cache": {
+        "type": "String"
+      }
+    }
+  },
+  "usagePlanLimits": "Plan limits",
+  "usagePercentUsed": "{percent}% used",
+  "@usagePercentUsed": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "usageResetsIn": "Resets in {time}",
+  "@usageResetsIn": {
+    "description": "{time} is a short duration like 2h 10m.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "usageResetsSoon": "Resets soon",
+  "usageProjects": "Projects",
+  "usageModels": "Models",
+  "usageNotRecorded": "Not recorded ({count})",
+  "@usageNotRecorded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "usageNotRecordedHint": "These agents leave no local usage logs to read.",
+  "usageEmpty": "No agent usage recorded in this period.",
+  "usageLoading": "Reading usage…",
+  "errHookOutdatedUsage": "Update openmosh-hook on this computer to see usage.",
+  "errUsagePeriod": "The period must be 1–31 days."
 }
