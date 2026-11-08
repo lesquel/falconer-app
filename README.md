@@ -19,14 +19,43 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
   the host's encrypted, token-authenticated reply and is pinned.
 - **SSH pairing** — for a host you already reach with your own key: add it manually, confirm its
   host key fingerprint, then *Enable notifications* runs `openmosh-hook pair-ssh` over SSH.
-- **Terminal** — full xterm emulation, extra-keys bar (Esc, Tab, Ctrl, Alt, arrows, `|`, `/`,
-  `~`, `-`), tmux and Herdr prefix rows, automatic reconnect with backoff on network change or
-  app resume, re-attaching the Herdr/tmux session.
+- **Terminal** — full xterm emulation in the chosen color scheme. A grid of six big keys
+  (Esc, Tab, Ctrl, *more keys*, Chat, Keyboard) sits under the thumb; *more keys* opens rows with
+  Alt, arrows, `|`, `/`, `~`, `-`, text size −/+ and the tmux or Herdr prefix keys. Chat mode
+  composes a whole message with image/file attachments before sending it. Automatic reconnect
+  with backoff on network change or app resume, re-attaching the Herdr/tmux session; sessions
+  stay connected in the background unless disabled in Settings.
 - **Sessions** — lists Herdr/tmux sessions and agents through the hook and attaches to one.
 - **Inbox** — encrypted pushes are decrypted on the phone; approve, deny or reply from the inbox
   or from a notification (which opens a confirm screen; nothing is sent from the lock screen).
 - **Uploads** — pick an image or file, upload it over SFTP to `~/.openmosh/uploads/` and paste
   the path at the cursor.
+- **Home** — greets you, says which computer is waiting for an answer and puts the newest
+  request in a big card you can open with one thumb; below are your computers with *Terminal*
+  and *Sessions* buttons. Tabs (Hosts, Inbox, Keys, Settings) are a dock of big tiles.
+
+## Look and feel
+
+The app follows the "UI-G" one-hand design: black `#0A0A0A` / white `#FAFAFA`, rounded cards
+(`#171717` / `#262626` on dark), big actions in the bottom half of the screen and one accent
+color. The mascot, **Topo** the mole with accent goggles, is the launcher icon (adaptive, with
+an Android 13 themed variant), the splash screen and the empty, loading and pairing-success
+states.
+
+**Settings → Colors** chooses:
+
+| Setting | Options | Default |
+|---|---|---|
+| Accent | Blue `#6B93FF`, Green `#4ADE9E`, Violet `#B69CFF`, Amber `#FFC24D`, Coral `#FF8F7A`, White `#FAFAFA` (darker shades on the light theme) | Blue |
+| App theme | System, Light, Dark | System (an older install keeps its dark/light choice) |
+| Terminal | Black, Paper, Sepia, High contrast | Black |
+
+Accessibility: every text color passes WCAG 2.2 AA (4.5:1) on every surface of both themes, for
+every accent and terminal scheme (`test/app/theme_contrast_test.dart`); touch targets are at
+least 44 px; a selected choice, active modifier or selected tab is also marked with a check, dot,
+lock or label, never by color alone. The font is Manrope, bundled under the SIL Open Font
+License 1.1 (`assets/fonts/Manrope-OFL.txt`, also listed in the app's licenses); no font is
+downloaded at runtime.
 
 ## Security properties
 
@@ -92,7 +121,7 @@ If the files are missing the vector tests are skipped with `vectors pending`.
    ```sh
    openmosh-hook pair
    ```
-4. In the app: **Hosts → Scan pairing code**, scan the QR, check the host address, choose
+4. In the app: **Hosts → Pair with QR** (or *Scan pairing code* on the empty home), scan the QR, check the host address, choose
    a name for the phone and tap **Pair**. The code is single-use and expires after 5 minutes.
 5. Open the host and tap **Shell** or **Load sessions**. The first connection asks for your
    fingerprint/PIN.

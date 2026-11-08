@@ -22,7 +22,8 @@ lib/
 │   ├── ssh/data/datasources/     # ssh_bridge.dart: the only user of the Rust SSH API
 │   ├── data/                     # drift database (hosts, key metadata, inbox, settings)
 │   ├── logging/                  # redacting logger (the only logging entry point)
-│   ├── ui/{atoms,molecules,organisms}/
+│   ├── ui/{atoms,molecules,organisms}/ # UI-G widgets: MoleLogo, MoshTile, ThumbPage, KeyCap…
+│   ├── ui/tokens/                # MoshColors theme extension (UI-G colors) and radii
 │   └── bridge/                   # generated flutter_rust_bridge bindings (do not edit)
 └── features/<feature>/
     ├── domain/{entities,repositories,usecases}/
@@ -52,7 +53,7 @@ UnifiedPush connector starts without the Rust library loaded.
 | `inbox` | Push receive/decrypt, inbox state machine, answers | `PushEndpointSource`, `PushOpener`, `InboxRepository`, `EventNotifier`, `HandlePushMessage`, `RespondToEvent`, `SyncInbox` |
 | `pairing` | QR pairing (TCP, v1 wire contract) and SSH pairing | `PairingGateway`, `PairWithQr`, `PairOverSsh`, `SyncPushEndpoint` |
 | `uploads` | Pick file, SFTP upload, paste path | `FileSource`, `UploadFile` |
-| `settings` | Previews, theme, font, presets | `SettingsRepository` |
+| `settings` | Previews, app theme, accent, terminal scheme, font, presets | `SettingsRepository`, `AccentColor`, `TerminalScheme` |
 
 Cross-feature use goes through domain types only (for example `pairing` uses `hosts`, `keys` and
 `inbox` ports; every feature that talks to a host uses `HostConnections`).
@@ -76,6 +77,18 @@ TerminalRunner: connect ─► openShell ─► write attach command ─► stre
         connection lost ─► backoff 0.5 s … 8 s ─► reconnect (new unlock) ─► re-attach
         shell exited on a live connection ─► session ended; mismatch/cancel/auth ─► stop
 ```
+
+## Theme
+
+`app/theme.dart` builds Material themes from `MoshColors` (light and dark, one accent from
+`settings/domain/entities/appearance.dart`); widgets read `MoshColors.of(context)`. Appearance
+choices are ARGB integers in the domain, so contrast is unit-tested without Flutter
+(`shared/domain/contrast.dart`). The terminal maps `TerminalScheme` to xterm's `TerminalTheme` in
+`terminal/presentation/views/terminal_palette.dart`. Settings are key/value rows; the `theme` key
+replaced the boolean `dark` key, which is still read (migration) and still written (so an older
+build installed over a newer one keeps the choice). The Android launcher icon and splash are
+vector drawables under `android/app/src/main/res/` (`ic_launcher_foreground`,
+`mipmap-anydpi-v26`, `values-v31` for the Android 12+ splash).
 
 ## Rules
 
