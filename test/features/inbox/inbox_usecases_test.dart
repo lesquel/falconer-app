@@ -8,21 +8,45 @@ import 'package:openmosh/features/inbox/domain/entities/push_endpoint.dart';
 import 'package:openmosh/features/inbox/domain/repositories/inbox_ports.dart';
 import 'package:openmosh/features/inbox/domain/usecases/inbox_usecases.dart';
 import 'package:openmosh/shared/domain/failure.dart';
+import 'package:openmosh/shared/domain/once.dart';
 import 'package:openmosh/shared/ssh/domain/ssh_ports.dart';
 
 import '../../support/fakes.dart';
 
 class MemInbox implements InboxRepository {
   final Map<String, InboxEvent> rows = {};
+  final calls = <String>[];
   @override
-  Future<InboxEvent?> byId(String hostId, String id) async => rows['$hostId/$id'];
+  Future<InboxEvent?> byId(String hostId, String id) async {
+    calls.add('byId');
+    return rows['$hostId/$id'];
+  }
+
+  @override
+  Future<Map<String, InboxEvent>> byIds(String hostId, Iterable<String> ids) async {
+    calls.add('byIds');
+    return {for (final id in ids) id: ?rows['$hostId/$id']};
+  }
+
+  @override
+  Future<void> upsertAll(List<InboxEvent> events) async {
+    calls.add('upsertAll');
+    for (final e in events) {
+      rows['${e.hostId}/${e.id}'] = e;
+    }
+  }
+
   @override
   Future<int> maxSeq(String hostId) async =>
       rows.values.where((e) => e.hostId == hostId).fold<int>(0, (m, e) => e.seq > m ? e.seq : m);
   @override
   Future<int> pendingCount() async => rows.values.where((e) => e.needsAction).length;
   @override
-  Future<void> upsert(InboxEvent e) async => rows['${e.hostId}/${e.id}'] = e;
+  Future<void> upsert(InboxEvent e) async {
+    calls.add('upsert');
+    rows['${e.hostId}/${e.id}'] = e;
+  }
+
   @override
   Stream<List<InboxEvent>> watchAll() => const Stream.empty();
 }
@@ -136,6 +160,29 @@ void main() {
     opener.next = wire(id: 'ev2', seq: 6);
     await quiet(body('kid1'));
     expect(notifier.shown.single.$1, 'ev2');
+  });
+
+  test('a push reads the settings once for hours and previews', () async {
+    var loads = 0;
+    Future<bool> Function() load() => () async {
+      loads++;
+      return true;
+    };
+    final settings = once(load());
+    final h = HandlePushMessage(
+      hosts: hosts,
+      inbox: inbox,
+      opener: opener,
+      notifier: notifier,
+      previews: settings,
+      allowed: (_, _) => settings(),
+      kidOf: (b) => (jsonDecode(utf8.decode(b)) as Map)['kid'] as String?,
+      now: () => now,
+    );
+    opener.next = wire();
+    await h(body('kid1'));
+    expect(notifier.shown.single, ('ev1', 'work', true));
+    expect(loads, 1);
   });
 
   test('unknown kid or undecryptable body is discarded silently', () async {
@@ -333,6 +380,25 @@ void main() {
     expect(conn.scripts.single, contains("'--since' '0'"));
     expect((await inbox.byId('h1', 'ev10'))!.status, InboxStatus.pending);
     expect(await cursors.read('h1'), 11);
+  });
+
+  test('sync reads and writes a page in one query and one transaction', () async {
+    opener.next = wire(id: 'ev1', seq: 5);
+    await handle(body('kid1'));
+    inbox.calls.clear();
+    final conn = FakeConnection(
+      (_, _) => ok([
+        wire(id: 'ev1', seq: 5)..['status'] = 'resolved',
+        wire(id: 'ev2', seq: 6),
+        wire(id: 'ev2', seq: 7),
+        wire(id: 'ev3', seq: 8),
+      ]),
+    );
+    expect(await syncWith(conn)('h1'), 4);
+    expect(inbox.calls, ['byIds', 'upsertAll']);
+    expect((await inbox.byId('h1', 'ev1'))!.status, InboxStatus.resolved);
+    expect((await inbox.byId('h1', 'ev2'))!.seq, 7, reason: 'a later copy in the page merges');
+    expect(await inbox.byId('h1', 'ev3'), isNotNull);
   });
 
   test('sync reads the hook inbox page shape', () async {

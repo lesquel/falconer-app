@@ -5,6 +5,12 @@ abstract interface class InboxRepository {
   Stream<List<InboxEvent>> watchAll();
   Future<InboxEvent?> byId(String hostId, String id);
   Future<void> upsert(InboxEvent event);
+
+  /// The stored events of [hostId] among [ids], by id.
+  Future<Map<String, InboxEvent>> byIds(String hostId, Iterable<String> ids);
+
+  /// Stores [events] in one transaction.
+  Future<void> upsertAll(List<InboxEvent> events);
   Future<int> maxSeq(String hostId);
   Future<int> pendingCount();
 }

@@ -138,16 +138,22 @@ final class SyncInbox {
       final items = data is List ? data : (data is Map ? data['events'] : null);
       if (items is! List || items.isEmpty) break;
       var last = since;
+      final incoming = <InboxEvent>[];
       for (final raw in items) {
         if (raw is! Map<String, Object?>) continue;
-        final incoming = eventFromWire(raw, hostId: hostId);
-        if (incoming == null) continue;
-        if (incoming.seq > last) last = incoming.seq;
-        if (incoming.kind == EventKind.resolved) continue;
-        final existing = await inbox.byId(hostId, incoming.id);
-        await inbox.upsert(existing?.mergeIncoming(incoming) ?? incoming);
-        n++;
+        final e = eventFromWire(raw, hostId: hostId);
+        if (e == null) continue;
+        if (e.seq > last) last = e.seq;
+        if (e.kind == EventKind.resolved) continue;
+        incoming.add(e);
       }
+      // One read and one transaction per page; a page may repeat an id.
+      final merged = await inbox.byIds(hostId, incoming.map((e) => e.id));
+      for (final e in incoming) {
+        merged[e.id] = merged[e.id]?.mergeIncoming(e) ?? e;
+      }
+      await inbox.upsertAll([for (final e in incoming.map((e) => e.id).toSet()) merged[e]!]);
+      n += incoming.length;
       final reported = data is Map ? data['last_seq'] : null;
       if (reported is int && reported > last) last = reported;
       if (last <= since) break;

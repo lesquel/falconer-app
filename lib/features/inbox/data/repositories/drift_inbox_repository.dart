@@ -39,23 +39,38 @@ class DriftInboxRepository implements InboxRepository {
   }
 
   @override
-  Future<void> upsert(InboxEvent e) => _db
-      .into(_db.eventRows)
-      .insertOnConflictUpdate(
-        EventRowsCompanion.insert(
-          hostId: e.hostId,
-          id: e.id,
-          seq: e.seq,
-          agent: e.agent,
-          kind: e.kind.wire,
-          title: e.title,
-          summary: e.summary,
-          pane: e.pane,
-          at: e.at.millisecondsSinceEpoch,
-          status: e.status.name,
-          response: Value(e.response?.name),
-        ),
-      );
+  Future<Map<String, InboxEvent>> byIds(String hostId, Iterable<String> ids) async {
+    final list = ids.toSet().toList();
+    if (list.isEmpty) return const {};
+    final rows = await (_db.select(
+      _db.eventRows,
+    )..where((t) => t.hostId.equals(hostId) & t.id.isIn(list))).get();
+    return {for (final r in rows) r.id: _map(r)};
+  }
+
+  @override
+  Future<void> upsert(InboxEvent e) => _db.into(_db.eventRows).insertOnConflictUpdate(_row(e));
+
+  @override
+  Future<void> upsertAll(List<InboxEvent> events) async {
+    if (events.isEmpty) return;
+    // A batch runs in one transaction.
+    await _db.batch((b) => b.insertAllOnConflictUpdate(_db.eventRows, events.map(_row).toList()));
+  }
+
+  EventRowsCompanion _row(InboxEvent e) => EventRowsCompanion.insert(
+    hostId: e.hostId,
+    id: e.id,
+    seq: e.seq,
+    agent: e.agent,
+    kind: e.kind.wire,
+    title: e.title,
+    summary: e.summary,
+    pane: e.pane,
+    at: e.at.millisecondsSinceEpoch,
+    status: e.status.name,
+    response: Value(e.response?.name),
+  );
 
   @override
   Future<int> maxSeq(String hostId) async {
