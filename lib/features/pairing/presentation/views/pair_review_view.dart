@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../shared/ui/molecules/fingerprint_card.dart';
 import '../../domain/entities/pair_payload.dart';
 
 class PairReviewView extends StatefulWidget {
@@ -36,11 +35,12 @@ class _PairReviewViewState extends State<PairReviewView> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text('Pair with ${c.alias}', style: Theme.of(context).textTheme.headlineSmall),
+        Text('Pair with ${c.ip}', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 8),
-        Text('${c.sshUser}@${c.ip}:${c.sshPort}'),
-        const SizedBox(height: 12),
-        FingerprintCard(label: 'SSH host key that will be pinned', fingerprint: c.sshFingerprint),
+        const Text(
+          'The host proves itself with the key in the code; its name and SSH host key '
+          'fingerprint are pinned from its encrypted reply.',
+        ),
         const SizedBox(height: 12),
         TextField(
           controller: _name,

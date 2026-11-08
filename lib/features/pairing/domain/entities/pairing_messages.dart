@@ -31,8 +31,19 @@ final class PairRequestBody {
   );
 }
 
+/// Decrypted host reply. It is authenticated by the token and the host key from
+/// the QR, so its SSH details are pinned as received.
 final class PairResponse {
-  const PairResponse({required this.deviceId, required this.alias});
+  const PairResponse({
+    required this.deviceId,
+    required this.alias,
+    required this.sshUser,
+    required this.sshPort,
+    required this.sshFingerprint,
+  });
   final String deviceId;
   final String alias;
+  final String sshUser;
+  final int sshPort;
+  final String sshFingerprint;
 }

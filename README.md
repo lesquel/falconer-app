@@ -15,7 +15,8 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
   device credential, enforced by the hardware. Requires Android 9+ and a screen lock.
 - **QR pairing** — scan the code printed by `openmosh-hook pair` (or paste the `openmosh://pair`
   link). The phone creates its keys, registers for UnifiedPush and pairs over a one-shot
-  encrypted exchange inside the tailnet. The host's SSH key fingerprint from the code is pinned.
+  encrypted exchange inside the tailnet. The host's SSH key fingerprint arrives in
+  the host's encrypted, token-authenticated reply and is pinned.
 - **SSH pairing** — for a host you already reach with your own key: add it manually, confirm its
   host key fingerprint, then *Enable notifications* runs `openmosh-hook pair-ssh` over SSH.
 - **Terminal** — full xterm emulation, extra-keys bar (Esc, Tab, Ctrl, Alt, arrows, `|`, `/`,
@@ -91,7 +92,7 @@ If the files are missing the vector tests are skipped with `vectors pending`.
    ```sh
    openmosh-hook pair
    ```
-4. In the app: **Hosts → Scan pairing code**, scan the QR, check the host and fingerprint, choose
+4. In the app: **Hosts → Scan pairing code**, scan the QR, check the host address, choose
    a name for the phone and tap **Pair**. The code is single-use and expires after 5 minutes.
 5. Open the host and tap **Shell** or **Load sessions**. The first connection asks for your
    fingerprint/PIN.

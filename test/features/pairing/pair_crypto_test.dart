@@ -25,7 +25,7 @@ void main() {
     expect(b64uEncode(await req.responseKey.extractBytes()), v['k_resp']);
   }, skip: skip);
 
-  test('response line decrypts to device_id and alias', () async {
+  test('response line decrypts to device id, alias and SSH details', () async {
     final eph = await c.x25519FromPrivate(b64uDecode(v!['eph_priv']! as String));
     final req = await PairCrypto.sealRequest(
       hostPublicKey: b64uDecode(v['host_pub']! as String),
@@ -38,6 +38,9 @@ void main() {
     final expected = jsonDecode(v['resp_plaintext']! as String) as Map<String, Object?>;
     expect(resp.deviceId, expected['device_id']);
     expect(resp.alias, expected['alias']);
+    expect(resp.sshUser, expected['ssh_user']);
+    expect(resp.sshPort, expected['ssh_port']);
+    expect(resp.sshFingerprint, expected['ssh_fp']);
   }, skip: skip);
 
   group('without vectors', () {
@@ -100,11 +103,17 @@ void main() {
       expect(PairCrypto.openResponse('garbage', key), throwsA(isA<PairingFailure>()));
     });
 
-    Future<PairResponse> replyWith(Map<String, Object?> body) async {
+    Future<PairResponse> replyWith(Map<String, Object?> fields) async {
+      final body = {
+        'ssh_user': 'me',
+        'ssh_port': 22,
+        'ssh_fp': 'SHA256:i2cBF5DBtTy5/U7Y27668/2F1HhY/qwC4eALG8QAiQM',
+        ...fields,
+      };
       final host = await c.newX25519KeyPair();
       final req = await PairCrypto.sealRequest(
         hostPublicKey: await c.x25519PublicBytes(host),
-        token: c.randomBytes(32),
+        token: c.randomBytes(16),
         plaintext: utf8.encode('{}'),
       );
       final n = c.randomBytes(c.nonceLength);
@@ -130,6 +139,25 @@ void main() {
     test('a plain reply alias is kept as is', () async {
       final r = await replyWith({'device_id': 'd1', 'alias': 'My Box_2'});
       expect(r.alias, 'My Box_2');
+    });
+
+    test('reply SSH details must be well formed', () async {
+      for (final bad in <Map<String, Object?>>[
+        {'ssh_fp': 'MD5:aa'},
+        {'ssh_fp': 'SHA256:short'},
+        {'ssh_user': 'me; rm -rf'},
+        {'ssh_user': ''},
+        {'ssh_port': 0},
+        {'ssh_port': 65536},
+        {'ssh_port': '22'},
+        {'ssh_fp': null},
+      ]) {
+        await expectLater(
+          replyWith({'device_id': 'd1', 'alias': 'box', ...bad}),
+          throwsA(isA<PairingFailure>()),
+          reason: '$bad',
+        );
+      }
     });
 
     test('a reply alias longer than 64 characters is invalid', () async {

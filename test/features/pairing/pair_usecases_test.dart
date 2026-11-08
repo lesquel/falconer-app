@@ -21,7 +21,13 @@ class FakeGateway implements PairingGateway {
   Future<PairResponse> exchange(PairPayload code, PairRequestBody body) async {
     this.code = code;
     sent = body;
-    return const PairResponse(deviceId: 'dev123', alias: 'workstation');
+    return const PairResponse(
+      deviceId: 'dev123',
+      alias: 'workstation',
+      sshUser: 'me',
+      sshPort: 2222,
+      sshFingerprint: 'SHA256:i2cBF5DBtTy5/U7Y27668/2F1HhY/qwC4eALG8QAiQM',
+    );
   }
 }
 
@@ -34,11 +40,10 @@ class FakeEndpoints implements PushEndpointSource {
   Future<String?> knownEndpoint() async => url;
 }
 
-String code({int exp = 2000, String ip = '100.101.102.103'}) {
+String code({String ip = '100.101.102.103'}) {
   final hpk = b64uEncode(List.filled(32, 7));
-  final tok = b64uEncode(List.filled(32, 9));
-  return 'openmosh://pair?v=2&n=ws&i=$ip&s=2222&u=me'
-      '&f=i2cBF5DBtTy5_U7Y27668_2F1HhY_qwC4eALG8QAiQM&k=$hpk&p=41000&t=$tok&e=$exp';
+  final tok = b64uEncode(List.filled(16, 9));
+  return 'openmosh://pair?v=3&i=$ip&k=$hpk&p=41000&t=$tok';
 }
 
 void main() {
@@ -65,7 +70,7 @@ void main() {
   test('sends token, device ssh key, push key and endpoint; pins the host', () async {
     final host = await pair(code(), deviceName: 'Phone');
     final sent = gateway.sent!;
-    expect(sent.token, List.filled(32, 9));
+    expect(sent.token, List.filled(16, 9));
     expect(sent.sshPublicKey, 'ssh-ed25519 AAAAC3 device');
     expect(sent.pushPublicKey, List.filled(32, 3));
     expect(sent.endpoint, 'https://ntfy.sh/upXYZ');
@@ -74,14 +79,19 @@ void main() {
     expect(host.fingerprint, 'SHA256:i2cBF5DBtTy5/U7Y27668/2F1HhY/qwC4eALG8QAiQM');
     expect(host.address, '100.101.102.103');
     expect(host.port, 2222);
+    expect(host.user, 'me');
+    expect(host.alias, 'workstation');
     expect(host.deviceId, 'dev123');
     expect(host.hostPushKey, b64uEncode(List.filled(32, 7)));
     expect(host.pairedVia, PairedVia.qr);
     expect(hosts.rows['host-1'], isNotNull);
   });
 
-  test('expired code makes no network call and saves nothing', () async {
-    await expectLater(pair(code(exp: 1000), deviceName: 'Phone'), throwsA(isA<PairCodeFailure>()));
+  test('invalid code makes no network call and saves nothing', () async {
+    await expectLater(
+      pair(code(ip: '192.168.1.2'), deviceName: 'Phone'),
+      throwsA(isA<PairCodeFailure>()),
+    );
     expect(gateway.sent, isNull);
     expect(hosts.rows, isEmpty);
   });

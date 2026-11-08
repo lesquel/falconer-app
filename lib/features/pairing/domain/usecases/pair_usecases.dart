@@ -38,7 +38,7 @@ final class PairWithQr {
   final DateTime Function() now;
 
   /// Parses and validates the code without side effects.
-  PairPayload inspect(String raw) => PairPayload.parse(raw, now: now().toUtc());
+  PairPayload inspect(String raw) => PairPayload.parse(raw);
 
   Future<Host> call(String raw, {required String deviceName}) async {
     final code = inspect(raw);
@@ -48,9 +48,7 @@ final class PairWithQr {
     if (!isAllowedPushEndpoint(endpoint)) {
       throw const PushFailure('The push endpoint must use https.');
     }
-    // Re-check expiry: key generation and push registration take time.
-    if (!now().toUtc().isBefore(code.expiresAt)) throw PairCodeFailure(PairCodeError.expired);
-
+    // Expiry and single use are enforced by the host, which rejects late codes.
     final reply = await gateway.exchange(
       code,
       PairRequestBody(
@@ -63,11 +61,11 @@ final class PairWithQr {
     );
     final host = Host(
       id: newId(),
-      alias: reply.alias.isNotEmpty ? reply.alias : code.alias,
+      alias: reply.alias,
       address: code.ip,
-      port: code.sshPort,
-      user: code.sshUser,
-      fingerprint: code.sshFingerprint,
+      port: reply.sshPort,
+      user: reply.sshUser,
+      fingerprint: reply.sshFingerprint,
       pairedVia: PairedVia.qr,
       createdAt: now(),
       keyId: SshKeyInfo.deviceKeyId,

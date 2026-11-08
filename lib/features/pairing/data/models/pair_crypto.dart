@@ -14,6 +14,8 @@ import '../../domain/entities/pairing_messages.dart';
 export '../../domain/entities/pairing_messages.dart';
 
 const _aad = 'openmosh/pair/v1';
+final _fingerprint = RegExp(r'^SHA256:[A-Za-z0-9+/]{43}$');
+final _user = RegExp(r'^[A-Za-z0-9._][A-Za-z0-9._-]{0,63}$');
 const maxPairLineBytes = 16 * 1024;
 
 final class SealedPairRequest {
@@ -99,9 +101,21 @@ abstract final class PairCrypto {
     if (body is! Map<String, Object?>) throw invalid;
     final id = body['device_id'];
     final alias = body['alias'];
-    if (id is! String || id.isEmpty || alias is! String) throw invalid;
+    final user = body['ssh_user'];
+    final port = body['ssh_port'];
+    final fp = body['ssh_fp'];
+    if (id is! String || id.isEmpty || id.length > 64 || alias is! String) throw invalid;
+    if (user is! String || !_user.hasMatch(user)) throw invalid;
+    if (port is! int || port < 1 || port > 65535) throw invalid;
+    if (fp is! String || !_fingerprint.hasMatch(fp)) throw invalid;
     final cleanAlias = sanitizeLabel(alias);
-    if (cleanAlias == null) throw invalid;
-    return PairResponse(deviceId: id, alias: cleanAlias);
+    if (cleanAlias == null || cleanAlias.isEmpty) throw invalid;
+    return PairResponse(
+      deviceId: id,
+      alias: cleanAlias,
+      sshUser: user,
+      sshPort: port,
+      sshFingerprint: fp,
+    );
   }
 }

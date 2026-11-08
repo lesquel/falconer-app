@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openmosh/features/pairing/domain/entities/pair_payload.dart';
 import 'package:openmosh/shared/domain/b64u.dart';
 
-/// Builds a v2 pairing link; a null value omits the parameter.
+/// Builds a v3 pairing link; a null value omits the parameter.
 String link(Map<String, String?> q) {
   final query = [
     for (final e in q.entries)
@@ -12,23 +12,16 @@ String link(Map<String, String?> q) {
 }
 
 Map<String, String?> valid() => {
-  'v': '2',
-  'n': 'workstation',
+  'v': '3',
   'i': '100.101.102.103',
-  's': '22',
-  'u': 'me',
-  'f': 'i2cBF5DBtTy5_U7Y27668_2F1HhY_qwC4eALG8QAiQM',
   'k': b64uEncode(List<int>.filled(32, 7)),
   'p': '40123',
-  't': b64uEncode(List<int>.filled(32, 9)),
-  'e': '1000',
+  't': b64uEncode(List<int>.filled(16, 9)),
 };
 
-final now = DateTime.fromMillisecondsSinceEpoch(900 * 1000, isUtc: true);
-
-PairCodeError? errorOf(String raw, {DateTime? at}) {
+PairCodeError? errorOf(String raw) {
   try {
-    PairPayload.parse(raw, now: at ?? now);
+    PairPayload.parse(raw);
     return null;
   } on PairCodeFailure catch (e) {
     return e.reason;
@@ -37,45 +30,45 @@ PairCodeError? errorOf(String raw, {DateTime? at}) {
 
 void main() {
   test('parses a valid code', () {
-    final p = PairPayload.parse(link(valid()), now: now);
-    expect(p.alias, 'workstation');
+    final p = PairPayload.parse(link(valid()));
     expect(p.ip, '100.101.102.103');
-    expect(p.sshPort, 22);
     expect(p.pairPort, 40123);
-    expect(p.hostPublicKey.length, 32);
-    expect(p.token.length, 32);
-    expect(p.sshFingerprint, 'SHA256:i2cBF5DBtTy5/U7Y27668/2F1HhY/qwC4eALG8QAiQM');
-    expect(p.expiresAt, DateTime.fromMillisecondsSinceEpoch(1000 * 1000, isUtc: true));
+    expect(p.hostPublicKey, List<int>.filled(32, 7));
+    expect(p.token, List<int>.filled(16, 9));
   });
 
-  test('expired code is rejected, including exactly at exp', () {
-    expect(
-      errorOf(link(valid()), at: DateTime.fromMillisecondsSinceEpoch(1000 * 1000)),
-      PairCodeError.expired,
-    );
-    expect(
-      errorOf(link(valid()), at: DateTime.fromMillisecondsSinceEpoch(5000 * 1000)),
-      PairCodeError.expired,
-    );
+  test('code from openmosh-hook fits a small QR', () {
+    final longest = link({
+      ...valid(),
+      'i': '100.100.100.100',
+      'p': '65535',
+      'k': b64uEncode(List<int>.filled(32, 255)),
+      't': b64uEncode(List<int>.filled(16, 255)),
+    });
+    expect(errorOf(longest), isNull);
+    // Version 6 at error correction L holds 134 bytes.
+    expect(longest.length, lessThanOrEqualTo(134));
   });
 
-  test('wrong version is rejected', () {
-    expect(errorOf(link(valid()..['v'] = '1')), PairCodeError.unsupportedVersion);
-    expect(errorOf(link(valid()..['v'] = '3')), PairCodeError.unsupportedVersion);
+  test('other versions are rejected', () {
+    for (final v in ['1', '2', '4']) {
+      expect(errorOf(link(valid()..['v'] = v)), PairCodeError.unsupportedVersion, reason: v);
+    }
     expect(errorOf(link(valid()..remove('v'))), PairCodeError.unsupportedVersion);
-    // v1 codes carried the whole offer in `d`.
     expect(errorOf('openmosh://pair?d=eyJ2IjoxfQ'), PairCodeError.unsupportedVersion);
   });
 
   test('malformed links are rejected', () {
     for (final raw in [
       '',
-      'https://example.com/?d=abc',
-      'openmosh://other?d=abc',
+      '100.88.77.66:36141',
+      'https://example.com/?v=3',
+      'openmosh://other?v=3',
       'openmosh://pair',
-      'openmosh://pair?v=2',
-      '${link(valid())}&n=other',
-      '${link(valid())}&x=1',
+      'openmosh://pair?v=3',
+      '${link(valid())}&t=other',
+      '${link(valid())}&n=extra',
+      '${link(valid())}&v=3',
     ]) {
       expect(errorOf(raw), PairCodeError.malformed, reason: raw);
     }
@@ -83,18 +76,18 @@ void main() {
 
   test('bad fields are malformed', () {
     final cases = <String, String?>{
-      'f': 'SHA256:i2cBF5DBtTy5/U7Y27668/2F1HhY/qwC4eALG8QAiQM',
       'k': b64uEncode(List<int>.filled(31, 1)),
-      't': 'short',
+      't': b64uEncode(List<int>.filled(32, 1)),
       'p': '0',
-      's': '70000',
-      'u': 'me; rm -rf',
-      'n': '',
       'i': null,
     };
     cases.forEach((k, v) {
       expect(errorOf(link(valid()..[k] = v)), PairCodeError.malformed, reason: k);
     });
+    for (final port in ['0', '-1', '65536', '01', ' 1', '1.5', 'x', '']) {
+      expect(errorOf(link(valid()..['p'] = port)), PairCodeError.malformed, reason: port);
+    }
+    expect(errorOf(link(valid()..['p'] = '65535')), isNull);
   });
 
   test('pairing address outside the tailnet range is refused', () {
@@ -105,34 +98,9 @@ void main() {
     expect(errorOf(link(valid()..['i'] = '100.127.255.254')), isNull);
   });
 
-  test('exp that is not a positive in-range integer is malformed, never a crash', () {
-    for (final exp in <String?>[
-      '0',
-      '-1',
-      '1.5',
-      null,
-      'true',
-      '01000',
-      ' 1000',
-      '${900 + 86400 + 1}',
-      '${1 << 62}',
-      '99999999999999999999999',
-    ]) {
-      expect(errorOf(link(valid()..['e'] = exp)), PairCodeError.malformed, reason: '$exp');
-    }
-    expect(errorOf(link(valid()..['e'] = '${900 + 86400}')), isNull);
-  });
-
-  test('QR alias is cleaned of format and separator characters', () {
-    final p = PairPayload.parse(link(valid()..['n'] = '\u2067work\u00A0station\uFEFF'), now: now);
-    expect(p.alias, 'work station');
-    expect(errorOf(link(valid()..['n'] = '\u200B\u200B')), PairCodeError.malformed);
-  });
-
   test('ip octets must be plain decimal digits', () {
     for (final ip in ['100.64.0. 1', '100.64.+0.1', '100.64.0.1 ', '100.064.0.1', '100.64..1']) {
       expect(errorOf(link(valid()..['i'] = ip)), isNot(isNull), reason: ip);
-      expect(errorOf(link(valid()..['i'] = ip)), isNot(PairCodeError.expired), reason: ip);
     }
   });
 }
