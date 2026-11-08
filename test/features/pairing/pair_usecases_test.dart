@@ -59,14 +59,13 @@ void main() {
       pushKeys: FakePushKeys(),
       endpoints: endpoints,
       hosts: hosts,
-      deviceName: 'Phone',
       newId: () => 'host-1',
       now: () => DateTime.fromMillisecondsSinceEpoch(1000 * 1000, isUtc: true),
     );
   });
 
   test('sends token, device ssh key, push key and endpoint; pins the host', () async {
-    final host = await pair(code());
+    final host = await pair(code(), deviceName: 'Phone');
     final sent = gateway.sent!;
     expect(sent.token, List.filled(32, 9));
     expect(sent.sshPublicKey, 'ssh-ed25519 AAAAC3 device');
@@ -84,14 +83,14 @@ void main() {
   });
 
   test('expired code makes no network call and saves nothing', () async {
-    await expectLater(pair(code(exp: 1000)), throwsA(isA<PairCodeFailure>()));
+    await expectLater(pair(code(exp: 1000), deviceName: 'Phone'), throwsA(isA<PairCodeFailure>()));
     expect(gateway.sent, isNull);
     expect(hosts.rows, isEmpty);
   });
 
   test('plain http push endpoints outside the tailnet are refused', () async {
     endpoints.url = 'http://ntfy.example.com/up';
-    await expectLater(pair(code()), throwsA(isA<PushFailure>()));
+    await expectLater(pair(code(), deviceName: 'Phone'), throwsA(isA<PushFailure>()));
     expect(gateway.sent, isNull);
   });
 
@@ -100,8 +99,8 @@ void main() {
     final conn = FakeConnection((cmd, _) => ok({'device_id': 'd9', 'alias': 'box', 'hpk': b64uEncode(List.filled(32, 1))}));
     final connections = HostConnections(hosts: hosts, vault: FakeVault(), connector: FakeConnector(() => conn));
     final updated = await PairOverSsh(
-      connections: connections, hosts: hosts, pushKeys: FakePushKeys(), endpoints: endpoints, deviceName: 'Phone',
-    )('h1');
+      connections: connections, hosts: hosts, pushKeys: FakePushKeys(), endpoints: endpoints,
+    )('h1', deviceName: 'Phone');
     expect(conn.commands.single, "'/h/openmosh-hook' 'pair-ssh' '--json'");
     expect(jsonDecode(utf8.decode(conn.stdins.single!)),
         {'name': 'Phone', 'ppk': b64uEncode(List.filled(32, 3)), 'endpoint': 'https://ntfy.sh/upXYZ'});

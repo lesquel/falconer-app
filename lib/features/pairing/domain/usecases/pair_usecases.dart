@@ -24,7 +24,6 @@ final class PairWithQr {
     required this.pushKeys,
     required this.endpoints,
     required this.hosts,
-    required this.deviceName,
     required this.newId,
     required this.now,
   });
@@ -34,16 +33,15 @@ final class PairWithQr {
   final PushKeyStore pushKeys;
   final PushEndpointSource endpoints;
   final HostRepository hosts;
-  final String deviceName;
   final String Function() newId;
   final DateTime Function() now;
 
   /// Parses and validates the code without side effects.
   PairPayload inspect(String raw) => PairPayload.parse(raw, now: now().toUtc());
 
-  Future<Host> call(String raw) async {
+  Future<Host> call(String raw, {required String deviceName}) async {
     final code = inspect(raw);
-    final key = await vault.ensureDeviceKey(comment: 'openmosh:$deviceName');
+    final key = await vault.ensureDeviceKey(comment: 'openmosh-device');
     final ppk = await pushKeys.publicKey();
     final endpoint = await endpoints.currentEndpoint();
     if (!isAllowedPushEndpoint(endpoint)) {
@@ -87,16 +85,14 @@ final class PairOverSsh {
     required this.hosts,
     required this.pushKeys,
     required this.endpoints,
-    required this.deviceName,
   });
 
   final HostConnections connections;
   final HostRepository hosts;
   final PushKeyStore pushKeys;
   final PushEndpointSource endpoints;
-  final String deviceName;
 
-  Future<Host> call(String hostId) async {
+  Future<Host> call(String hostId, {required String deviceName}) async {
     final host = await hosts.byId(hostId);
     if (host == null) throw const ValidationFailure('Unknown host.');
     final endpoint = await endpoints.currentEndpoint();
