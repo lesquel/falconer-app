@@ -51,3 +51,9 @@ app.*.map.json
 /rust/target/
 /rust_builder/cargokit/build_tool/.dart_tool/
 android/.kotlin/
+
+# Signing material (never committed)
+*.jks
+*.keystore
+key.properties
+*.minisign.key

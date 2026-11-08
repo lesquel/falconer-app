@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -33,6 +35,10 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+      - name: Test
+        run: |
+          flutter pub get
+          flutter test
       - name: Release keystore
         env:
           KEYSTORE_B64: ${{ secrets.OPENMOSH_KEYSTORE_B64 }}
@@ -44,10 +50,6 @@ jobs:
           umask 077
           echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
           echo "OPENMOSH_KEYSTORE_PATH=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
-      - name: Test
-        run: |
-          flutter pub get
-          flutter test
       - name: Build APKs
         env:
           OPENMOSH_KEYSTORE_PASSWORD: ${{ secrets.OPENMOSH_KEYSTORE_PASSWORD }}
