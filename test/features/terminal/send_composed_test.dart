@@ -44,6 +44,6 @@ void main() {
       send: (s) async => log.add(s),
       wait: (_) async {},
     );
-    expect(log.first, '\x1b[200~ab\x1b[201~');
+    expect(log.first, '\x1b[200~a[201~b\x1b[201~');
   });
 }

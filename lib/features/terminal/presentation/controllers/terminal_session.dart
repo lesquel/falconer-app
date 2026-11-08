@@ -4,6 +4,7 @@ import '../../../hosts/domain/usecases/host_connections.dart';
 import '../../../keyboard/domain/entities/modifier_state.dart';
 import '../../../sessions/domain/entities/remote_session.dart';
 import '../../data/datasources/xterm_emulator.dart';
+import '../../../../shared/domain/paste_text.dart';
 import '../../domain/usecases/terminal_runner.dart';
 import 'chat_attachment.dart';
 
@@ -33,10 +34,7 @@ Future<void> sendComposed({
   bool submit = true,
   Future<void> Function(Duration) wait = Future<void>.delayed,
 }) async {
-  Future<void> paste(String s) {
-    final clean = s.replaceAll('\x1b[201~', '');
-    return send(bracketed ? '\x1b[200~$clean\x1b[201~' : clean);
-  }
+  Future<void> paste(String s) => send(wrapPaste(s, bracketed: bracketed));
 
   for (final p in files) {
     await paste(p);

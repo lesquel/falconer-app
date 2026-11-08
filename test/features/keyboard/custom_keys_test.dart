@@ -26,4 +26,13 @@ void main() {
     expect(KeyPresets.forSession('tmux', PresetName.herdr), PresetName.tmux);
     expect(KeyPresets.forSession(null, PresetName.none), PresetName.none);
   });
+
+  test('a text shortcut drops escape and control characters pasted into it', () {
+    final k = CustomKeys.text('ls\x1b[201~\x9b; id', enter: true)!;
+    expect(k.sequence, 'ls[201~; id\r');
+  });
+
+  test('a text shortcut made only of control characters is rejected', () {
+    expect(CustomKeys.text('\x1b\x07'), isNull);
+  });
 }

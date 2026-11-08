@@ -7,10 +7,11 @@ import 'dart:convert';
 
 import 'package:xterm/xterm.dart';
 
+import '../../../../shared/domain/paste_text.dart';
 import '../../domain/repositories/terminal_emulator.dart';
 
 class XtermEmulator implements TerminalEmulator {
-  XtermEmulator() : terminal = Terminal(maxLines: 10000) {
+  XtermEmulator() : terminal = _SafeTerminal(maxLines: 10000) {
     _sink = const Utf8Decoder(allowMalformed: true)
         .startChunkedConversion(_StringSink(terminal.write));
     terminal.onOutput = _input.add;
@@ -79,4 +80,18 @@ class XtermProxy implements TerminalEmulator {
   Stream<String> get input => inner.input;
   @override
   Stream<(int, int)> get resizes => inner.resizes;
+}
+
+/// Sanitizes what the terminal view pastes (Paste shortcut) and multi-character
+/// keyboard inserts (a soft keyboard pasting from its clipboard), so neither
+/// can end bracketed paste early or inject control sequences. A single
+/// character passes untouched: keyboards may send ESC or a control key as text.
+class _SafeTerminal extends Terminal {
+  _SafeTerminal({super.maxLines});
+
+  @override
+  void paste(String text) => super.paste(sanitizePaste(text));
+
+  @override
+  void textInput(String text) => super.textInput(text.length > 1 ? sanitizePaste(text) : text);
 }

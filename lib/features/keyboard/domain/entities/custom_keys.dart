@@ -1,6 +1,7 @@
 /// Builders for the user's saved shortcut keys.
 library;
 
+import '../../../../shared/domain/paste_text.dart';
 import 'extra_key.dart';
 
 abstract final class CustomKeys {
@@ -15,7 +16,9 @@ abstract final class CustomKeys {
 
   /// Text typed as is, optionally followed by Enter. The label defaults to the
   /// text, shortened to fit a key.
-  static ExtraKey? text(String text, {bool enter = false, String label = ''}) {
+  /// Escape and control characters (pasted into the field) are dropped.
+  static ExtraKey? text(String raw, {bool enter = false, String label = ''}) {
+    final text = sanitizePaste(raw);
     if (text.isEmpty) return null;
     final name = label.trim().isNotEmpty
         ? label.trim()
