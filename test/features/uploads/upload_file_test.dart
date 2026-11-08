@@ -7,7 +7,7 @@ import 'package:openmosh/shared/domain/failure.dart';
 import '../../support/fakes.dart';
 
 void main() {
-  test('uploads under a sanitized random name and returns a quoted path', () async {
+  test('uploads under a sanitized random name and returns the plain remote path', () async {
     final hosts = FakeHostRepository();
     await hosts.save(testHost());
     final upload = UploadFile(
@@ -20,7 +20,7 @@ void main() {
     );
     expect(
       await upload('h1', const PickedFile(path: '/cache/x', name: 'My shot.PNG', size: 10)),
-      "'/home/me/.openmosh/uploads/deadbeef-My_shot.png' ",
+      '/home/me/.openmosh/uploads/deadbeef-My_shot.png',
     );
     await expectLater(
       upload('h1', const PickedFile(path: '/c', name: 'big', size: 50 * 1024 * 1024 + 1)),

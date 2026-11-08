@@ -5,6 +5,7 @@ import '../../../keyboard/domain/entities/modifier_state.dart';
 import '../../../sessions/domain/entities/remote_session.dart';
 import '../../data/datasources/xterm_emulator.dart';
 import '../../domain/usecases/terminal_runner.dart';
+import 'chat_attachment.dart';
 
 /// One terminal: emulator, connection runner and sticky modifier state.
 /// Lives in the session pool so it can outlive its screen.
@@ -36,11 +37,25 @@ final class TerminalSession {
   /// Chat composer state, kept while the session lives.
   bool chatOpen = false;
   String draft = '';
+  final attachments = <ChatAttachment>[];
 
-  /// Sends a composed message: one paste (bracketed when the app asks for
-  /// it, so newlines do not submit early), then Enter.
+  /// Pastes uploaded paths one by one, each as its own paste, so agents that
+  /// accept dropped files (Claude Code shows `[Image #1]`) recognise them.
+  Future<void> pastePaths(Iterable<String> paths) async {
+    for (final p in paths) {
+      emulator.terminal.paste(p);
+      await runner.send(' ');
+    }
+  }
+
+  /// Sends a composed message: its attachments, then the text as one paste
+  /// (bracketed when the app asks for it, so newlines do not submit early),
+  /// then Enter.
   Future<void> sendMessage(String text) async {
-    emulator.terminal.paste(text);
+    final files = [for (final a in attachments) a.remotePath];
+    attachments.clear();
+    await pastePaths(files);
+    if (text.isNotEmpty) emulator.terminal.paste(text);
     await runner.send('\r');
   }
 

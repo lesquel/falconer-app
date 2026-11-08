@@ -11,5 +11,11 @@ String shQuote(String arg) {
   return "'${arg.replaceAll("'", r"'\''")}'";
 }
 
+final _plainWord = RegExp(r'^[A-Za-z0-9._/~+@%=:,-]+$');
+
+/// Leaves [arg] as is when a shell would read it as one word anyway, else
+/// [shQuote]s it. Agents recognise an image path pasted without quotes.
+String shQuoteIfNeeded(String arg) => _plainWord.hasMatch(arg) ? arg : shQuote(arg);
+
 /// Joins [argv] into a command line where each element is one word.
 String shJoin(List<String> argv) => argv.map(shQuote).join(' ');

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,6 +14,7 @@ import '../../../keyboard/presentation/views/extra_keys_bar.dart';
 import '../../../settings/domain/entities/app_settings.dart';
 import '../../data/datasources/connectivity_signals.dart';
 import '../../domain/usecases/terminal_runner.dart';
+import '../controllers/chat_attachment.dart';
 import '../controllers/terminal_session.dart';
 import '../controllers/terminal_session_pool.dart';
 import '../views/chat_composer.dart';
@@ -28,6 +30,9 @@ class TerminalContainer extends ConsumerStatefulWidget {
   @override
   ConsumerState<TerminalContainer> createState() => _TerminalContainerState();
 }
+
+/// Thumbnails are read from the picked copy; skip huge originals.
+const _maxPreviewBytes = 12 * 1024 * 1024;
 
 class _TerminalContainerState extends ConsumerState<TerminalContainer> with WidgetsBindingObserver {
   late final String _key;
@@ -107,38 +112,44 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
 
   void _leave() => context.canPop() ? context.pop() : context.go('/hosts/${widget.hostId}');
 
-  /// Uploads picked files; returns the remote paths separated by spaces.
-  Future<String?> _uploadPaths(bool images) async {
+  /// Uploads picked files; returns them with a thumbnail for images.
+  Future<List<ChatAttachment>> _uploadFiles(bool images) async {
     final source = ref.read(fileSourceProvider);
     final messenger = ScaffoldMessenger.of(context);
     setState(() => _uploading = true);
     try {
       final files = images ? await source.pickImages() : [?(await source.pick(imagesOnly: false))];
-      final pasted = <String>[];
+      final done = <ChatAttachment>[];
       try {
         for (final file in files) {
-          pasted.add(await ref.read(uploadFileProvider)(widget.hostId, file));
+          final remote = await ref.read(uploadFileProvider)(widget.hostId, file);
+          final preview = images && file.size <= _maxPreviewBytes
+              ? await File(file.path).readAsBytes()
+              : null;
+          done.add(ChatAttachment(remotePath: remote, name: file.name, preview: preview));
         }
       } finally {
         for (final file in files) {
           await source.discard(file);
         }
       }
-      return pasted.isEmpty ? null : pasted.join(' ');
+      return done;
     } on AppFailure catch (e) {
       messenger.showSnackBar(SnackBar(content: Text(e.message)));
-      return null;
+      return const [];
+    } on FileSystemException {
+      return const [];
     } finally {
       if (mounted) setState(() => _uploading = false);
     }
   }
 
   Future<void> _upload(bool images) async {
-    final text = await _uploadPaths(images);
-    if (text != null) await _runner.send(text);
+    final files = await _uploadFiles(images);
+    await _session.pastePaths(files.map((f) => f.remotePath));
   }
 
-  Future<String?> _attachToChat() async {
+  Future<void> _attachToChat() async {
     final images = await showModalBottomSheet<bool>(
       context: context,
       showDragHandle: true,
@@ -160,8 +171,9 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
         ),
       ),
     );
-    if (images == null) return null;
-    return _uploadPaths(images);
+    if (images == null) return;
+    final files = await _uploadFiles(images);
+    if (mounted) setState(() => _session.attachments.addAll(files));
   }
 
   void _toggleChat() {
@@ -219,10 +231,15 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
         composer: _session.chatOpen
             ? ChatComposer(
                 initialText: _session.draft,
+                attachments: List.unmodifiable(_session.attachments),
                 busy: _uploading,
                 onChanged: (t) => _session.draft = t,
-                onSend: (t) => unawaited(_session.sendMessage(t)),
-                onAttach: _attachToChat,
+                onSend: (t) {
+                  unawaited(_session.sendMessage(t));
+                  setState(() {});
+                },
+                onAttach: () => unawaited(_attachToChat()),
+                onRemoveAttachment: (i) => setState(() => _session.attachments.removeAt(i)),
                 onClose: _toggleChat,
               )
             : null,

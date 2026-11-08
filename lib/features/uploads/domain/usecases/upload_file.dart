@@ -16,6 +16,6 @@ final class UploadFile {
     final name = sanitizeUploadName(file.name, prefix: prefix());
     final conn = await connections.connection(hostId);
     final remote = await conn.upload(file.path, name);
-    return '${shQuote(remote)} ';
+    return shQuoteIfNeeded(remote);
   }
 }
