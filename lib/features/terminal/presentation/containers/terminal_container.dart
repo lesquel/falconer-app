@@ -57,6 +57,13 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
   late TerminalPhase _phase;
   bool _uploading = false;
 
+  /// False until the user is verified when the shell is already live (a
+  /// pooled session or a reused connection): nothing of it is shown before.
+  bool _verified = true;
+
+  /// Last seen "Keep sessions connected"; `ref` is unusable in [dispose].
+  bool _keepConnected = true;
+
   TerminalRunner get _runner => _session.runner;
 
   @override
@@ -80,8 +87,28 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     _selection.addListener(_onMods);
     _phaseSub = _runner.phases.listen((p) => setState(() => _phase = p));
     _net = networkRegained().listen((_) => _runner.wake());
-    if (fresh) {
+    final reused = !fresh || ref.read(hostConnectionsProvider).isConnected(widget.hostId);
+    if (reused) {
+      _verified = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_verifyThenShow(fresh)));
+    } else {
       WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_runner.start()));
+    }
+  }
+
+  /// A live shell opens without the key prompt, so it needs its own check
+  /// unless the user was verified in the last few minutes. A refusal leaves.
+  Future<void> _verifyThenShow(bool fresh) async {
+    final reason = context.l10n.verifyToShowTerminal;
+    final ok = await ref.read(userPresenceProvider).ensureRecent(reason);
+    if (!mounted) return;
+    if (!ok) {
+      _leave();
+      return;
+    }
+    setState(() => _verified = true);
+    if (fresh) {
+      unawaited(_runner.start());
     } else {
       _runner.wake();
     }
@@ -106,8 +133,7 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     if (_fullScreen) {
       unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
     }
-    final keep = ref.read(settingsProvider).value?.keepConnected ?? true;
-    if (!keep) unawaited(_pool.release(_key));
+    if (!_keepConnected) unawaited(_pool.release(_key));
     super.dispose();
   }
 
@@ -267,6 +293,10 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider).value ?? const AppSettings();
+    _keepConnected = ref.watch(settingsProvider).value?.keepConnected ?? true;
+    if (!_verified) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     final host = ref.watch(hostProvider(widget.hostId)).value;
     final preset = KeyPresets.forName(
       KeyPresets.forSession(widget.kind, settings.keyPreset),

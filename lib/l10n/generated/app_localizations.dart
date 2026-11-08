@@ -2108,6 +2108,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'It is marked as sensitive on the clipboard. Paste it only on computers you trust.'**
   String get copyPublicKeyBody;
+
+  /// Biometric prompt reason before showing a terminal that stayed connected.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify it\'s you to show the open terminal'**
+  String get verifyToShowTerminal;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

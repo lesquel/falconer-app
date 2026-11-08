@@ -1172,4 +1172,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get copyPublicKeyBody =>
       'It is marked as sensitive on the clipboard. Paste it only on computers you trust.';
+
+  @override
+  String get verifyToShowTerminal => 'Verify it\'s you to show the open terminal';
 }

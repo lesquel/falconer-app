@@ -41,6 +41,22 @@ void main() {
     expect(vault.unlocks, 2);
   });
 
+  test('unlocking the key counts as a verification; a cancelled unlock does not', () async {
+    var verified = 0;
+    vault.cancel = true;
+    pool = HostConnections(
+      hosts: repo,
+      vault: vault,
+      connector: connector,
+      onVerified: () => verified++,
+    );
+    await expectLater(pool.connection('h1'), throwsA(isA<UserCancelledFailure>()));
+    expect(verified, 0);
+    vault.cancel = false;
+    await pool.connection('h1');
+    expect(verified, 1);
+  });
+
   test('connects with the pinned fingerprint of the host', () async {
     await pool.connection('h1');
     expect(connector.endpoints.single.pinnedFingerprint, testHost().fingerprint);

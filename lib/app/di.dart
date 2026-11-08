@@ -27,6 +27,7 @@ import '../features/keys/domain/entities/ssh_key_info.dart';
 import '../features/keys/domain/repositories/key_vault.dart';
 import '../features/keys/domain/usecases/legacy_key_migration.dart';
 import '../features/lock/domain/app_lock.dart';
+import '../features/lock/domain/user_presence.dart';
 import '../features/pairing/data/repositories/tcp_pairing_gateway.dart';
 import '../features/pairing/domain/repositories/pairing_gateway.dart';
 import '../features/pairing/domain/usecases/pair_usecases.dart';
@@ -37,6 +38,7 @@ import '../features/settings/domain/repositories/settings_repository.dart';
 import '../features/uploads/data/datasources/file_picker_source.dart';
 import '../features/uploads/domain/repositories/file_source.dart';
 import '../features/uploads/domain/usecases/upload_file.dart';
+import '../shared/domain/monotonic.dart';
 import '../shared/data/app_database.dart';
 import '../features/usage/domain/usecases/load_agent_usage.dart';
 import '../shared/hook/domain/hook_client.dart';
@@ -85,10 +87,19 @@ final legacyKeyMigrationProvider = Provider<MigratingAuthenticator>(
       MigratingAuthenticator(ref.watch(platformAuthenticatorProvider), ref.watch(keyVaultProvider)),
 );
 
-/// User verification for sensitive actions; also moves v0.1 keys once.
-final authenticatorProvider = Provider<UserAuthenticator>(
-  (ref) => ref.watch(legacyKeyMigrationProvider),
+/// Monotonic time for security windows.
+final monotonicClockProvider = Provider<Elapsed>((ref) => monotonicClock());
+
+/// Remembers the last successful verification (re-verify pooled terminals).
+final userPresenceProvider = Provider<UserPresence>(
+  (ref) => UserPresence(
+    inner: ref.watch(legacyKeyMigrationProvider),
+    elapsed: ref.watch(monotonicClockProvider),
+  ),
 );
+
+/// User verification for sensitive actions; also moves v0.1 keys once.
+final authenticatorProvider = Provider<UserAuthenticator>((ref) => ref.watch(userPresenceProvider));
 
 final pushKeysProvider = Provider<PushKeyStore>(
   (ref) => SecurePushKeyStore(ref.watch(secureStorageProvider)),
@@ -110,6 +121,7 @@ final hostConnectionsProvider = Provider<HostConnections>((ref) {
     hosts: hosts,
     vault: ref.watch(keyVaultProvider),
     connector: ref.watch(sshConnectorProvider),
+    onVerified: ref.watch(userPresenceProvider).markVerified,
   );
   final endpointSync = SyncPushEndpoint(hosts: hosts, endpoints: ref.watch(pushEndpointsProvider));
   const hook = HookClient();
@@ -227,7 +239,8 @@ final terminalSessionPoolProvider = Provider<TerminalSessionPool<TerminalSession
 
 /// One lock for the app's lifetime.
 final appLockProvider = Provider<AppLock>(
-  (ref) => AppLock(auth: ref.watch(authenticatorProvider), now: DateTime.now),
+  (ref) =>
+      AppLock(auth: ref.watch(authenticatorProvider), elapsed: ref.watch(monotonicClockProvider)),
 );
 
 final settingsProvider = StreamProvider<AppSettings>(

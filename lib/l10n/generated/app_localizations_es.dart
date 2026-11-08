@@ -1177,4 +1177,7 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get copyPublicKeyBody =>
       'Se marca como sensible en el portapapeles. Pégala solo en computadoras de confianza.';
+
+  @override
+  String get verifyToShowTerminal => 'Verifica que eres tú para mostrar la terminal abierta';
 }

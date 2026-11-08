@@ -3,7 +3,7 @@
 /// in the background. Pure Dart; the gate widget feeds it lifecycle events.
 library;
 
-import '../../../shared/domain/clock.dart';
+import '../../../shared/domain/monotonic.dart';
 import '../../keys/domain/repositories/key_vault.dart';
 
 const lockAfterBackground = Duration(seconds: 60);
@@ -23,30 +23,33 @@ final class LockPrompts {
 }
 
 final class AppLock {
-  AppLock({required this.auth, required this.now});
+  AppLock({required this.auth, required this.elapsed});
 
   final UserAuthenticator auth;
-  final Clock now;
+
+  /// Monotonic, so changing the phone's clock cannot skip the timeout.
+  final Elapsed elapsed;
 
   /// Set by the lock gate from the current locale.
   LockPrompts prompts = const LockPrompts();
 
   bool _locked = false;
-  DateTime? _backgroundSince;
+  Duration? _backgroundSince;
 
   bool get locked => _locked;
 
   void coldStart({required bool enabled}) => _locked = enabled;
 
   /// Keeps the first timestamp when several background events arrive.
-  void backgrounded() => _backgroundSince ??= now();
+  void backgrounded() => _backgroundSince ??= elapsed();
 
   void resumed({required bool enabled}) {
     final since = _backgroundSince;
     _backgroundSince = null;
-    if (enabled && since != null && now().difference(since) > lockAfterBackground) {
-      _locked = true;
-    }
+    if (!enabled || since == null) return;
+    final away = elapsed() - since;
+    // A clock that went back cannot be trusted: lock.
+    if (away.isNegative || away > lockAfterBackground) _locked = true;
   }
 
   /// Verifies the user before the "Lock OpenMosh" setting changes: turning

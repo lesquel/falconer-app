@@ -9,13 +9,13 @@ import '../features/hosts/paired_devices_test.dart' show ScriptedAuth;
 
 void main() {
   late ScriptedAuth auth;
-  late DateTime now;
+  late Duration now;
   late AppLock lock;
 
   setUp(() {
     auth = ScriptedAuth()..allow = false;
-    now = DateTime.utc(2026, 11, 8, 12);
-    lock = AppLock(auth: auth, now: () => now);
+    now = const Duration(hours: 3);
+    lock = AppLock(auth: auth, elapsed: () => now);
   });
 
   Widget gate(bool? enabled) => MaterialApp(
@@ -58,7 +58,7 @@ void main() {
     t.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     t.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
     t.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-    now = now.add(const Duration(seconds: 30));
+    now += const Duration(seconds: 30);
     t.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
     t.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     t.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
@@ -69,7 +69,7 @@ void main() {
     t.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     t.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
     t.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-    now = now.add(const Duration(seconds: 61));
+    now += const Duration(seconds: 61);
     t.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
     t.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     t.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
@@ -101,7 +101,7 @@ void main() {
       t.binding.handleAppLifecycleStateChanged(s);
     }
     t.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-    now = now.add(const Duration(seconds: 61));
+    now += const Duration(seconds: 61);
     for (final s in [AppLifecycleState.hidden, AppLifecycleState.inactive]) {
       t.binding.handleAppLifecycleStateChanged(s);
     }

@@ -20,12 +20,17 @@ final class HostConnections {
     required this.vault,
     required this.connector,
     this.hook = const HookClient(),
+    this.onVerified,
   });
 
   final HostRepository hosts;
   final KeyVault vault;
   final SshConnector connector;
   final HookClient hook;
+
+  /// Called after the key vault verified the user to unlock a key, so a
+  /// terminal opened right after is not asked for a second verification.
+  final void Function()? onVerified;
   final List<OnConnected> _onConnected = [];
   final Map<String, SshConnection> _open = {};
   final Map<String, Future<SshConnection>> _pending = {};
@@ -52,6 +57,7 @@ final class HostConnections {
       keyId,
       reason: 'Unlock key to connect to ${host.alias}',
     );
+    onVerified?.call();
     final conn = await connector.connect(
       SshEndpoint(
         host: host.address,

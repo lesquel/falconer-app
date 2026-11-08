@@ -940,5 +940,9 @@
   "copyPublicKeyBody": "It is marked as sensitive on the clipboard. Paste it only on computers you trust.",
   "@copyPublicKeyBody": {
     "description": "Body of the copy public key confirmation."
+  },
+  "verifyToShowTerminal": "Verify it's you to show the open terminal",
+  "@verifyToShowTerminal": {
+    "description": "Biometric prompt reason before showing a terminal that stayed connected."
   }
 }
