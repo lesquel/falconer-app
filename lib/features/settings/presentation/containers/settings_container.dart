@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/di.dart';
+import '../../../../l10n/l10n.dart';
 import '../../domain/entities/app_settings.dart';
 import '../views/settings_view.dart';
 
@@ -24,9 +25,10 @@ class SettingsContainer extends ConsumerWidget {
 
   Future<void> _toggleLock(BuildContext context, WidgetRef ref, bool enable) async {
     final messenger = ScaffoldMessenger.of(context);
+    final l = context.l10n;
     final why = await ref.read(appLockProvider).verifyToggle(enable: enable);
     if (why != null) {
-      messenger.showSnackBar(SnackBar(content: Text(why)));
+      messenger.showSnackBar(SnackBar(content: Text(l.failureMessage(why))));
       return;
     }
     final current = ref.read(settingsProvider).value ?? const AppSettings();

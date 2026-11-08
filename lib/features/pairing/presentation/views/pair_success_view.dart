@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/molecules/themed_mole.dart';
 
 /// Shown once pairing finished: the mole celebrates, then open the host.
@@ -11,15 +12,15 @@ class PairSuccessView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MoleMessage(
-    title: 'Paired with $alias',
-    message: 'Its SSH host key is pinned and notifications are encrypted end to end.',
+    title: context.l10n.pairedWith(alias),
+    message: context.l10n.pairedBody,
     size: 180,
     actions: [
       FilledButton.icon(
         key: const Key('open_paired_host'),
         onPressed: onOpen,
         icon: const Icon(Icons.arrow_forward),
-        label: const Text('Open host'),
+        label: Text(context.l10n.openHost),
       ),
     ],
   );

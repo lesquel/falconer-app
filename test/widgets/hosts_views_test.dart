@@ -3,9 +3,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openmosh/features/hosts/presentation/views/fingerprint_confirm_view.dart';
 import 'package:openmosh/features/hosts/presentation/views/hosts_view.dart';
 
-import '../support/fakes.dart';
+import 'package:openmosh/features/inbox/domain/entities/inbox_event.dart';
 
-Widget app(Widget child) => MaterialApp(home: Scaffold(body: child));
+import '../support/fakes.dart';
+import '../support/l10n_app.dart';
+
+Widget app(Widget child, {Locale locale = const Locale('en')}) => l10nApp(
+  home: Scaffold(body: child),
+  locale: locale,
+);
 
 void main() {
   testWidgets('empty hosts view leads to QR pairing', (t) async {
@@ -31,6 +37,40 @@ void main() {
     expect(find.text('work'), findsOneWidget);
     expect(find.text('me@100.100.1.2:22'), findsOneWidget);
     expect(find.text('push'), findsOneWidget);
+  });
+
+  testWidgets('hosts view speaks Spanish under the es locale', (t) async {
+    final now = DateTime.utc(2026, 1, 1, 10);
+    final e = InboxEvent.received(
+      id: 'ev1',
+      hostId: 'h1',
+      seq: 1,
+      agent: 'claude',
+      kind: EventKind.approvalRequired,
+      title: 'Run tests?',
+      summary: '',
+      pane: 'p1',
+      at: now,
+    );
+    await t.pumpWidget(
+      app(
+        HostsView(
+          hosts: [testHost(deviceId: 'd', hpk: 'k')],
+          events: [e],
+          now: now,
+          onOpen: (_) {},
+          onPair: () {},
+          onAdd: () {},
+        ),
+        locale: const Locale('es'),
+      ),
+    );
+    expect(find.text('Buenos días'), findsOneWidget);
+    expect(find.text('Todo bien,\nsalvo work.', findRichText: true), findsOneWidget);
+    expect(find.text('claude espera tu respuesta.'), findsOneWidget);
+    expect(find.text('1 evento'), findsOneWidget);
+    expect(find.text('Terminal'), findsOneWidget);
+    expect(find.text('Sesiones'), findsOneWidget);
   });
 
   testWidgets('fingerprint confirmation shows the fingerprint and needs an explicit tap', (

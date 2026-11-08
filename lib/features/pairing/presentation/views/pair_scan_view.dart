@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
+
 /// Camera scanner plus a paste field for `openmosh://pair?v=3&…` links.
 /// The camera stays live while an error is shown, so a new scan replaces it.
 class PairScanView extends StatefulWidget {
@@ -31,12 +33,13 @@ class _PairScanViewState extends State<PairScanView> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return Column(
       children: [
         if (widget.error != null)
           MaterialBanner(
             content: Text(widget.error!),
-            actions: [TextButton(onPressed: widget.onDismissError, child: const Text('Dismiss'))],
+            actions: [TextButton(onPressed: widget.onDismissError, child: Text(l.dismiss))],
           ),
         Expanded(
           child: Padding(
@@ -53,9 +56,9 @@ class _PairScanViewState extends State<PairScanView> {
                   controller: _link,
                   autocorrect: false,
                   enableSuggestions: false,
-                  decoration: const InputDecoration(
-                    labelText: 'Or paste the openmosh://pair link',
-                    helperText: 'Print it on the host with: openmosh-hook pair --uri',
+                  decoration: InputDecoration(
+                    labelText: l.pasteLinkLabel,
+                    helperText: l.pasteLinkHelper,
                     isDense: true,
                   ),
                 ),

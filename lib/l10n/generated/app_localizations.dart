@@ -1473,6 +1473,18 @@ abstract class AppLocalizations {
   /// **'That is not a usable ssh-ed25519 private key.'**
   String get errNotUsableKey;
 
+  /// No description provided for @errLockStaysOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not verify you, so the lock stays off. Set up a fingerprint, face or screen lock on this phone, then try again.'**
+  String get errLockStaysOff;
+
+  /// No description provided for @errLockStaysOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not verify you, so the lock stays on.'**
+  String get errLockStaysOn;
+
   /// No description provided for @errAlreadyAnswered.
   ///
   /// In en, this message translates to:

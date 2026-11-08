@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/organisms/thumb_page.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
 import '../../domain/entities/pair_payload.dart';
@@ -23,7 +24,18 @@ class PairReviewView extends StatefulWidget {
 }
 
 class _PairReviewViewState extends State<PairReviewView> {
-  final _name = TextEditingController(text: 'Android phone');
+  final _name = TextEditingController();
+  var _named = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // The default name follows the app language; it is set once.
+    if (!_named) {
+      _name.text = context.l10n.defaultDeviceName;
+      _named = true;
+    }
+  }
 
   @override
   void dispose() {
@@ -35,32 +47,27 @@ class _PairReviewViewState extends State<PairReviewView> {
   Widget build(BuildContext context) {
     final c = widget.code;
     final muted = MoshColors.of(context).muted;
+    final l = context.l10n;
     return ThumbPage(
-      eyebrow: 'New computer',
-      title: Text('Pair with ${c.ip}'),
-      subtitle:
-          'The host proves itself with the key in the code; its name and SSH host key '
-          'fingerprint are pinned from its encrypted reply.',
+      eyebrow: l.newComputer,
+      title: Text(l.pairWith(c.ip)),
+      subtitle: l.pairReviewSubtitle,
       children: [
         TextField(
           controller: _name,
-          decoration: const InputDecoration(labelText: 'Name for this phone'),
+          decoration: InputDecoration(labelText: l.nameForThisPhone),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(8, 10, 8, 16),
-          child: Text(
-            'This creates an SSH key on this phone, authorizes it on the host only from your '
-            'tailnet, and registers encrypted notifications.',
-            style: TextStyle(color: muted),
-          ),
+          child: Text(l.pairReviewNote, style: TextStyle(color: muted)),
         ),
         if (widget.busy) ...[const LinearProgressIndicator(), const SizedBox(height: 10)],
         FilledButton(
           onPressed: widget.busy ? null : () => widget.onPair(_name.text),
-          child: Text(widget.busy ? 'Pairing…' : 'Pair'),
+          child: Text(widget.busy ? l.pairing : l.pair),
         ),
         const SizedBox(height: 4),
-        TextButton(onPressed: widget.busy ? null : widget.onCancel, child: const Text('Cancel')),
+        TextButton(onPressed: widget.busy ? null : widget.onCancel, child: Text(l.cancel)),
       ],
     );
   }

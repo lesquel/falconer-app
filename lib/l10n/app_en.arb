@@ -527,5 +527,7 @@
   "errDataTooLarge": "The data is too large.",
   "errNotUnencryptedKey": "That is not an unencrypted ssh-ed25519 private key.",
   "errNotUsableKey": "That is not a usable ssh-ed25519 private key.",
+  "errLockStaysOff": "Could not verify you, so the lock stays off. Set up a fingerprint, face or screen lock on this phone, then try again.",
+  "errLockStaysOn": "Could not verify you, so the lock stays on.",
   "errAlreadyAnswered": "This event was already answered."
 }

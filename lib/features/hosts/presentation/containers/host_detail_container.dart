@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/di.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/molecules/themed_mole.dart';
 import '../../../../shared/ui/organisms/failure_panel.dart';
 import '../../domain/entities/paired_device.dart';
@@ -16,17 +17,15 @@ class HostDetailContainer extends ConsumerWidget {
   final String hostId;
 
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
+    final l = context.l10n;
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
-        title: const Text('Delete host?'),
-        content: const Text(
-          'Removes the host, its pinned key and its inbox from this phone. '
-          'To also remove this phone from the host, revoke it under Paired devices first.',
-        ),
+        title: Text(l.deleteHostTitle),
+        content: Text(l.deleteHostBody),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(c, true), child: const Text('Delete')),
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(l.delete)),
         ],
       ),
     );
@@ -40,17 +39,19 @@ class HostDetailContainer extends ConsumerWidget {
       await showDialog<bool>(
         context: context,
         builder: (c) => AlertDialog(
-          title: Text(d.isThisPhone ? 'Revoke this phone?' : 'Revoke ${d.name}?'),
+          title: Text(
+            d.isThisPhone
+                ? context.l10n.revokeThisPhoneTitle
+                : context.l10n.revokeDeviceTitle(d.name),
+          ),
           content: Text(
             d.isThisPhone
-                ? 'This is the phone you are using. OpenMosh will lose access to $alias: '
-                      'the host removes its SSH key and push key. Pair again to get access back.'
-                : 'Removes its SSH key and push key from $alias. '
-                      'It can no longer connect or get notifications.',
+                ? context.l10n.revokeThisPhoneBody(alias)
+                : context.l10n.revokeDeviceBody(alias),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.pop(c, true), child: const Text('Revoke')),
+            TextButton(onPressed: () => Navigator.pop(c, false), child: Text(context.l10n.cancel)),
+            FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(context.l10n.revoke)),
           ],
         ),
       ) ==
@@ -61,10 +62,10 @@ class HostDetailContainer extends ConsumerWidget {
         .read(pairedDevicesControllerProvider(hostId).notifier)
         .revoke(d, confirm: (d) => _confirmRevoke(context, alias, d));
     if (!context.mounted) return;
+    final l = context.l10n;
     final msg = switch (outcome) {
-      RevokeOutcome.revoked => '${d.name} was revoked.',
-      RevokeOutcome.revokedThisPhone =>
-        'This phone was revoked from $alias. Pair again or delete the host.',
+      RevokeOutcome.revoked => l.deviceRevoked(d.name),
+      RevokeOutcome.revokedThisPhone => l.thisPhoneRevoked(alias),
       _ => null,
     };
     if (msg != null) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
@@ -78,7 +79,7 @@ class HostDetailContainer extends ConsumerWidget {
     final devices = ref.watch(pairedDevicesControllerProvider(hostId));
     final devicesCtrl = ref.read(pairedDevicesControllerProvider(hostId).notifier);
     if (host == null) {
-      return const Scaffold(body: MoleMessage(title: 'Opening host', busy: true));
+      return Scaffold(body: MoleMessage(title: context.l10n.openingHost, busy: true));
     }
     return Scaffold(
       body: HostDetailView(

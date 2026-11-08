@@ -64,7 +64,10 @@ class SettingsView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(l.colors, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                      Text(
+                        l.colors,
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                      ),
                       Text(
                         l.colorsSummary(
                           l.accentName(s.accent),

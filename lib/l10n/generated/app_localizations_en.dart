@@ -807,5 +807,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errNotUsableKey => 'That is not a usable ssh-ed25519 private key.';
 
   @override
+  String get errLockStaysOff =>
+      'Could not verify you, so the lock stays off. Set up a fingerprint, face or screen lock on this phone, then try again.';
+
+  @override
+  String get errLockStaysOn => 'Could not verify you, so the lock stays on.';
+
+  @override
   String get errAlreadyAnswered => 'This event was already answered.';
 }

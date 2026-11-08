@@ -230,5 +230,7 @@
   "errDataTooLarge": "Los datos son demasiado grandes.",
   "errNotUnencryptedKey": "Eso no es una clave privada ssh-ed25519 sin cifrar.",
   "errNotUsableKey": "Eso no es una clave privada ssh-ed25519 utilizable.",
+  "errLockStaysOff": "No se pudo verificar tu identidad, así que el bloqueo sigue desactivado. Configura una huella, el rostro o un bloqueo de pantalla en este teléfono y vuelve a intentarlo.",
+  "errLockStaysOn": "No se pudo verificar tu identidad, así que el bloqueo sigue activado.",
   "errAlreadyAnswered": "Este evento ya se respondió."
 }

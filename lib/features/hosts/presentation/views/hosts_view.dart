@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/atoms/status_badge.dart';
 import '../../../../shared/ui/atoms/time_ago.dart';
 import '../../../../shared/ui/molecules/mosh_tile.dart';
@@ -37,21 +38,23 @@ class HostsView extends StatelessWidget {
   final ValueChanged<InboxEvent>? onOpenEvent;
   final VoidCallback? onInbox;
 
-  String _alias(String hostId) => hosts.where((h) => h.id == hostId).firstOrNull?.alias ?? 'a host';
+  String _alias(AppLocalizations l, String hostId) =>
+      hosts.where((h) => h.id == hostId).firstOrNull?.alias ?? l.aHost;
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     if (hosts.isEmpty) {
       return MoleMessage(
-        title: 'No computers yet',
-        message: 'Run `openmosh-hook pair` on your computer, then scan the code.',
+        title: l.noComputersTitle,
+        message: l.noComputersBody,
         actions: [
           FilledButton.icon(
             onPressed: onPair,
             icon: const Icon(Icons.qr_code_scanner),
-            label: const Text('Scan pairing code'),
+            label: Text(l.scanPairingCode),
           ),
-          TextButton(onPressed: onAdd, child: const Text('Add host manually')),
+          TextButton(onPressed: onAdd, child: Text(l.addHostManually)),
         ],
       );
     }
@@ -60,27 +63,32 @@ class HostsView extends StatelessWidget {
     final waiting = events.where((e) => e.needsAction).toList();
     final first = waiting.firstOrNull;
     final today = events.where((e) => clock.difference(e.at) < const Duration(hours: 24)).length;
-    final Widget title = first == null
-        ? const Text('All quiet.')
-        : Text.rich(
+    final Widget title;
+    if (first == null) {
+      title = Text(l.allQuiet);
+    } else {
+      // Split the sentence around the alias so only the alias is highlighted.
+      const mark = '\uFFFC';
+      final parts = l.allGoodExcept(mark, waiting.length - 1).split(mark);
+      title = Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(text: parts.first),
             TextSpan(
-              children: [
-                const TextSpan(text: 'All good,\nexcept '),
-                TextSpan(
-                  text: _alias(first.hostId),
-                  style: TextStyle(color: c.accent),
-                ),
-                TextSpan(text: waiting.length > 1 ? ' and ${waiting.length - 1} more.' : '.'),
-              ],
+              text: _alias(l, first.hostId),
+              style: TextStyle(color: c.accent),
             ),
-          );
+            TextSpan(text: parts.skip(1).join(mark)),
+          ],
+        ),
+      );
+    }
     return ThumbPage(
-      eyebrow: greetingFor(clock),
+      eyebrow: greetingFor(l, clock),
       title: title,
       subtitle: first == null
-          ? '${hosts.length} ${hosts.length == 1 ? 'computer' : 'computers'} paired. '
-                'Nothing is waiting for you.'
-          : '${first.agent} is waiting for your answer.',
+          ? l.computersPairedNothingWaiting(hosts.length)
+          : l.agentWaitingForAnswer(first.agent),
       children: [
         Row(
           children: [
@@ -88,11 +96,11 @@ class HostsView extends StatelessWidget {
               child: MoshTile(
                 height: 120,
                 onTap: onInbox,
-                semanticLabel: 'Inbox, $today events today, ${waiting.length} waiting',
+                semanticLabel: l.inboxTileSemantics(today, waiting.length),
                 child: _TileText(
-                  top: 'Today',
-                  big: '$today ${today == 1 ? 'event' : 'events'}',
-                  small: '${waiting.length} waiting',
+                  top: l.today,
+                  big: l.eventCount(today),
+                  small: l.waitingCount(waiting.length),
                   smallColor: waiting.isEmpty ? c.muted : c.accent,
                 ),
               ),
@@ -102,10 +110,10 @@ class HostsView extends StatelessWidget {
               child: MoshTile(
                 height: 120,
                 onTap: onPair,
-                semanticLabel: 'Pair a computer with a QR code',
+                semanticLabel: l.pairTileSemantics,
                 child: _TileText(
-                  top: 'Add',
-                  big: 'Pair with QR',
+                  top: l.addTile,
+                  big: l.pairWithQr,
                   small: 'openmosh-hook pair',
                   smallColor: c.muted,
                 ),
@@ -117,12 +125,12 @@ class HostsView extends StatelessWidget {
           const SizedBox(height: 10),
           _ApprovalCard(
             event: first,
-            alias: _alias(first.hostId),
-            when: timeAgo(first.at, clock),
+            alias: _alias(l, first.hostId),
+            when: timeAgo(l, first.at, clock),
             onTap: onOpenEvent == null ? null : () => onOpenEvent!(first),
           ),
         ],
-        const SectionLabel('Your computers'),
+        SectionLabel(l.yourComputers),
         for (final h in hosts)
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
@@ -138,7 +146,7 @@ class HostsView extends StatelessWidget {
           child: TextButton.icon(
             onPressed: onAdd,
             icon: const Icon(Icons.edit_outlined),
-            label: const Text('Add host manually'),
+            label: Text(l.addHostManually),
           ),
         ),
       ],
@@ -205,9 +213,10 @@ class _ApprovalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = MoshColors.of(context);
+    final l = context.l10n;
     final what = event.summary.isNotEmpty
         ? event.summary
-        : (event.title.isNotEmpty ? event.title : 'Needs you');
+        : (event.title.isNotEmpty ? event.title : l.needsYou);
     return MoshTile(
       key: const Key('approval_card'),
       tone: TileTone.accent,
@@ -215,7 +224,7 @@ class _ApprovalCard extends StatelessWidget {
       height: 132,
       padding: const EdgeInsets.all(20),
       onTap: onTap,
-      semanticLabel: 'Review request from $alias, ${event.agent}: $what',
+      semanticLabel: l.reviewRequestSemantics(alias, event.agent, what),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -274,6 +283,7 @@ class _HostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = MoshColors.of(context);
+    final l = context.l10n;
     final h = host;
     return MoshTile(
       radius: MoshRadii.hero,
@@ -293,7 +303,7 @@ class _HostCard extends StatelessWidget {
                 ),
               ),
               StatusBadge(
-                label: h.pushEnabled ? 'push' : 'no push',
+                label: h.pushEnabled ? l.badgePush : l.badgeNoPush,
                 tone: h.pushEnabled ? BadgeTone.success : BadgeTone.neutral,
               ),
             ],
@@ -312,7 +322,7 @@ class _HostCard extends StatelessWidget {
                 Icon(Icons.pending_actions, size: 18, color: c.accent),
                 const SizedBox(width: 6),
                 Text(
-                  '$waiting waiting for you',
+                  l.waitingForYou(waiting),
                   style: TextStyle(color: c.accent, fontWeight: FontWeight.w700),
                 ),
               ],
@@ -328,8 +338,8 @@ class _HostCard extends StatelessWidget {
                   height: 52,
                   padding: EdgeInsets.zero,
                   onTap: onTerminal,
-                  child: const Center(
-                    child: Text('Terminal', style: TextStyle(fontWeight: FontWeight.w800)),
+                  child: Center(
+                    child: Text(l.terminal, style: const TextStyle(fontWeight: FontWeight.w800)),
                   ),
                 ),
               ),
@@ -341,8 +351,8 @@ class _HostCard extends StatelessWidget {
                   height: 52,
                   padding: EdgeInsets.zero,
                   onTap: onOpen,
-                  child: const Center(
-                    child: Text('Sessions', style: TextStyle(fontWeight: FontWeight.w800)),
+                  child: Center(
+                    child: Text(l.sessions, style: const TextStyle(fontWeight: FontWeight.w800)),
                   ),
                 ),
               ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../../keys/domain/entities/ssh_key_info.dart';
 import '../../domain/entities/host_draft.dart';
 
@@ -44,21 +45,19 @@ class _HostFormViewState extends State<HostFormView> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         TextField(
           controller: _alias,
-          decoration: const InputDecoration(labelText: 'Name'),
+          decoration: InputDecoration(labelText: l.fieldName),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _address,
           enabled: !widget.lockAddress,
-          decoration: const InputDecoration(
-            labelText: 'Hostname or Tailscale IP',
-            hintText: 'box.tailnet.ts.net',
-          ),
+          decoration: InputDecoration(labelText: l.fieldAddress, hintText: 'box.tailnet.ts.net'),
           keyboardType: TextInputType.url,
           autocorrect: false,
         ),
@@ -66,21 +65,21 @@ class _HostFormViewState extends State<HostFormView> {
         TextField(
           controller: _port,
           enabled: !widget.lockAddress,
-          decoration: const InputDecoration(labelText: 'Port'),
+          decoration: InputDecoration(labelText: l.fieldPort),
           keyboardType: TextInputType.number,
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _user,
-          decoration: const InputDecoration(labelText: 'User'),
+          decoration: InputDecoration(labelText: l.fieldUser),
           autocorrect: false,
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<String?>(
           initialValue: _keyId,
-          decoration: const InputDecoration(labelText: 'Key'),
+          decoration: InputDecoration(labelText: l.fieldKey),
           items: [
-            const DropdownMenuItem(value: null, child: Text('This device (Ed25519)')),
+            DropdownMenuItem(value: null, child: Text(l.thisDeviceKey)),
             for (final k in widget.keys.where((k) => k.id != SshKeyInfo.deviceKeyId))
               DropdownMenuItem(value: k.id, child: Text(k.label)),
           ],
@@ -88,7 +87,10 @@ class _HostFormViewState extends State<HostFormView> {
         ),
         if (widget.error != null) ...[
           const SizedBox(height: 12),
-          Text(widget.error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+          Text(
+            l.failureMessage(widget.error!),
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
         ],
         const SizedBox(height: 20),
         FilledButton(
@@ -104,7 +106,7 @@ class _HostFormViewState extends State<HostFormView> {
                   _keyId,
                 ),
           child: Text(
-            widget.busy ? 'Checking host key…' : (widget.lockAddress ? 'Save' : 'Continue'),
+            widget.busy ? l.checkingHostKey : (widget.lockAddress ? l.save : l.continueAction),
           ),
         ),
       ],

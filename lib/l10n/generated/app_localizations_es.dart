@@ -811,5 +811,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get errNotUsableKey => 'Eso no es una clave privada ssh-ed25519 utilizable.';
 
   @override
+  String get errLockStaysOff =>
+      'No se pudo verificar tu identidad, así que el bloqueo sigue desactivado. Configura una huella, el rostro o un bloqueo de pantalla en este teléfono y vuelve a intentarlo.';
+
+  @override
+  String get errLockStaysOn =>
+      'No se pudo verificar tu identidad, así que el bloqueo sigue activado.';
+
+  @override
   String get errAlreadyAnswered => 'Este evento ya se respondió.';
 }

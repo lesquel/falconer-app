@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/di.dart';
+import '../../../../l10n/l10n.dart';
 import '../../domain/entities/host_draft.dart';
 import '../controllers/host_form_controller.dart';
 import '../views/fingerprint_confirm_view.dart';
@@ -25,7 +26,7 @@ class HostFormContainer extends ConsumerWidget {
       final host = ref.watch(hostProvider(hostId!)).value;
       if (host == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
       return Scaffold(
-        appBar: AppBar(title: const Text('Edit host')),
+        appBar: AppBar(title: Text(context.l10n.editHost)),
         body: HostFormView(
           keys: keys,
           lockAddress: true,
@@ -46,7 +47,7 @@ class HostFormContainer extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Add host')),
+      appBar: AppBar(title: Text(context.l10n.addHost)),
       body: state.probed != null
           ? FingerprintConfirmView(
               address: state.draft!.address,

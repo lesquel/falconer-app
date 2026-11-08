@@ -116,6 +116,10 @@ extension FailureL10n on AppLocalizations {
     'The data is too large.' => errDataTooLarge,
     'That is not an unencrypted ssh-ed25519 private key.' => errNotUnencryptedKey,
     'That is not a usable ssh-ed25519 private key.' => errNotUsableKey,
+    'Could not verify you, so the lock stays off. Set up a fingerprint, face or screen '
+        'lock on this phone, then try again.' =>
+      errLockStaysOff,
+    'Could not verify you, so the lock stays on.' => errLockStaysOn,
     'This event was already answered.' => errAlreadyAnswered,
     _ => message,
   };
