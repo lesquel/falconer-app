@@ -132,4 +132,18 @@ void main() {
     expect(conns, hasLength(2), reason: 'a new SSH connection');
     expect(shown.runner.phase, TerminalPhase.connected);
   });
+
+  test('coming back while the 10-minute close runs still reconnects the screen', () async {
+    final shown = open('main');
+    await pump();
+    lifecycle.paused();
+    timers.single.fire(); // the close starts
+    lifecycle.resumed(); // ...and the app is back before it ends
+    shown.runner.wake(restart: true); // what the verified screen does
+    for (var i = 0; i < 5; i++) {
+      await pump();
+    }
+    expect(shown.runner.suspended, isFalse);
+    expect(shown.runner.phase, TerminalPhase.connected);
+  });
 }

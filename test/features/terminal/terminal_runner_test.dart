@@ -44,6 +44,7 @@ class FakeShell implements ShellChannel {
   Future<void> write(List<int> data) async => written.add(utf8.decode(data));
   @override
   Future<void> resize(int c, int r) async => sizes.add((c, r));
+
   /// Like the Rust shell, closing does not wait for the reader to drain.
   @override
   Future<void> close() async => unawaited(out.close());
@@ -253,5 +254,18 @@ void main() {
     expect(runner.suspended, isFalse);
     expect(runner.phase, TerminalPhase.connected);
     expect(emu.resets, 1, reason: 'the suspended screen is cleared before re-attaching');
+  });
+
+  test('a restart asked while a suspend is still winding down is not lost', () async {
+    unawaited(runner.start());
+    await pump();
+    final suspending = runner.suspend();
+    runner.wake(restart: true);
+    await suspending;
+    for (var i = 0; i < 4; i++) {
+      await pump();
+    }
+    expect(shells, hasLength(2), reason: 'a new shell after the restart');
+    expect(runner.phase, TerminalPhase.connected);
   });
 }

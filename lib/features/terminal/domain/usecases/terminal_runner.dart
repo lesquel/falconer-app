@@ -170,6 +170,11 @@ final class TerminalRunner {
       attempt++;
     }
     _running = false;
+    if (_restartPending && !_disposed) {
+      _restartPending = false;
+      unawaited(start());
+      return;
+    }
     if (_suspended && !_disposed) _set(TerminalPhase.idle);
   }
 
@@ -215,8 +220,17 @@ final class TerminalRunner {
     _completeWake();
     if (_suspended && !restart) return;
     if (_conn?.isClosed ?? false) _shell?.close();
-    if (restart && !_running) unawaited(start());
+    if (!restart) return;
+    if (_running) {
+      // The old loop is still winding down (e.g. right after suspend):
+      // restart once it has exited instead of dropping the request.
+      _restartPending = true;
+    } else {
+      unawaited(start());
+    }
   }
+
+  bool _restartPending = false;
 
   Future<void> send(String data) async {
     final s = _shell;

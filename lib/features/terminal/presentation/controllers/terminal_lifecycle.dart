@@ -58,7 +58,17 @@ final class TerminalLifecycle {
     if (!_background) return;
     await pool.releaseHidden();
     for (final s in pool.shownSessions) {
+      if (!_background) break;
       await s.runner.suspend();
+    }
+    // The app may have come back while this was closing: a screen that
+    // already asked its runner to resume found it not yet suspended, so
+    // restart what this close suspended instead of leaving it idle.
+    if (!_background) {
+      for (final s in pool.shownSessions) {
+        if (s.runner.suspended) s.runner.wake(restart: true);
+      }
+      return;
     }
     await disconnectAll();
   }
