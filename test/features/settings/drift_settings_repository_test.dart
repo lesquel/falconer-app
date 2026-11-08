@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openmosh/features/keyboard/domain/entities/extra_key.dart';
 import 'package:openmosh/features/settings/data/repositories/drift_settings_repository.dart';
 import 'package:openmosh/features/settings/domain/entities/app_settings.dart';
 import 'package:openmosh/features/settings/domain/entities/appearance.dart';
@@ -84,5 +85,29 @@ void main() {
     expect(s.notificationPreviews, isTrue);
     expect(s.fontSize, 18);
     expect(s.keepConnected, isTrue);
+  });
+
+  test('language and saved shortcut keys round-trip', () async {
+    expect((await repo.load()).language, AppLanguage.system);
+    expect((await repo.load()).customKeys.map((k) => k.label), contains('Ctrl+C'));
+    await repo.save(
+      const AppSettings().copyWith(
+        language: AppLanguage.es,
+        customKeys: const [ExtraKey.send('git st', 'git status\r')],
+      ),
+    );
+    final s = await repo.load();
+    expect(s.language, AppLanguage.es);
+    expect(s.customKeys.single.label, 'git st');
+    expect(s.customKeys.single.sequence, 'git status\r');
+  });
+
+  test('malformed saved shortcut keys fall back to the defaults', () async {
+    await db
+        .into(db.settingRows)
+        .insertOnConflictUpdate(
+          SettingRowsCompanion.insert(key: 'custom_keys', value: '{not json'),
+        );
+    expect((await repo.load()).customKeys, AppSettings.defaultCustomKeys);
   });
 }

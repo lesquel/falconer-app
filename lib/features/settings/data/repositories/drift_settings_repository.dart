@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import '../../../../shared/data/app_database.dart';
+import '../../../keyboard/domain/entities/extra_key.dart';
 import '../../../keyboard/domain/entities/key_presets.dart';
 import '../../domain/entities/app_settings.dart';
 import '../../domain/entities/appearance.dart';
@@ -22,6 +25,22 @@ class DriftSettingsRepository implements SettingsRepository {
         _ => const AppSettings().themePreference,
       };
 
+  /// `[[label, bytes], ...]`; anything malformed falls back to the defaults.
+  static List<ExtraKey>? _keys(String? raw) {
+    if (raw == null) return null;
+    try {
+      final list = jsonDecode(raw) as List<dynamic>;
+      return [
+        for (final e in list)
+          if (e case [final String label, final String seq]) ExtraKey.send(label, seq),
+      ];
+    } on FormatException {
+      return null;
+    } on TypeError {
+      return null;
+    }
+  }
+
   AppSettings _parse(List<SettingRow> rows) {
     final m = {for (final r in rows) r.key: r.value};
     const d = AppSettings();
@@ -35,6 +54,8 @@ class DriftSettingsRepository implements SettingsRepository {
       herdrPrefix: m['herdr_prefix'] ?? d.herdrPrefix,
       keepConnected: m['keep_connected'] != 'false',
       appLock: m['app_lock'] == 'true',
+      language: _byName(AppLanguage.values, m['language']) ?? d.language,
+      customKeys: _keys(m['custom_keys']) ?? d.customKeys,
     );
   }
 
@@ -61,6 +82,14 @@ class DriftSettingsRepository implements SettingsRepository {
       SettingRowsCompanion.insert(key: 'herdr_prefix', value: s.herdrPrefix),
       SettingRowsCompanion.insert(key: 'keep_connected', value: '${s.keepConnected}'),
       SettingRowsCompanion.insert(key: 'app_lock', value: '${s.appLock}'),
+      SettingRowsCompanion.insert(key: 'language', value: s.language.name),
+      SettingRowsCompanion.insert(
+        key: 'custom_keys',
+        value: jsonEncode([
+          for (final k in s.customKeys)
+            if (k.sequence != null) [k.label, k.sequence],
+        ]),
+      ),
     ]),
   );
 }
