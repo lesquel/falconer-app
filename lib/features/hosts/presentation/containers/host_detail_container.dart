@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/di.dart';
+import '../../../../shared/ui/molecules/themed_mole.dart';
 import '../../../../shared/ui/organisms/failure_panel.dart';
 import '../controllers/host_detail_controller.dart';
 import '../views/host_detail_view.dart';
@@ -37,21 +38,10 @@ class HostDetailContainer extends ConsumerWidget {
     final host = ref.watch(hostProvider(hostId)).value;
     final state = ref.watch(hostDetailProvider(hostId));
     final ctrl = ref.read(hostDetailProvider(hostId).notifier);
-    if (host == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (host == null) {
+      return const Scaffold(body: MoleMessage(title: 'Opening host', busy: true));
+    }
     return Scaffold(
-      appBar: AppBar(
-        title: Text(host.alias),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: () => context.push('/hosts/$hostId/edit'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            onPressed: () => _delete(context, ref),
-          ),
-        ],
-      ),
       body: HostDetailView(
         host: host,
         sessions: state.sessions,
@@ -72,6 +62,9 @@ class HostDetailContainer extends ConsumerWidget {
           ).toString(),
         ),
         onEnablePush: () => ctrl.enablePush('Android phone'),
+        onBack: () => context.canPop() ? context.pop() : context.go('/'),
+        onEdit: () => context.push('/hosts/$hostId/edit'),
+        onDelete: () => _delete(context, ref),
       ),
     );
   }

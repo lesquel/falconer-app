@@ -8,6 +8,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/di.dart';
 import '../../../../shared/domain/failure.dart';
+import '../../../../shared/ui/atoms/circle_icon_button.dart';
+import '../../../../shared/ui/tokens/mosh_colors.dart';
 import '../../../../shared/ui/organisms/failure_panel.dart';
 import '../../../keyboard/domain/entities/key_presets.dart';
 import '../../../keyboard/presentation/views/extra_keys_bar.dart';
@@ -19,6 +21,7 @@ import '../controllers/terminal_session.dart';
 import '../controllers/terminal_session_pool.dart';
 import '../views/chat_composer.dart';
 import '../views/session_ended_panel.dart';
+import '../views/terminal_palette.dart';
 import '../views/terminal_screen_view.dart';
 
 class TerminalContainer extends ConsumerStatefulWidget {
@@ -200,33 +203,67 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
         : _phase == TerminalPhase.closed
         ? SessionEndedPanel(onReconnect: () => _runner.wake(restart: true), onBack: _leave)
         : null;
+    final c = MoshColors.of(context);
+    final subtitle = widget.session == null
+        ? (host == null ? 'shell' : '${host.alias} · shell')
+        : '${host?.alias ?? 'host'} · ${widget.kind ?? 'session'}';
     return Scaffold(
-      appBar: AppBar(
-        leading: BackButton(onPressed: _leave),
-        title: Text(widget.session ?? host?.alias ?? 'Terminal'),
-        actions: [
-          IconButton(
-            tooltip: 'Upload image',
-            icon: const Icon(Icons.image_outlined),
-            onPressed: _uploading ? null : () => _upload(true),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(68),
+        child: SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
+            child: Row(
+              children: [
+                CircleIconButton(icon: Icons.chevron_left, tooltip: 'Back', onPressed: _leave),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        widget.session ?? host?.alias ?? 'Terminal',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
+                      ),
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 12, color: c.muted),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Upload image',
+                  icon: const Icon(Icons.image_outlined),
+                  onPressed: _uploading ? null : () => _upload(true),
+                ),
+                IconButton(
+                  tooltip: 'Upload file',
+                  icon: const Icon(Icons.attach_file),
+                  onPressed: _uploading ? null : () => _upload(false),
+                ),
+                IconButton(
+                  tooltip: 'Disconnect',
+                  icon: const Icon(Icons.link_off),
+                  onPressed: _disconnect,
+                ),
+              ],
+            ),
           ),
-          IconButton(
-            tooltip: 'Upload file',
-            icon: const Icon(Icons.attach_file),
-            onPressed: _uploading ? null : () => _upload(false),
-          ),
-          IconButton(
-            tooltip: 'Disconnect',
-            icon: const Icon(Icons.link_off),
-            onPressed: _disconnect,
-          ),
-        ],
+        ),
       ),
       body: TerminalScreenView(
         terminal: _session.emulator.terminal,
         focusNode: _focus,
         phase: _phase,
         fontSize: settings.fontSize,
+        theme: terminalThemeFor(settings.terminalScheme),
         overlay: overlay,
         composer: _session.chatOpen
             ? ChatComposer(
@@ -250,19 +287,19 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
           onKey: (seq) => _runner.send(seq),
           onModifier: (m) => _session.modifiers.value = mods.toggle(m),
           onModifierLock: (m) => _session.modifiers.value = mods.lock(m),
+          expanded: _session.moreKeys,
+          onToggleExpanded: () => setState(() => _session.moreKeys = !_session.moreKeys),
           pinned: [
-            IconButton(
+            KeyGridButton(
               tooltip: _session.chatOpen ? 'Type in the terminal' : 'Chat',
-              isSelected: _session.chatOpen,
-              icon: const Icon(Icons.chat_bubble_outline),
-              selectedIcon: const Icon(Icons.chat_bubble),
+              selected: _session.chatOpen,
+              icon: Icons.chat_bubble_outline,
+              selectedIcon: Icons.chat_bubble,
               onPressed: _toggleChat,
             ),
-            IconButton(
-              tooltip: 'Keyboard',
-              icon: const Icon(Icons.keyboard),
-              onPressed: _toggleKeyboard,
-            ),
+            KeyGridButton(tooltip: 'Keyboard', icon: Icons.keyboard, onPressed: _toggleKeyboard),
+          ],
+          trailing: [
             IconButton(
               tooltip: 'Smaller text',
               icon: const Icon(Icons.text_decrease),

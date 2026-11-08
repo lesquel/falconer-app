@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../controllers/pairing_controller.dart';
 import '../views/camera_unavailable_view.dart';
 import '../views/pair_review_view.dart';
+import '../views/pair_success_view.dart';
 import '../views/pair_scan_view.dart';
 
 class PairingContainer extends ConsumerWidget {
@@ -15,11 +16,12 @@ class PairingContainer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(pairingProvider);
     final ctrl = ref.read(pairingProvider.notifier);
-    ref.listen(pairingProvider, (_, next) {
-      if (next.step == PairStep.done && next.host != null) context.go('/hosts/${next.host!.id}');
-    });
-
+    final paired = state.step == PairStep.done ? state.host : null;
     final body = switch (state.step) {
+      PairStep.done when paired != null => PairSuccessView(
+        alias: paired.alias,
+        onOpen: () => context.go('/hosts/${paired.id}'),
+      ),
       PairStep.review || PairStep.pairing => PairReviewView(
         code: state.code!,
         busy: state.step == PairStep.pairing,

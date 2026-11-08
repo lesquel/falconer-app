@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../shared/ui/organisms/thumb_page.dart';
+import '../../../../shared/ui/tokens/mosh_colors.dart';
 import '../../domain/entities/pair_payload.dart';
 
 class PairReviewView extends StatefulWidget {
@@ -32,32 +34,33 @@ class _PairReviewViewState extends State<PairReviewView> {
   @override
   Widget build(BuildContext context) {
     final c = widget.code;
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Text('Pair with ${c.ip}', style: Theme.of(context).textTheme.headlineSmall),
-        const SizedBox(height: 8),
-        const Text(
+    final muted = MoshColors.of(context).muted;
+    return ThumbPage(
+      eyebrow: 'New computer',
+      title: Text('Pair with ${c.ip}'),
+      subtitle:
           'The host proves itself with the key in the code; its name and SSH host key '
           'fingerprint are pinned from its encrypted reply.',
-        ),
-        const SizedBox(height: 12),
+      children: [
         TextField(
           controller: _name,
           decoration: const InputDecoration(labelText: 'Name for this phone'),
         ),
-        const SizedBox(height: 8),
-        const Text(
-          'This creates an SSH key on this phone, authorizes it on the host only from your '
-          'tailnet, and registers encrypted notifications.',
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 10, 8, 16),
+          child: Text(
+            'This creates an SSH key on this phone, authorizes it on the host only from your '
+            'tailnet, and registers encrypted notifications.',
+            style: TextStyle(color: muted),
+          ),
         ),
-        const SizedBox(height: 16),
+        if (widget.busy) ...[const LinearProgressIndicator(), const SizedBox(height: 10)],
         FilledButton(
           onPressed: widget.busy ? null : () => widget.onPair(_name.text),
           child: Text(widget.busy ? 'Pairing…' : 'Pair'),
         ),
+        const SizedBox(height: 4),
         TextButton(onPressed: widget.busy ? null : widget.onCancel, child: const Text('Cancel')),
-        if (widget.busy) const LinearProgressIndicator(),
       ],
     );
   }

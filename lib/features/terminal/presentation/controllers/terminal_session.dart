@@ -36,6 +36,9 @@ final class TerminalSession {
 
   /// Chat composer state, kept while the session lives.
   bool chatOpen = false;
+
+  /// The keys bar shows the arrow, symbol and preset rows.
+  bool moreKeys = false;
   String draft = '';
   final attachments = <ChatAttachment>[];
 

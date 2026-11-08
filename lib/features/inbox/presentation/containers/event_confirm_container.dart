@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/di.dart';
+import '../../../../shared/ui/atoms/time_ago.dart';
+import '../../../../shared/ui/molecules/themed_mole.dart';
 import '../../domain/entities/inbox_event.dart';
 import '../controllers/event_confirm_controller.dart';
 import '../views/event_confirm_view.dart';
@@ -33,10 +35,15 @@ class EventConfirmContainer extends ConsumerWidget {
       if (ok && context.mounted) context.pop();
     }
 
+    void close() => context.canPop() ? context.pop() : context.go('/inbox');
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Agent request')),
       body: event == null
-          ? const Center(child: Text('Event not found. It may have been cleared.'))
+          ? MoleMessage(
+              title: 'Event not found',
+              message: 'It may have been cleared.',
+              actions: [TextButton(onPressed: close, child: const Text('Back'))],
+            )
           : EventConfirmView(
               event: event,
               hostAlias: host?.alias ?? 'host',
@@ -47,6 +54,8 @@ class EventConfirmContainer extends ConsumerWidget {
               onDeny: () => run(ResponseKind.deny),
               onText: (t) => run(ResponseKind.text, t),
               onOpenTerminal: () => context.push('/terminal/$hostId'),
+              onClose: close,
+              when: timeAgo(event.at, DateTime.now()),
             ),
     );
   }

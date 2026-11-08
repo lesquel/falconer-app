@@ -38,7 +38,12 @@ class _PairScanViewState extends State<PairScanView> {
             content: Text(widget.error!),
             actions: [TextButton(onPressed: widget.onDismissError, child: const Text('Dismiss'))],
           ),
-        Expanded(child: widget.scanner),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+            child: ClipRRect(borderRadius: BorderRadius.circular(26), child: widget.scanner),
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
