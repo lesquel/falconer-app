@@ -129,11 +129,15 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
 
   Future<void> _reverifyOnResume() async {
     _reverifying = true;
+    // Hidden at once: no frame of the terminal while the clock is read.
+    setState(() => _verified = false);
     try {
       final presence = ref.read(userPresenceProvider);
-      if (await presence.recent()) return;
+      if (await presence.recent()) {
+        if (mounted) setState(() => _verified = true);
+        return;
+      }
       if (!mounted) return;
-      setState(() => _verified = false);
       final ok = await presence.ensureRecent(context.l10n.verifyToShowTerminal);
       if (!mounted) return;
       if (ok) {
