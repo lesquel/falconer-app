@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openmosh/features/hosts/domain/entities/host_draft.dart';
@@ -21,8 +23,9 @@ void main() {
     await repo.save(testHost());
     vault = FakeVault();
     conn = FakeConnection(
-      (cmd, _) =>
-          cmd.startsWith('command -v') ? text('/home/me/.local/bin/openmosh-hook\n') : ok(const []),
+      (_, stdin) => utf8.decode(stdin!).startsWith('command -v')
+          ? text('/home/me/.local/bin/openmosh-hook\n')
+          : ok(const []),
     );
     connector = FakeConnector(() => conn);
     pool = HostConnections(hosts: repo, vault: vault, connector: connector);
@@ -67,9 +70,10 @@ void main() {
   test('hook path is resolved once, saved, and quoted in every call', () async {
     await pool.runHook('h1', HookCommand.sessionsList());
     await pool.runHook('h1', HookCommand.agentsList());
-    expect(conn.commands.where((c) => c.startsWith('command -v')).length, 1);
+    expect(conn.scripts.where((c) => c.startsWith('command -v')).length, 1);
+    expect(conn.commands.toSet(), {'sh -s'});
     expect((await repo.byId('h1'))!.hookPath, '/home/me/.local/bin/openmosh-hook');
-    expect(conn.commands.last, "'/home/me/.local/bin/openmosh-hook' 'agents' 'list' '--json'");
+    expect(conn.scripts.last, "'/home/me/.local/bin/openmosh-hook' 'agents' 'list' '--json'\n");
   });
 
   test('a host without the hook binary reports hook_missing', () async {

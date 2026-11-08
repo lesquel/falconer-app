@@ -85,6 +85,9 @@ class FakeConnection implements SshConnection {
   final List<List<int>?> stdins = [];
   bool closed = false;
 
+  /// Scripts written to `sh -s` on stdin (hook calls are shell-independent).
+  List<String> get scripts => [for (final s in stdins) s == null ? '' : utf8.decode(s)];
+
   @override
   Future<ExecOutput> exec(String command, {List<int>? stdin}) async {
     commands.add(command);

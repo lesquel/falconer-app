@@ -139,8 +139,12 @@ void main() {
       pushKeys: FakePushKeys(),
       endpoints: endpoints,
     )('h1', deviceName: 'Phone');
-    expect(conn.commands.single, "'/h/openmosh-hook' 'pair-ssh' '--json'");
-    expect(jsonDecode(utf8.decode(conn.stdins.single!)), {
+    expect(conn.commands.single, 'sh -s');
+    final script = conn.scripts.single;
+    expect(script, startsWith("printf '%s' '"));
+    expect(script, endsWith("' | '/h/openmosh-hook' 'pair-ssh' '--json'\n"));
+    final json = script.substring("printf '%s' '".length, script.indexOf("' | '"));
+    expect(jsonDecode(json), {
       'name': 'Phone',
       'ppk': b64uEncode(List.filled(32, 3)),
       'endpoint': 'https://ntfy.sh/upXYZ',

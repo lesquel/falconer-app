@@ -3,6 +3,8 @@
 /// [HookCommand.toShell], which single-quotes every word.
 library;
 
+import 'dart:convert';
+
 import '../../domain/failure.dart';
 import '../../domain/posix_shell.dart';
 
@@ -52,6 +54,19 @@ final class HookCommand {
   }
 
   String toShell(String hookPath) => shJoin([hookPath, ...argv]);
+
+  /// Script for [execCommand]: the quoted command line, with [stdin] piped in
+  /// from a quoted `printf` (the script itself occupies the channel's stdin).
+  /// [stdin] must be UTF-8 text without NUL (request JSON).
+  String toScript(String hookPath, {List<int>? stdin}) {
+    final line = toShell(hookPath);
+    if (stdin == null) return '$line\n';
+    return "printf '%s' ${shQuote(utf8.decode(stdin))} | $line\n";
+  }
+
+  /// The only command the remote login shell parses (it may be fish or csh):
+  /// a POSIX `sh` reading the script from stdin.
+  static const execCommand = 'sh -s';
 
   static void _checkId(String id) {
     // Hook ids are b64u and may start with '-'; the hook declares these

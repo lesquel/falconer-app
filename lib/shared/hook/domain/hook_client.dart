@@ -1,5 +1,6 @@
 /// Runs `openmosh-hook` commands over an exec channel and decodes the
-/// JSON envelope.
+/// JSON envelope. The exec request is always `sh -s` and the POSIX-quoted
+/// script is written to stdin, so the host's login shell never parses it.
 library;
 
 import 'dart:convert';
@@ -18,7 +19,8 @@ final class HookClient {
     HookCommand cmd, {
     List<int>? stdin,
   }) async {
-    final out = await conn.exec(cmd.toShell(hookPath), stdin: stdin);
+    final script = cmd.toScript(hookPath, stdin: stdin);
+    final out = await conn.exec(HookCommand.execCommand, stdin: utf8.encode(script));
     if (out.stdout.isEmpty && out.exitCode == 127) {
       throw const HookFailure('hook_missing', 'openmosh-hook is not installed on this host.');
     }
@@ -33,7 +35,10 @@ final class HookClient {
 
   /// Runs [HookCommand.resolvePathScript]; returns an absolute path.
   Future<String> resolvePath(SshConnection conn) async {
-    final out = await conn.exec(HookCommand.resolvePathScript);
+    final out = await conn.exec(
+      HookCommand.execCommand,
+      stdin: utf8.encode('${HookCommand.resolvePathScript}\n'),
+    );
     final path = utf8.decode(out.stdout, allowMalformed: true).trim();
     if (!path.startsWith('/') || path.contains(RegExp(r'[\x00-\x1f\x7f]')) || path.length > 512) {
       throw const HookFailure('hook_missing', 'openmosh-hook is not installed on this host.');

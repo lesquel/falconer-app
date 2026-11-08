@@ -17,7 +17,7 @@ lib/
 ├── shared/
 │   ├── domain/                   # failures, POSIX quoting, b64u, IPv4/tailnet rules, label cleaning
 │   ├── crypto/                   # X25519 / HKDF / XChaCha20-Poly1305 (pure Dart)
-│   ├── hook/domain/              # openmosh-hook commands, envelope parser, HookClient
+│   ├── hook/domain/              # openmosh-hook commands, envelope parser, HookClient (exec `sh -s`, script on stdin)
 │   ├── ssh/domain/               # SshConnector / SshConnection / ShellChannel ports
 │   ├── ssh/data/datasources/     # ssh_bridge.dart: the only user of the Rust SSH API
 │   ├── data/                     # drift database (hosts, key metadata, inbox, settings)

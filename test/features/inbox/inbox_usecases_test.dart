@@ -171,7 +171,7 @@ void main() {
     test('approve runs the respond command and resolves', () async {
       reply = (_, _) => ok({'resolved': true});
       final done = await respond('h1', 'ev1', ResponseKind.allow);
-      expect(conn.commands.single, "'/h' 'respond' 'ev1' '--action' 'allow' '--json'");
+      expect(conn.scripts.single, "'/h' 'respond' 'ev1' '--action' 'allow' '--json'\n");
       expect(done.status, InboxStatus.resolved);
       expect(notifier.cancelled, ['ev1']);
     });
@@ -204,7 +204,7 @@ void main() {
       ),
     );
     expect(await sync('h1'), 2);
-    expect(conn.commands.single, contains("'--since' '5'"));
+    expect(conn.scripts.single, contains("'--since' '5'"));
     expect((await inbox.byId('h1', 'ev1'))!.status, InboxStatus.resolved);
     expect((await inbox.byId('h1', 'ev9'))!.status, InboxStatus.pending);
   });
@@ -260,7 +260,7 @@ void main() {
       ),
       notifier: notifier,
     )('h1', '-x1', ResponseKind.allow);
-    expect(conn.commands.single, "'/h' 'respond' '-x1' '--action' 'allow' '--json'");
+    expect(conn.scripts.single, "'/h' 'respond' '-x1' '--action' 'allow' '--json'\n");
   });
 
   test('endpoint rule: https anywhere, http only inside the tailnet', () {
