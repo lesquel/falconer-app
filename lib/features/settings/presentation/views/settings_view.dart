@@ -7,6 +7,7 @@ import '../../../../shared/ui/tokens/mosh_colors.dart';
 import '../../../keyboard/domain/entities/key_presets.dart';
 import '../../domain/entities/app_settings.dart';
 import '../../domain/entities/appearance.dart';
+import 'notification_hours_tile.dart';
 
 class SettingsView extends StatelessWidget {
   const SettingsView({
@@ -91,6 +92,15 @@ class SettingsView extends StatelessWidget {
             subtitle: Text(l.notificationPreviewsBody),
             value: s.notificationPreviews,
             onChanged: (v) => onChanged(s.copyWith(notificationPreviews: v)),
+          ),
+          NotificationHoursTile(
+            hours: s.notificationHours,
+            onChanged: (c) => onChanged(
+              s.withNotificationHours(switch (c) {
+                SetHours(:final hours) => hours,
+                InheritHours() => null,
+              }),
+            ),
           ),
           SwitchListTile(
             key: const Key('keep_connected'),

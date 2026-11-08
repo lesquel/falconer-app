@@ -5,6 +5,7 @@ import '../../../keyboard/domain/entities/extra_key.dart';
 import '../../../keyboard/domain/entities/key_presets.dart';
 import '../../domain/entities/app_settings.dart';
 import '../../domain/entities/appearance.dart';
+import '../../domain/entities/notification_hours.dart';
 import '../../domain/repositories/settings_repository.dart';
 
 /// Settings are key/value rows. Unknown or missing values fall back to defaults.
@@ -41,6 +42,22 @@ class DriftSettingsRepository implements SettingsRepository {
     }
   }
 
+  /// `{"<hostId>": "480-1260", ...}`; malformed entries are dropped.
+  static Map<String, NotificationHours> _hostHours(String? raw) {
+    if (raw == null) return const {};
+    try {
+      final map = jsonDecode(raw) as Map<String, dynamic>;
+      return {
+        for (final e in map.entries)
+          if (e.value case final String v) e.key: ?NotificationHours.parse(v),
+      };
+    } on FormatException {
+      return const {};
+    } on TypeError {
+      return const {};
+    }
+  }
+
   AppSettings _parse(List<SettingRow> rows) {
     final m = {for (final r in rows) r.key: r.value};
     const d = AppSettings();
@@ -56,6 +73,8 @@ class DriftSettingsRepository implements SettingsRepository {
       appLock: m['app_lock'] == 'true',
       language: _byName(AppLanguage.values, m['language']) ?? d.language,
       customKeys: _keys(m['custom_keys']) ?? d.customKeys,
+      notificationHours: NotificationHours.parse(m['notify_hours']),
+      hostNotificationHours: _hostHours(m['notify_hours_hosts']),
     );
   }
 
@@ -83,6 +102,13 @@ class DriftSettingsRepository implements SettingsRepository {
       SettingRowsCompanion.insert(key: 'keep_connected', value: '${s.keepConnected}'),
       SettingRowsCompanion.insert(key: 'app_lock', value: '${s.appLock}'),
       SettingRowsCompanion.insert(key: 'language', value: s.language.name),
+      SettingRowsCompanion.insert(key: 'notify_hours', value: s.notificationHours?.encode() ?? ''),
+      SettingRowsCompanion.insert(
+        key: 'notify_hours_hosts',
+        value: jsonEncode({
+          for (final e in s.hostNotificationHours.entries) e.key: e.value.encode(),
+        }),
+      ),
       SettingRowsCompanion.insert(
         key: 'custom_keys',
         value: jsonEncode([

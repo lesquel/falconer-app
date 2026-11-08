@@ -5,6 +5,7 @@ import 'package:openmosh/features/keyboard/domain/entities/extra_key.dart';
 import 'package:openmosh/features/settings/data/repositories/drift_settings_repository.dart';
 import 'package:openmosh/features/settings/domain/entities/app_settings.dart';
 import 'package:openmosh/features/settings/domain/entities/appearance.dart';
+import 'package:openmosh/features/settings/domain/entities/notification_hours.dart';
 import 'package:openmosh/shared/data/app_database.dart';
 
 void main() {
@@ -109,5 +110,21 @@ void main() {
           SettingRowsCompanion.insert(key: 'custom_keys', value: '{not json'),
         );
     expect((await repo.load()).customKeys, AppSettings.defaultCustomKeys);
+  });
+
+  test('notification hours round-trip, app-wide and per host', () async {
+    expect((await repo.load()).notificationHours, isNull);
+    await repo.save(
+      const AppSettings()
+          .withNotificationHours(const NotificationHours(480, 1260))
+          .withHostNotificationHours('h1', const NotificationHours(1320, 120)),
+    );
+    final s = await repo.load();
+    expect(s.notificationHours, const NotificationHours(480, 1260));
+    expect(s.hostNotificationHours, {'h1': const NotificationHours(1320, 120)});
+    await repo.save(s.withNotificationHours(null).withHostNotificationHours('h1', null));
+    final cleared = await repo.load();
+    expect(cleared.notificationHours, isNull);
+    expect(cleared.hostNotificationHours, isEmpty);
   });
 }

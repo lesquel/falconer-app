@@ -26,6 +26,7 @@ class HostDetailView extends StatelessWidget {
     this.onEdit,
     this.onDelete,
     this.onUsage,
+    this.notificationHours,
   });
 
   final Host host;
@@ -46,6 +47,9 @@ class HostDetailView extends StatelessWidget {
 
   /// Opens the "Agent usage" screen.
   final VoidCallback? onUsage;
+
+  /// This host's notification hours row.
+  final Widget? notificationHours;
 
   BadgeTone _tone(AgentState s) => switch (s) {
     AgentState.blocked => BadgeTone.attention,
@@ -144,6 +148,10 @@ class HostDetailView extends StatelessWidget {
             icon: const Icon(Icons.insights_outlined),
             label: Text(l.agentUsage),
           ),
+        ],
+        if (host.pushEnabled && notificationHours != null) ...[
+          const SizedBox(height: 8),
+          Card(margin: EdgeInsets.zero, child: notificationHours!),
         ],
         if (!host.pushEnabled) ...[
           const SizedBox(height: 8),

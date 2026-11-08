@@ -39,6 +39,7 @@ final class PushRuntime {
       opener: CryptoPushOpener(SecurePushKeyStore(storage)),
       notifier: notifier,
       previews: () async => (await settings.load()).notificationPreviews,
+      allowed: (hostId, at) async => (await settings.load()).notificationsAllowed(hostId, at),
       kidOf: PushCrypto.kidOf,
       now: DateTime.now,
     );

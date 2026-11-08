@@ -110,6 +110,34 @@ void main() {
     expect(notifier.shown.last, ('ev2', 'work', true));
   });
 
+  test('outside the notification hours the event is stored but not notified', () async {
+    final asked = <(String, DateTime)>[];
+    var allowed = false;
+    final quiet = HandlePushMessage(
+      hosts: hosts,
+      inbox: inbox,
+      opener: opener,
+      notifier: notifier,
+      previews: () async => previews,
+      kidOf: (b) => (jsonDecode(utf8.decode(b)) as Map)['kid'] as String?,
+      now: () => now,
+      allowed: (hostId, at) async {
+        asked.add((hostId, at));
+        return allowed;
+      },
+    );
+    opener.next = wire();
+    final e = await quiet(body('kid1'));
+    expect(e!.status, InboxStatus.pending);
+    expect(await inbox.byId('h1', 'ev1'), isNotNull);
+    expect(notifier.shown, isEmpty);
+    expect(asked.single, ('h1', now));
+    allowed = true;
+    opener.next = wire(id: 'ev2', seq: 6);
+    await quiet(body('kid1'));
+    expect(notifier.shown.single.$1, 'ev2');
+  });
+
   test('unknown kid or undecryptable body is discarded silently', () async {
     opener.next = wire();
     expect(await handle(body('other')), isNull);

@@ -861,5 +861,52 @@
   "usageEmpty": "No agent usage recorded in this period.",
   "usageLoading": "Reading usage…",
   "errHookOutdatedUsage": "Update openmosh-hook on this computer to see usage.",
-  "errUsagePeriod": "The period must be 1–31 days."
+  "errUsagePeriod": "The period must be 1–31 days.",
+  "notifyHours": "Notification hours",
+  "@notifyHours": {
+    "description": "Notification hours setting."
+  },
+  "notifyHoursBody": "Outside these hours, events still reach the inbox, without sound or a notification.",
+  "@notifyHoursBody": {
+    "description": "Notification hours setting."
+  },
+  "notifyAlways": "Always",
+  "@notifyAlways": {
+    "description": "Notification hours setting."
+  },
+  "notifyBetween": "{from} – {to}",
+  "@notifyBetween": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "notifyUsesApp": "App setting: {hours}",
+  "@notifyUsesApp": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "notifyUseAppSetting": "Use the app setting",
+  "@notifyUseAppSetting": {
+    "description": "Notification hours setting."
+  },
+  "notifyOnlyBetween": "Only between",
+  "@notifyOnlyBetween": {
+    "description": "Notification hours setting."
+  },
+  "notifyFrom": "From",
+  "@notifyFrom": {
+    "description": "Notification hours setting."
+  },
+  "notifyTo": "To",
+  "@notifyTo": {
+    "description": "Notification hours setting."
+  }
 }

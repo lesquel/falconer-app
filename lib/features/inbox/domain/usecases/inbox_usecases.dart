@@ -13,6 +13,9 @@ import '../entities/push_freshness.dart';
 import '../repositories/inbox_ports.dart';
 
 typedef PreviewsEnabled = Future<bool> Function();
+
+/// Whether a notification for [hostId] may sound at [at] (notification hours).
+typedef NotifyAllowed = Future<bool> Function(String hostId, DateTime at);
 typedef KidOf = String? Function(List<int> body);
 
 final class HandlePushMessage {
@@ -24,8 +27,11 @@ final class HandlePushMessage {
     required this.previews,
     required this.kidOf,
     required this.now,
+    this.allowed,
   });
 
+  /// Null means always allowed.
+  final NotifyAllowed? allowed;
   final HostRepository hosts;
   final InboxRepository inbox;
   final PushOpener opener;
@@ -74,7 +80,9 @@ final class HandlePushMessage {
     }
     final merged = existing?.mergeIncoming(incoming) ?? incoming;
     await inbox.upsert(merged);
-    if (existing == null && merged.status != InboxStatus.resolved) {
+    // Outside the notification hours the event is kept in the inbox, silently.
+    final sound = await allowed?.call(host.id, now()) ?? true;
+    if (existing == null && merged.status != InboxStatus.resolved && sound) {
       await notifier.show(merged, hostAlias: host.alias, preview: await previews());
     }
     return merged;

@@ -1119,4 +1119,36 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errUsagePeriod => 'El periodo debe ser de 1 a 31 días.';
+
+  @override
+  String get notifyHours => 'Horario de notificaciones';
+
+  @override
+  String get notifyHoursBody =>
+      'Fuera de este horario los avisos igual llegan al inbox, sin sonido ni notificación.';
+
+  @override
+  String get notifyAlways => 'Siempre';
+
+  @override
+  String notifyBetween(String from, String to) {
+    return '$from – $to';
+  }
+
+  @override
+  String notifyUsesApp(String hours) {
+    return 'Ajuste de la app: $hours';
+  }
+
+  @override
+  String get notifyUseAppSetting => 'Usar el ajuste de la app';
+
+  @override
+  String get notifyOnlyBetween => 'Solo entre';
+
+  @override
+  String get notifyFrom => 'Desde';
+
+  @override
+  String get notifyTo => 'Hasta';
 }

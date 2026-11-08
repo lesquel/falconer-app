@@ -318,5 +318,14 @@
   "usageEmpty": "No hay uso de agentes registrado en este periodo.",
   "usageLoading": "Leyendo el uso…",
   "errHookOutdatedUsage": "Actualiza openmosh-hook en este equipo para ver el uso.",
-  "errUsagePeriod": "El periodo debe ser de 1 a 31 días."
+  "errUsagePeriod": "El periodo debe ser de 1 a 31 días.",
+  "notifyHours": "Horario de notificaciones",
+  "notifyHoursBody": "Fuera de este horario los avisos igual llegan al inbox, sin sonido ni notificación.",
+  "notifyAlways": "Siempre",
+  "notifyBetween": "{from} – {to}",
+  "notifyUsesApp": "Ajuste de la app: {hours}",
+  "notifyUseAppSetting": "Usar el ajuste de la app",
+  "notifyOnlyBetween": "Solo entre",
+  "notifyFrom": "Desde",
+  "notifyTo": "Hasta"
 }

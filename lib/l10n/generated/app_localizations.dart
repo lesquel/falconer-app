@@ -2006,6 +2006,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The period must be 1–31 days.'**
   String get errUsagePeriod;
+
+  /// Notification hours setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification hours'**
+  String get notifyHours;
+
+  /// Notification hours setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Outside these hours, events still reach the inbox, without sound or a notification.'**
+  String get notifyHoursBody;
+
+  /// Notification hours setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Always'**
+  String get notifyAlways;
+
+  /// No description provided for @notifyBetween.
+  ///
+  /// In en, this message translates to:
+  /// **'{from} – {to}'**
+  String notifyBetween(String from, String to);
+
+  /// No description provided for @notifyUsesApp.
+  ///
+  /// In en, this message translates to:
+  /// **'App setting: {hours}'**
+  String notifyUsesApp(String hours);
+
+  /// Notification hours setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the app setting'**
+  String get notifyUseAppSetting;
+
+  /// Notification hours setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Only between'**
+  String get notifyOnlyBetween;
+
+  /// Notification hours setting.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get notifyFrom;
+
+  /// Notification hours setting.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get notifyTo;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

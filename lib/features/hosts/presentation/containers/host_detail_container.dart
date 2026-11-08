@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,9 @@ import '../../../../app/di.dart';
 import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/molecules/themed_mole.dart';
 import '../../../../shared/ui/organisms/failure_panel.dart';
+import '../../../settings/domain/entities/app_settings.dart';
+import '../../../settings/domain/entities/notification_hours.dart';
+import '../../../settings/presentation/views/notification_hours_tile.dart';
 import '../../domain/entities/paired_device.dart';
 import '../controllers/host_detail_controller.dart';
 import '../controllers/paired_devices_controller.dart';
@@ -77,6 +82,7 @@ class HostDetailContainer extends ConsumerWidget {
     final state = ref.watch(hostDetailProvider(hostId));
     final ctrl = ref.read(hostDetailProvider(hostId).notifier);
     final devices = ref.watch(pairedDevicesControllerProvider(hostId));
+    final settings = ref.watch(settingsProvider).value ?? const AppSettings();
     final devicesCtrl = ref.read(pairedDevicesControllerProvider(hostId).notifier);
     if (host == null) {
       return Scaffold(body: MoleMessage(title: context.l10n.openingHost, busy: true));
@@ -117,6 +123,22 @@ class HostDetailContainer extends ConsumerWidget {
         onBack: () => context.canPop() ? context.pop() : context.go('/'),
         onEdit: () => context.push('/hosts/$hostId/edit'),
         onUsage: () => context.push('/hosts/$hostId/usage'),
+        notificationHours: NotificationHoursTile(
+          hours: settings.hostNotificationHours[hostId],
+          inherited: () => settings.notificationHours,
+          onChanged: (c) => unawaited(
+            ref
+                .read(settingsRepositoryProvider)
+                .save(
+                  settings.withHostNotificationHours(hostId, switch (c) {
+                    // "Always" for one host is an all-day window, so it
+                    // overrides an app-wide window.
+                    SetHours(:final hours) => hours ?? const NotificationHours(0, 0),
+                    InheritHours() => null,
+                  }),
+                ),
+          ),
+        ),
         onDelete: () => _delete(context, ref),
       ),
     );

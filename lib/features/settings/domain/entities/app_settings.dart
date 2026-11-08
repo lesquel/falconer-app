@@ -1,6 +1,7 @@
 import '../../../keyboard/domain/entities/key_presets.dart';
 import '../../../keyboard/domain/entities/extra_key.dart';
 import 'appearance.dart';
+import 'notification_hours.dart';
 
 /// App language. `system` follows the phone's language (English fallback).
 enum AppLanguage { system, en, es }
@@ -18,6 +19,8 @@ final class AppSettings {
     this.appLock = false,
     this.language = AppLanguage.system,
     this.customKeys = defaultCustomKeys,
+    this.notificationHours,
+    this.hostNotificationHours = const {},
   });
 
   /// Saved shortcut keys shown in their own row of the keys bar.
@@ -60,10 +63,50 @@ final class AppSettings {
   /// User shortcuts (label + bytes), in the order they were added.
   final List<ExtraKey> customKeys;
 
+  /// When notifications may sound, for every host; null means always.
+  final NotificationHours? notificationHours;
+
+  /// Per-host windows (by host id) that replace [notificationHours].
+  final Map<String, NotificationHours> hostNotificationHours;
+
+  /// Whether a push from [hostId] may show a notification at [at].
+  bool notificationsAllowed(String hostId, DateTime at) =>
+      (hostNotificationHours[hostId] ?? notificationHours)?.allows(at) ?? true;
+
+  /// Copy with the app-wide window set, or cleared with null.
+  AppSettings withNotificationHours(NotificationHours? hours) =>
+      _copy(notificationHours: () => hours);
+
+  /// Copy with [hostId]'s own window set, or removed with null.
+  AppSettings withHostNotificationHours(String hostId, NotificationHours? hours) {
+    final map = {...hostNotificationHours}..remove(hostId);
+    if (hours != null) map[hostId] = hours;
+    return _copy(hostNotificationHours: map);
+  }
+
   String get herdrPrefixSequence {
     final c = herdrPrefix.toLowerCase().codeUnitAt(0);
     return (c >= 0x61 && c <= 0x7a) ? String.fromCharCode(c - 0x60) : '\x02';
   }
+
+  AppSettings _copy({
+    NotificationHours? Function()? notificationHours,
+    Map<String, NotificationHours>? hostNotificationHours,
+  }) => AppSettings(
+    notificationPreviews: notificationPreviews,
+    themePreference: themePreference,
+    accent: accent,
+    terminalScheme: terminalScheme,
+    fontSize: fontSize,
+    keyPreset: keyPreset,
+    herdrPrefix: herdrPrefix,
+    keepConnected: keepConnected,
+    appLock: appLock,
+    language: language,
+    customKeys: customKeys,
+    notificationHours: notificationHours != null ? notificationHours() : this.notificationHours,
+    hostNotificationHours: hostNotificationHours ?? this.hostNotificationHours,
+  );
 
   AppSettings copyWith({
     bool? notificationPreviews,
@@ -89,5 +132,7 @@ final class AppSettings {
     appLock: appLock ?? this.appLock,
     language: language ?? this.language,
     customKeys: customKeys ?? this.customKeys,
+    notificationHours: notificationHours,
+    hostNotificationHours: hostNotificationHours,
   );
 }
