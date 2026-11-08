@@ -78,3 +78,16 @@ jobs:
         run: |
           cargo install cargo-audit --locked
           cargo audit
+
+  dart-deps:
+    # SEC-12: known vulnerabilities in pub dependencies (pubspec.lock).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: osv-scanner
+        run: |
+          go install github.com/google/osv-scanner/v2/cmd/osv-scanner@latest
+          "$(go env GOPATH)/bin/osv-scanner" scan --lockfile=pubspec.lock
