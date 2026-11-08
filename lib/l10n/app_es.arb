@@ -328,5 +328,7 @@
   "notifyOnlyBetween": "Solo entre",
   "notifyFrom": "Desde",
   "notifyTo": "Hasta",
-  "appTheme": "Tema"
+  "appTheme": "Tema",
+  "openHerdr": "Abrir Herdr",
+  "openHerdrHint": "Abre la sesión de Herdr con espejo: la computadora sigue la pestaña y el workspace que elijas aquí."
 }

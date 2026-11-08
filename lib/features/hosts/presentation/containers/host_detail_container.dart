@@ -11,6 +11,7 @@ import '../../../../shared/ui/organisms/failure_panel.dart';
 import '../../../settings/domain/entities/app_settings.dart';
 import '../../../settings/domain/entities/notification_hours.dart';
 import '../../../settings/presentation/views/notification_hours_tile.dart';
+import '../../../sessions/domain/entities/remote_session.dart';
 import '../../domain/entities/paired_device.dart';
 import '../controllers/host_detail_controller.dart';
 import '../controllers/paired_devices_controller.dart';
@@ -113,6 +114,23 @@ class HostDetailContainer extends ConsumerWidget {
         ),
         onLoad: ctrl.load,
         onShell: () => context.push('/terminal/$hostId'),
+        // The listed Herdr session, or the default one when not loaded yet.
+        onHerdr: state.sessions != null && !state.sessions!.any((s) => s.kind == SessionKind.herdr)
+            ? null
+            : () => context.push(
+                Uri(
+                  path: '/terminal/$hostId',
+                  queryParameters: {
+                    'session':
+                        state.sessions
+                            ?.where((s) => s.kind == SessionKind.herdr)
+                            .firstOrNull
+                            ?.name ??
+                        'default',
+                    'kind': SessionKind.herdr.name,
+                  },
+                ).toString(),
+              ),
         onAttach: (s) => context.push(
           Uri(
             path: '/terminal/$hostId',

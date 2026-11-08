@@ -912,5 +912,13 @@
   "appTheme": "Theme",
   "@appTheme": {
     "description": "Settings row: light, dark or system theme."
+  },
+  "openHerdr": "Open Herdr",
+  "openHerdrHint": "Opens the Herdr session with mirroring: the computer follows the tab and workspace you pick here.",
+  "@openHerdr": {
+    "description": "Primary host action: attach the Herdr session through openmosh-hook (mirroring)."
+  },
+  "@openHerdrHint": {
+    "description": "Tooltip of the Open Herdr action."
   }
 }

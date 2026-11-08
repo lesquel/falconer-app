@@ -1154,4 +1154,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get appTheme => 'Tema';
+
+  @override
+  String get openHerdr => 'Abrir Herdr';
+
+  @override
+  String get openHerdrHint =>
+      'Abre la sesión de Herdr con espejo: la computadora sigue la pestaña y el workspace que elijas aquí.';
 }

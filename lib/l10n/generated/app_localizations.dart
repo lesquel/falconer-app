@@ -2066,6 +2066,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Theme'**
   String get appTheme;
+
+  /// Primary host action: attach the Herdr session through openmosh-hook (mirroring).
+  ///
+  /// In en, this message translates to:
+  /// **'Open Herdr'**
+  String get openHerdr;
+
+  /// Tooltip of the Open Herdr action.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens the Herdr session with mirroring: the computer follows the tab and workspace you pick here.'**
+  String get openHerdrHint;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

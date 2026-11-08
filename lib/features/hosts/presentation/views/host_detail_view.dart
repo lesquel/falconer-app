@@ -27,6 +27,7 @@ class HostDetailView extends StatelessWidget {
     this.onDelete,
     this.onUsage,
     this.notificationHours,
+    this.onHerdr,
   });
 
   final Host host;
@@ -47,6 +48,9 @@ class HostDetailView extends StatelessWidget {
 
   /// Opens the "Agent usage" screen.
   final VoidCallback? onUsage;
+
+  /// Opens the Herdr session with mirroring.
+  final VoidCallback? onHerdr;
 
   /// This host's notification hours row.
   final Widget? notificationHours;
@@ -122,10 +126,26 @@ class HostDetailView extends StatelessWidget {
           ),
           const SizedBox(height: 10),
         ],
+        if (onHerdr != null) ...[
+          Tooltip(
+            message: l.openHerdrHint,
+            child: SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                key: const Key('open_herdr'),
+                style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(56)),
+                onPressed: onHerdr,
+                icon: const Icon(Icons.dashboard_outlined),
+                label: Text(l.openHerdr),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
         Row(
           children: [
             Expanded(
-              child: FilledButton.icon(
+              child: FilledButton.tonalIcon(
                 onPressed: onShell,
                 icon: const Icon(Icons.terminal),
                 label: Text(l.shell),

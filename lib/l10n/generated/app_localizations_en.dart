@@ -1149,4 +1149,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appTheme => 'Theme';
+
+  @override
+  String get openHerdr => 'Open Herdr';
+
+  @override
+  String get openHerdrHint =>
+      'Opens the Herdr session with mirroring: the computer follows the tab and workspace you pick here.';
 }

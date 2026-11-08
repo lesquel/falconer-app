@@ -328,6 +328,19 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
                           ],
                         ),
                       ),
+                      if (widget.session == null)
+                        IconButton(
+                          key: const Key('switch_to_herdr'),
+                          tooltip: l.openHerdrHint,
+                          icon: const Icon(Icons.dashboard_outlined),
+                          // From a plain shell, re-open as the mirrored Herdr session.
+                          onPressed: () => context.pushReplacement(
+                            Uri(
+                              path: '/terminal/${widget.hostId}',
+                              queryParameters: {'session': 'default', 'kind': 'herdr'},
+                            ).toString(),
+                          ),
+                        ),
                       IconButton(
                         tooltip: l.fullScreen,
                         icon: const Icon(Icons.fullscreen),
