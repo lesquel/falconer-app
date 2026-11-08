@@ -27,6 +27,14 @@ class MemInbox implements InboxRepository {
   Stream<List<InboxEvent>> watchAll() => const Stream.empty();
 }
 
+class MemSeqs implements PushSeqStore {
+  final Map<String, int> rows = {};
+  @override
+  Future<int> highest(String deviceId) async => rows[deviceId] ?? 0;
+  @override
+  Future<void> record(String deviceId, int seq) async => rows[deviceId] = seq;
+}
+
 class FakeOpener implements PushOpener {
   Map<String, Object?>? next;
   @override
@@ -64,7 +72,10 @@ void main() {
   late FakeOpener opener;
   late FakeNotifier notifier;
   late HandlePushMessage handle;
+  late MemSeqs seqs;
   var previews = false;
+  // 1700000000 + 1 h: the default wire `ts` is fresh.
+  var now = DateTime.fromMillisecondsSinceEpoch(1700003600 * 1000, isUtc: true);
 
   setUp(() async {
     hosts = FakeHostRepository();
@@ -73,6 +84,8 @@ void main() {
     opener = FakeOpener();
     notifier = FakeNotifier();
     previews = false;
+    seqs = MemSeqs();
+    now = DateTime.fromMillisecondsSinceEpoch(1700003600 * 1000, isUtc: true);
     handle = HandlePushMessage(
       hosts: hosts,
       inbox: inbox,
@@ -80,6 +93,8 @@ void main() {
       notifier: notifier,
       previews: () async => previews,
       kidOf: (b) => (jsonDecode(utf8.decode(b)) as Map)['kid'] as String?,
+      seqs: seqs,
+      now: () => now,
     );
   });
 
@@ -91,7 +106,7 @@ void main() {
     expect(e!.status, InboxStatus.pending);
     expect(notifier.shown.single, ('ev1', 'work', false));
     previews = true;
-    opener.next = wire(id: 'ev2');
+    opener.next = wire(id: 'ev2', seq: 6);
     await handle(body('kid1'));
     expect(notifier.shown.last, ('ev2', 'work', true));
   });
@@ -123,13 +138,61 @@ void main() {
     expect(notifier.shown, isEmpty);
   });
 
-  test('a push without ts or seq still maps with defaults', () async {
-    opener.next = wire()
-      ..remove('ts')
-      ..remove('seq');
-    final e = await handle(body('kid1'));
-    expect(e!.seq, 0);
-    expect(e.at, DateTime.fromMillisecondsSinceEpoch(0, isUtc: true));
+  test('a push without ts or seq is discarded (it cannot be proven fresh)', () async {
+    opener.next = wire()..remove('ts');
+    expect(await handle(body('kid1')), isNull);
+    opener.next = wire()..remove('seq');
+    expect(await handle(body('kid1')), isNull);
+    expect(inbox.rows, isEmpty);
+  });
+
+  group('push freshness', () {
+    test('a push older than 24 h is discarded', () async {
+      opener.next = wire()..['ts'] = 1700003600 - 24 * 3600 - 1;
+      expect(await handle(body('kid1')), isNull);
+      opener.next = wire()..['ts'] = 1700003600 - 24 * 3600;
+      expect(await handle(body('kid1')), isNotNull);
+    });
+
+    test('a push more than 5 min in the future is discarded', () async {
+      opener.next = wire()..['ts'] = 1700003600 + 5 * 60 + 1;
+      expect(await handle(body('kid1')), isNull);
+      expect(inbox.rows, isEmpty);
+      expect(notifier.shown, isEmpty);
+      opener.next = wire()..['ts'] = 1700003600 + 5 * 60;
+      expect(await handle(body('kid1')), isNotNull);
+    });
+
+    test('a replayed or older seq is discarded and the highest seq is kept', () async {
+      opener.next = wire(id: 'ev1', seq: 7);
+      await handle(body('kid1'));
+      expect(seqs.rows['kid1'], 7);
+      opener.next = wire(id: 'ev2', seq: 7);
+      expect(await handle(body('kid1')), isNull);
+      opener.next = wire(id: 'ev3', seq: 3);
+      expect(await handle(body('kid1')), isNull);
+      expect(inbox.rows.keys, ['h1/ev1']);
+      expect(seqs.rows['kid1'], 7);
+    });
+
+    test('a resolved push with a new seq resolves; a replayed resolve is ignored', () async {
+      opener.next = wire(seq: 5);
+      await handle(body('kid1'));
+      opener.next = wire(kind: 'resolved', seq: 5);
+      expect(await handle(body('kid1')), isNull);
+      expect((await inbox.byId('h1', 'ev1'))!.status, InboxStatus.pending);
+      opener.next = wire(kind: 'resolved', seq: 6);
+      expect((await handle(body('kid1')))!.status, InboxStatus.resolved);
+      expect(seqs.rows['kid1'], 6);
+    });
+
+    test('a stale push does not advance the highest seq', () async {
+      opener.next = wire(seq: 50)..['ts'] = 1;
+      await handle(body('kid1'));
+      expect(seqs.rows, isEmpty);
+      opener.next = wire(seq: 2);
+      expect(await handle(body('kid1')), isNotNull);
+    });
   });
 
   test('a duplicate push is not notified twice', () async {
@@ -142,7 +205,7 @@ void main() {
   test('resolved push resolves the event and clears its notification', () async {
     opener.next = wire();
     await handle(body('kid1'));
-    opener.next = wire(kind: 'resolved');
+    opener.next = wire(kind: 'resolved', seq: 6);
     final r = await handle(body('kid1'));
     expect(r!.status, InboxStatus.resolved);
     expect(notifier.cancelled, ['ev1']);

@@ -1,6 +1,7 @@
 /// Inbox flows: incoming pushes, responses over SSH, and sync on connect.
 library;
 
+import '../../../../shared/domain/clock.dart';
 import '../../../../shared/domain/failure.dart';
 import '../../../../shared/hook/domain/hook_command.dart';
 import '../../../../shared/logging/redacting_logger.dart';
@@ -8,6 +9,7 @@ import '../../../hosts/domain/repositories/host_repository.dart';
 import '../../../hosts/domain/usecases/host_connections.dart';
 import '../entities/event_mapper.dart';
 import '../entities/inbox_event.dart';
+import '../entities/push_freshness.dart';
 import '../repositories/inbox_ports.dart';
 
 typedef PreviewsEnabled = Future<bool> Function();
@@ -21,6 +23,8 @@ final class HandlePushMessage {
     required this.notifier,
     required this.previews,
     required this.kidOf,
+    required this.seqs,
+    required this.now,
   });
 
   final HostRepository hosts;
@@ -29,6 +33,8 @@ final class HandlePushMessage {
   final EventNotifier notifier;
   final PreviewsEnabled previews;
   final KidOf kidOf;
+  final PushSeqStore seqs;
+  final Clock now;
 
   /// Returns the stored event, or null when the message was discarded.
   Future<InboxEvent?> call(List<int> body) async {
@@ -45,6 +51,17 @@ final class HandlePushMessage {
     }
     final incoming = eventFromWire(plain, hostId: host.id);
     if (incoming == null) return null;
+    // Replay guard: the ciphertext is authentic but may be old. Resolved
+    // pushes reuse the event id with a new seq, so seq alone orders them.
+    if (!isFreshPush(incoming.at, now())) {
+      Log.warning('push', 'discarded stale message');
+      return null;
+    }
+    if (incoming.seq <= await seqs.highest(kid)) {
+      Log.warning('push', 'discarded replayed message');
+      return null;
+    }
+    await seqs.record(kid, incoming.seq);
     final existing = await inbox.byId(host.id, incoming.id);
 
     if (incoming.kind == EventKind.resolved) {

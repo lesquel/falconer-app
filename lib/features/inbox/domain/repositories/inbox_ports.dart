@@ -28,3 +28,10 @@ abstract interface class EventNotifier {
   Future<void> show(InboxEvent event, {required String hostAlias, required bool preview});
   Future<void> cancel(String hostId, String eventId);
 }
+
+/// Highest push `seq` accepted per paired device (`kid`), so a captured
+/// ciphertext cannot be replayed. `0` when nothing was accepted yet.
+abstract interface class PushSeqStore {
+  Future<int> highest(String deviceId);
+  Future<void> record(String deviceId, int seq);
+}
