@@ -149,4 +149,5 @@ Clean Architecture by feature. See [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 
 ## License
 
-Proposed GPL-3.0 (pending confirmation).
+Copyright (C) 2026 lesquel. Licensed under the [GNU General Public License v3.0](./LICENSE):
+modified versions must stay open source under the same license and keep this copyright notice.
