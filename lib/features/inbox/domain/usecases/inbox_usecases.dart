@@ -23,7 +23,6 @@ final class HandlePushMessage {
     required this.notifier,
     required this.previews,
     required this.kidOf,
-    required this.seqs,
     required this.now,
   });
 
@@ -33,7 +32,6 @@ final class HandlePushMessage {
   final EventNotifier notifier;
   final PreviewsEnabled previews;
   final KidOf kidOf;
-  final PushSeqStore seqs;
   final Clock now;
 
   /// Returns the stored event, or null when the message was discarded.
@@ -50,23 +48,26 @@ final class HandlePushMessage {
       return null;
     }
     final incoming = eventFromWire(plain, hostId: host.id);
-    if (incoming == null) return null;
-    // Replay guard: the ciphertext is authentic but may be old. Resolved
-    // pushes reuse the event id with a new seq, so seq alone orders them.
+    // Hook seqs start at 1; a push without one cannot be told from a replay.
+    if (incoming == null || incoming.seq < 1) return null;
+    // Replay guard: the ciphertext is authentic but may be old. Pushes are
+    // sent by separate processes and can arrive out of order, so there is no
+    // per-device high-water mark: a push is a replay when this event already
+    // holds its seq or a later one (resolved pushes reuse the id with a new
+    // seq). The ts window bounds replays of events no longer stored.
     if (!isFreshPush(incoming.at, now())) {
       Log.warning('push', 'discarded stale message');
       return null;
     }
-    if (incoming.seq <= await seqs.highest(kid)) {
+    final existing = await inbox.byId(host.id, incoming.id);
+    if (existing != null && existing.seq >= incoming.seq) {
       Log.warning('push', 'discarded replayed message');
       return null;
     }
-    await seqs.record(kid, incoming.seq);
-    final existing = await inbox.byId(host.id, incoming.id);
 
     if (incoming.kind == EventKind.resolved) {
       if (existing == null) return null;
-      final r = existing.resolvedElsewhere();
+      final r = existing.resolvedElsewhere(atSeq: incoming.seq);
       await inbox.upsert(r);
       await notifier.cancel(host.id, r.id);
       return r;
@@ -107,24 +108,44 @@ final class RespondToEvent {
 }
 
 final class SyncInbox {
-  const SyncInbox({required this.inbox, required this.connections});
+  const SyncInbox({required this.inbox, required this.cursors, required this.connections});
 
   final InboxRepository inbox;
+  final SyncCursorStore cursors;
   final HostConnections connections;
 
+  static const pageSize = 200;
+  static const maxPages = 10;
+
+  /// Reads `inbox list` pages after the stored cursor (not after the highest
+  /// stored seq: an event pushed late or lost would be skipped forever).
   Future<int> call(String hostId) async {
-    final since = await inbox.maxSeq(hostId);
-    final data = await connections.runHook(hostId, HookCommand.inboxList(since: since, limit: 200));
-    final items = data is List ? data : (data is Map ? data['events'] : null);
-    if (items is! List) return 0;
+    var since = await cursors.read(hostId);
     var n = 0;
-    for (final raw in items) {
-      if (raw is! Map<String, Object?>) continue;
-      final incoming = eventFromWire(raw, hostId: hostId);
-      if (incoming == null || incoming.kind == EventKind.resolved) continue;
-      final existing = await inbox.byId(hostId, incoming.id);
-      await inbox.upsert(existing?.mergeIncoming(incoming) ?? incoming);
-      n++;
+    for (var page = 0; page < maxPages; page++) {
+      final data = await connections.runHook(
+        hostId,
+        HookCommand.inboxList(since: since, limit: pageSize),
+      );
+      final items = data is List ? data : (data is Map ? data['events'] : null);
+      if (items is! List || items.isEmpty) break;
+      var last = since;
+      for (final raw in items) {
+        if (raw is! Map<String, Object?>) continue;
+        final incoming = eventFromWire(raw, hostId: hostId);
+        if (incoming == null) continue;
+        if (incoming.seq > last) last = incoming.seq;
+        if (incoming.kind == EventKind.resolved) continue;
+        final existing = await inbox.byId(hostId, incoming.id);
+        await inbox.upsert(existing?.mergeIncoming(incoming) ?? incoming);
+        n++;
+      }
+      final reported = data is Map ? data['last_seq'] : null;
+      if (reported is int && reported > last) last = reported;
+      if (last <= since) break;
+      since = last;
+      await cursors.write(hostId, since);
+      if (items.length < pageSize) break;
     }
     return n;
   }

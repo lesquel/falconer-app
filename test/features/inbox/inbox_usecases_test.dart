@@ -27,12 +27,12 @@ class MemInbox implements InboxRepository {
   Stream<List<InboxEvent>> watchAll() => const Stream.empty();
 }
 
-class MemSeqs implements PushSeqStore {
+class MemCursors implements SyncCursorStore {
   final Map<String, int> rows = {};
   @override
-  Future<int> highest(String deviceId) async => rows[deviceId] ?? 0;
+  Future<int> read(String hostId) async => rows[hostId] ?? 0;
   @override
-  Future<void> record(String deviceId, int seq) async => rows[deviceId] = seq;
+  Future<void> write(String hostId, int seq) async => rows[hostId] = seq;
 }
 
 class FakeOpener implements PushOpener {
@@ -72,7 +72,7 @@ void main() {
   late FakeOpener opener;
   late FakeNotifier notifier;
   late HandlePushMessage handle;
-  late MemSeqs seqs;
+  late MemCursors cursors;
   var previews = false;
   // 1700000000 + 1 h: the default wire `ts` is fresh.
   var now = DateTime.fromMillisecondsSinceEpoch(1700003600 * 1000, isUtc: true);
@@ -84,7 +84,7 @@ void main() {
     opener = FakeOpener();
     notifier = FakeNotifier();
     previews = false;
-    seqs = MemSeqs();
+    cursors = MemCursors();
     now = DateTime.fromMillisecondsSinceEpoch(1700003600 * 1000, isUtc: true);
     handle = HandlePushMessage(
       hosts: hosts,
@@ -93,7 +93,6 @@ void main() {
       notifier: notifier,
       previews: () async => previews,
       kidOf: (b) => (jsonDecode(utf8.decode(b)) as Map)['kid'] as String?,
-      seqs: seqs,
       now: () => now,
     );
   });
@@ -163,16 +162,20 @@ void main() {
       expect(await handle(body('kid1')), isNotNull);
     });
 
-    test('a replayed or older seq is discarded and the highest seq is kept', () async {
+    test('out-of-order pushes for different events are both stored and notified', () async {
+      opener.next = wire(id: 'ev11', seq: 11);
+      expect(await handle(body('kid1')), isNotNull);
+      opener.next = wire(id: 'ev10', seq: 10);
+      expect(await handle(body('kid1')), isNotNull);
+      expect(inbox.rows.keys.toSet(), {'h1/ev11', 'h1/ev10'});
+      expect(notifier.shown.map((s) => s.$1), ['ev11', 'ev10']);
+    });
+
+    test('the same ciphertext delivered twice is ignored the second time', () async {
       opener.next = wire(id: 'ev1', seq: 7);
-      await handle(body('kid1'));
-      expect(seqs.rows['kid1'], 7);
-      opener.next = wire(id: 'ev2', seq: 7);
+      expect(await handle(body('kid1')), isNotNull);
       expect(await handle(body('kid1')), isNull);
-      opener.next = wire(id: 'ev3', seq: 3);
-      expect(await handle(body('kid1')), isNull);
-      expect(inbox.rows.keys, ['h1/ev1']);
-      expect(seqs.rows['kid1'], 7);
+      expect(notifier.shown.length, 1);
     });
 
     test('a resolved push with a new seq resolves; a replayed resolve is ignored', () async {
@@ -183,15 +186,27 @@ void main() {
       expect((await inbox.byId('h1', 'ev1'))!.status, InboxStatus.pending);
       opener.next = wire(kind: 'resolved', seq: 6);
       expect((await handle(body('kid1')))!.status, InboxStatus.resolved);
-      expect(seqs.rows['kid1'], 6);
+      expect((await inbox.byId('h1', 'ev1'))!.seq, 6);
+      expect(await handle(body('kid1')), isNull);
+      expect(notifier.cancelled, ['ev1']);
     });
 
-    test('a stale push does not advance the highest seq', () async {
-      opener.next = wire(seq: 50)..['ts'] = 1;
+    test('a replay of the original push after its resolve is ignored', () async {
+      opener.next = wire(seq: 5);
       await handle(body('kid1'));
-      expect(seqs.rows, isEmpty);
-      opener.next = wire(seq: 2);
-      expect(await handle(body('kid1')), isNotNull);
+      opener.next = wire(kind: 'resolved', seq: 6);
+      await handle(body('kid1'));
+      opener.next = wire(seq: 5);
+      expect(await handle(body('kid1')), isNull);
+      expect((await inbox.byId('h1', 'ev1'))!.status, InboxStatus.resolved);
+      expect(notifier.shown.length, 1);
+    });
+
+    test('a stale push is dropped even with an unseen event id', () async {
+      opener.next = wire(id: 'ev50', seq: 50)..['ts'] = 1;
+      expect(await handle(body('kid1')), isNull);
+      expect(inbox.rows, isEmpty);
+      expect(notifier.shown, isEmpty);
     });
   });
 
@@ -252,24 +267,44 @@ void main() {
     });
   });
 
-  test('sync asks for events after the last seq and merges them', () async {
+  SyncInbox syncWith(FakeConnection conn) => SyncInbox(
+    inbox: inbox,
+    cursors: cursors,
+    connections: HostConnections(
+      hosts: hosts,
+      vault: FakeVault(),
+      connector: FakeConnector(() => conn),
+    ),
+  );
+
+  test('sync asks for events after the last synced seq and merges them', () async {
     opener.next = wire(seq: 5);
     await handle(body('kid1'));
     final conn = FakeConnection(
       (_, _) => ok([wire(id: 'ev1', seq: 5)..['status'] = 'resolved', wire(id: 'ev9', seq: 9)]),
     );
-    final sync = SyncInbox(
-      inbox: inbox,
-      connections: HostConnections(
-        hosts: hosts,
-        vault: FakeVault(),
-        connector: FakeConnector(() => conn),
-      ),
-    );
+    final sync = syncWith(conn);
     expect(await sync('h1'), 2);
-    expect(conn.scripts.single, contains("'--since' '5'"));
+    expect(conn.scripts.single, contains("'--since' '0'"));
     expect((await inbox.byId('h1', 'ev1'))!.status, InboxStatus.resolved);
     expect((await inbox.byId('h1', 'ev9'))!.status, InboxStatus.pending);
+    await sync('h1');
+    expect(conn.scripts.last, contains("'--since' '9'"));
+  });
+
+  test('a push that arrived ahead of a lost one does not make sync skip it', () async {
+    opener.next = wire(id: 'ev11', seq: 11);
+    await handle(body('kid1'));
+    final conn = FakeConnection(
+      (_, _) => ok({
+        'events': [wire(id: 'ev10', seq: 10), wire(id: 'ev11', seq: 11)],
+        'last_seq': 11,
+      }),
+    );
+    await syncWith(conn)('h1');
+    expect(conn.scripts.single, contains("'--since' '0'"));
+    expect((await inbox.byId('h1', 'ev10'))!.status, InboxStatus.pending);
+    expect(await cursors.read('h1'), 11);
   });
 
   test('sync reads the hook inbox page shape', () async {
@@ -295,15 +330,8 @@ void main() {
         'last_seq': 12,
       }),
     );
-    final sync = SyncInbox(
-      inbox: inbox,
-      connections: HostConnections(
-        hosts: hosts,
-        vault: FakeVault(),
-        connector: FakeConnector(() => conn),
-      ),
-    );
-    expect(await sync('h1'), 1);
+    expect(await syncWith(conn)('h1'), 1);
+    expect(await cursors.read('h1'), 12);
     final e = (await inbox.byId('h1', '-AbC'))!;
     expect(e.kind, EventKind.question);
     expect(e.at, DateTime.fromMillisecondsSinceEpoch(1762500000 * 1000, isUtc: true));

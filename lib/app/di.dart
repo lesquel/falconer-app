@@ -15,6 +15,7 @@ import '../features/hosts/domain/usecases/host_connections.dart';
 import '../features/hosts/domain/usecases/manage_hosts.dart';
 import '../features/hosts/domain/usecases/paired_devices.dart';
 import '../features/inbox/data/repositories/drift_inbox_repository.dart';
+import '../features/inbox/data/repositories/drift_sync_cursor_store.dart';
 import '../features/inbox/domain/entities/inbox_event.dart';
 import '../features/inbox/domain/repositories/inbox_ports.dart';
 import '../features/inbox/domain/usecases/inbox_usecases.dart';
@@ -166,6 +167,7 @@ final respondProvider = Provider<RespondToEvent>(
 final syncInboxProvider = Provider<SyncInbox>(
   (ref) => SyncInbox(
     inbox: ref.watch(inboxRepositoryProvider),
+    cursors: DriftSyncCursorStore(ref.watch(databaseProvider)),
     connections: ref.watch(hostConnectionsProvider),
   ),
 );

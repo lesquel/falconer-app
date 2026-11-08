@@ -101,11 +101,18 @@ final class InboxEvent {
   }
 
   /// Another device answered, or the host reported the event resolved.
-  InboxEvent resolvedElsewhere() => _with(InboxStatus.resolved, response);
+  /// [atSeq] is the seq of the resolving message, kept so it is not replayed.
+  InboxEvent resolvedElsewhere({int? atSeq}) =>
+      _with(InboxStatus.resolved, response, seq: _maxSeq(atSeq));
 
-  /// Same event delivered again (push + sync): keep the furthest state.
-  InboxEvent mergeIncoming(InboxEvent incoming) =>
-      _rank(incoming.status) > _rank(status) ? incoming : this;
+  /// Same event delivered again (push + sync): keep the furthest state and
+  /// the highest seq seen for it.
+  InboxEvent mergeIncoming(InboxEvent incoming) {
+    final keep = _rank(incoming.status) > _rank(status) ? incoming : this;
+    return keep._with(keep.status, keep.response, seq: _maxSeq(incoming.seq));
+  }
+
+  int _maxSeq(int? other) => other != null && other > seq ? other : seq;
 
   static int _rank(InboxStatus s) => switch (s) {
     InboxStatus.pending || InboxStatus.info => 0,
@@ -114,10 +121,10 @@ final class InboxEvent {
     InboxStatus.resolved => 3,
   };
 
-  InboxEvent _with(InboxStatus s, ResponseKind? r) => InboxEvent(
+  InboxEvent _with(InboxStatus s, ResponseKind? r, {int? seq}) => InboxEvent(
     id: id,
     hostId: hostId,
-    seq: seq,
+    seq: seq ?? this.seq,
     agent: agent,
     kind: kind,
     title: title,

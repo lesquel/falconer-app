@@ -8,7 +8,6 @@ import '../features/inbox/data/datasources/unifiedpush_datasource.dart';
 import '../features/inbox/data/models/push_crypto.dart';
 import '../features/inbox/data/repositories/crypto_push_opener.dart';
 import '../features/inbox/data/repositories/drift_inbox_repository.dart';
-import '../features/inbox/data/repositories/drift_push_seq_store.dart';
 import '../features/inbox/domain/usecases/inbox_usecases.dart';
 import '../features/keys/data/datasources/secure_key_storage.dart';
 import '../features/keys/data/repositories/secure_key_vault.dart';
@@ -41,7 +40,6 @@ final class PushRuntime {
       notifier: notifier,
       previews: () async => (await settings.load()).notificationPreviews,
       kidOf: PushCrypto.kidOf,
-      seqs: DriftPushSeqStore(db),
       now: DateTime.now,
     );
     await endpoints.initialize(

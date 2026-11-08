@@ -29,9 +29,10 @@ abstract interface class EventNotifier {
   Future<void> cancel(String hostId, String eventId);
 }
 
-/// Highest push `seq` accepted per paired device (`kid`), so a captured
-/// ciphertext cannot be replayed. `0` when nothing was accepted yet.
-abstract interface class PushSeqStore {
-  Future<int> highest(String deviceId);
-  Future<void> record(String deviceId, int seq);
+/// Per host, the `seq` up to which `inbox list` was read (the hook's
+/// `last_seq`). Only sync moves it: pushes can arrive out of order, so the
+/// highest pushed seq says nothing about gaps. `0` before the first sync.
+abstract interface class SyncCursorStore {
+  Future<int> read(String hostId);
+  Future<void> write(String hostId, int seq);
 }

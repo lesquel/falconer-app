@@ -51,7 +51,7 @@ UnifiedPush connector starts without the Rust library loaded.
 | `terminal` | PTY session, reconnect/backoff, re-attach | `TerminalEmulator`, `TerminalRunner`, `BackoffPolicy` |
 | `keyboard` | Extra keys, sticky modifiers, tmux/Herdr presets | `KeyPresets`, `ModifierState` |
 | `sessions` | Herdr/tmux sessions and agents via the hook | `SessionCatalog` |
-| `inbox` | Push receive/decrypt, freshness and replay guard, inbox state machine, answers | `PushEndpointSource`, `PushOpener`, `PushSeqStore`, `InboxRepository`, `EventNotifier`, `HandlePushMessage`, `RespondToEvent`, `SyncInbox` |
+| `inbox` | Push receive/decrypt, freshness and replay guard, inbox state machine, answers | `PushEndpointSource`, `PushOpener`, `SyncCursorStore`, `InboxRepository`, `EventNotifier`, `HandlePushMessage`, `RespondToEvent`, `SyncInbox` |
 | `pairing` | QR pairing (TCP, v1 wire contract) and SSH pairing | `PairingGateway`, `PairWithQr`, `PairOverSsh`, `SyncPushEndpoint` |
 | `uploads` | Pick file, SFTP upload, paste path | `FileSource`, `UploadFile` |
 | `settings` | Previews, app lock, app theme, accent, terminal scheme, font, presets | `SettingsRepository`, `AccentColor`, `TerminalScheme` |
@@ -89,8 +89,8 @@ TerminalRunner: connect ─► openShell ─► write attach command ─► stre
 `settings/domain/entities/appearance.dart`); widgets read `MoshColors.of(context)`. Appearance
 choices are ARGB integers in the domain, so contrast is unit-tested without Flutter
 (`shared/domain/contrast.dart`). The terminal maps `TerminalScheme` to xterm's `TerminalTheme` in
-`terminal/presentation/views/terminal_palette.dart`. Settings are key/value rows (the push replay
-guard also keeps one `push_seq:<device id>` row per paired host); the `theme` key
+`terminal/presentation/views/terminal_palette.dart`. Settings are key/value rows (the inbox sync
+keeps one `sync_cursor:<host id>` row per host; old `push_seq:<device id>` rows are ignored); the `theme` key
 replaced the boolean `dark` key, which is still read (migration) and still written (so an older
 build installed over a newer one keeps the choice). The Android launcher icon and splash are
 vector drawables under `android/app/src/main/res/` (`ic_launcher_foreground`,
