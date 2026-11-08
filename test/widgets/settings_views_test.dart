@@ -16,4 +16,20 @@ void main() {
     await t.tap(find.byKey(const Key('previews')));
     expect(changed!.notificationPreviews, isTrue);
   });
+
+  testWidgets('settings: sessions stay connected by default and can be turned off', (t) async {
+    AppSettings? changed;
+    await t.pumpWidget(
+      app(SettingsView(settings: const AppSettings(), onChanged: (s) => changed = s)),
+    );
+    final sw = t.widget<SwitchListTile>(find.byKey(const Key('keep_connected')));
+    expect(sw.value, isTrue);
+    await t.tap(find.byKey(const Key('keep_connected')));
+    expect(changed!.keepConnected, isFalse);
+  });
+
+  test('font size is clamped to 8..32', () {
+    expect(const AppSettings().copyWith(fontSize: 40).fontSize, 32);
+    expect(const AppSettings().copyWith(fontSize: 2).fontSize, 8);
+  });
 }

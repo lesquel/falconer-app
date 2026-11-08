@@ -7,6 +7,7 @@ final class AppSettings {
     this.fontSize = 14,
     this.keyPreset = PresetName.tmux,
     this.herdrPrefix = 'b',
+    this.keepConnected = true,
   });
 
   /// Off by default (SEC-2): the lock screen shows only `<alias>: <agent> needs you`.
@@ -17,6 +18,10 @@ final class AppSettings {
 
   /// Letter used with Ctrl as the Herdr prefix (`b` → Ctrl+B).
   final String herdrPrefix;
+
+  /// Keep terminal sessions connected (and reconnecting) after leaving the
+  /// terminal screen, until the app is closed or the session is disconnected.
+  final bool keepConnected;
 
   String get herdrPrefixSequence {
     final c = herdrPrefix.toLowerCase().codeUnitAt(0);
@@ -29,11 +34,13 @@ final class AppSettings {
     double? fontSize,
     PresetName? keyPreset,
     String? herdrPrefix,
+    bool? keepConnected,
   }) => AppSettings(
     notificationPreviews: notificationPreviews ?? this.notificationPreviews,
     darkTheme: darkTheme ?? this.darkTheme,
     fontSize: (fontSize ?? this.fontSize).clamp(8, 32).toDouble(),
     keyPreset: keyPreset ?? this.keyPreset,
     herdrPrefix: herdrPrefix ?? this.herdrPrefix,
+    keepConnected: keepConnected ?? this.keepConnected,
   );
 }

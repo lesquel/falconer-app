@@ -28,13 +28,23 @@ class SettingsView extends StatelessWidget {
           value: s.darkTheme,
           onChanged: (v) => onChanged(s.copyWith(darkTheme: v)),
         ),
+        SwitchListTile(
+          key: const Key('keep_connected'),
+          title: const Text('Keep sessions connected'),
+          subtitle: const Text(
+            'Terminals stay open and keep reconnecting after you leave them, until you '
+            'disconnect or close the app.',
+          ),
+          value: s.keepConnected,
+          onChanged: (v) => onChanged(s.copyWith(keepConnected: v)),
+        ),
         ListTile(
           title: const Text('Terminal font size'),
           subtitle: Slider(
             min: 8,
-            max: 24,
-            divisions: 16,
-            value: s.fontSize.clamp(8, 24),
+            max: 32,
+            divisions: 24,
+            value: s.fontSize.clamp(8, 32),
             label: s.fontSize.toStringAsFixed(0),
             onChanged: (v) => onChanged(s.copyWith(fontSize: v)),
           ),

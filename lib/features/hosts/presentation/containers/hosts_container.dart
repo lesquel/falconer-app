@@ -28,6 +28,39 @@ class HostsContainer extends ConsumerWidget {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'add-host',
+        icon: const Icon(Icons.add),
+        label: const Text('Add host'),
+        onPressed: () => showModalBottomSheet<void>(
+          context: context,
+          showDragHandle: true,
+          builder: (sheet) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.qr_code_scanner),
+                  title: const Text('Scan pairing code'),
+                  subtitle: const Text('Run `openmosh-hook pair` on the computer'),
+                  onTap: () {
+                    Navigator.of(sheet).pop();
+                    context.push('/pair');
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.edit_outlined),
+                  title: const Text('Add host manually'),
+                  onTap: () {
+                    Navigator.of(sheet).pop();
+                    context.push('/hosts/new');
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
       body: hosts.when(
         data: (list) => HostsView(
           hosts: list,

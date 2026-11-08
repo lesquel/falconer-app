@@ -15,6 +15,7 @@ class ExtraKeysBar extends StatelessWidget {
     required this.onModifier,
     required this.onModifierLock,
     this.trailing = const [],
+    this.pinned = const [],
   });
 
   final List<ExtraKey> base;
@@ -24,6 +25,9 @@ class ExtraKeysBar extends StatelessWidget {
   final ValueChanged<Modifier> onModifier;
   final ValueChanged<Modifier> onModifierLock;
   final List<Widget> trailing;
+
+  /// Controls that never scroll away (keyboard toggle, zoom), left of the base row.
+  final List<Widget> pinned;
 
   bool _active(Modifier m) => m == Modifier.ctrl ? modifiers.ctrl : modifiers.alt;
 
@@ -54,7 +58,12 @@ class ExtraKeysBar extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _row(base, extra: trailing),
+          Row(
+            children: [
+              ...pinned,
+              Expanded(child: _row(base, extra: trailing)),
+            ],
+          ),
           if (preset.isNotEmpty) _row(preset),
         ],
       ),

@@ -11,6 +11,7 @@ class TerminalScreenView extends StatelessWidget {
     required this.fontSize,
     required this.keysBar,
     this.overlay,
+    this.focusNode,
   });
 
   final Terminal terminal;
@@ -18,11 +19,11 @@ class TerminalScreenView extends StatelessWidget {
   final double fontSize;
   final Widget keysBar;
   final Widget? overlay;
+  final FocusNode? focusNode;
 
   String? get _banner => switch (phase) {
     TerminalPhase.connecting => 'Connecting…',
     TerminalPhase.reconnecting => 'Reconnecting…',
-    TerminalPhase.closed => 'Session ended',
     _ => null,
   };
 
@@ -47,6 +48,7 @@ class TerminalScreenView extends StatelessWidget {
               overlay ??
               TerminalView(
                 terminal,
+                focusNode: focusNode,
                 autofocus: true,
                 textStyle: TerminalStyle(fontSize: fontSize, fontFamily: 'monospace'),
                 keyboardType: TextInputType.visiblePassword,

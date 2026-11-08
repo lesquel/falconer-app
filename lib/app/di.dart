@@ -3,6 +3,7 @@
 /// `main.dart` and injected with overrides; tests override the rest.
 library;
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,6 +37,8 @@ import '../shared/data/app_database.dart';
 import '../shared/hook/domain/hook_client.dart';
 import '../shared/ssh/data/datasources/ssh_bridge.dart';
 import '../shared/ssh/domain/ssh_ports.dart';
+import '../features/terminal/presentation/controllers/terminal_session.dart';
+import '../features/terminal/presentation/controllers/terminal_session_pool.dart';
 
 String newId() {
   final r = Random.secure();
@@ -173,6 +176,14 @@ final inboxProvider = StreamProvider<List<InboxEvent>>(
 final keysProvider = StreamProvider<List<SshKeyInfo>>(
   (ref) => ref.watch(keyVaultProvider).watchAll(),
 );
+
+/// Terminals kept alive across screens ("Keep sessions connected").
+final terminalSessionPoolProvider = Provider<TerminalSessionPool<TerminalSession>>((ref) {
+  final pool = TerminalSessionPool<TerminalSession>(close: (s) => s.dispose());
+  ref.onDispose(() => unawaited(pool.closeAll()));
+  return pool;
+});
+
 final settingsProvider = StreamProvider<AppSettings>(
   (ref) => ref.watch(settingsRepositoryProvider).watch(),
 );

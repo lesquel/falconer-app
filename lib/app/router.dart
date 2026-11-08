@@ -29,8 +29,29 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
     StatefulShellRoute.indexedStack(
       builder: (_, _, shell) => HomeShell(shell: shell),
       branches: [
+        // Host screens are children of `/` so they stack inside the Hosts tab:
+        // the bottom navigation stays visible and the AppBar shows a back arrow.
         StatefulShellBranch(
-          routes: [GoRoute(path: '/', builder: (_, _) => const HostsContainer())],
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (_, _) => const HostsContainer(),
+              routes: [
+                GoRoute(path: 'pair', builder: (_, _) => const PairingContainer()),
+                GoRoute(path: 'hosts/new', builder: (_, _) => const HostFormContainer()),
+                GoRoute(
+                  path: 'hosts/:id',
+                  builder: (_, s) => HostDetailContainer(hostId: s.pathParameters['id']!),
+                  routes: [
+                    GoRoute(
+                      path: 'edit',
+                      builder: (_, s) => HostFormContainer(hostId: s.pathParameters['id']!),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
         ),
         StatefulShellBranch(
           routes: [GoRoute(path: '/inbox', builder: (_, _) => const InboxContainer())],
@@ -43,16 +64,7 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
         ),
       ],
     ),
-    GoRoute(path: '/pair', builder: (_, _) => const PairingContainer()),
-    GoRoute(path: '/hosts/new', builder: (_, _) => const HostFormContainer()),
-    GoRoute(
-      path: '/hosts/:id',
-      builder: (_, s) => HostDetailContainer(hostId: s.pathParameters['id']!),
-    ),
-    GoRoute(
-      path: '/hosts/:id/edit',
-      builder: (_, s) => HostFormContainer(hostId: s.pathParameters['id']!),
-    ),
+    // The terminal stays full screen (outside the shell) to keep its rows.
     GoRoute(
       path: '/terminal/:id',
       builder: (_, s) => TerminalContainer(

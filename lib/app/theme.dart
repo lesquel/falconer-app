@@ -7,5 +7,13 @@ ThemeData buildTheme(Brightness brightness) {
     colorScheme: scheme,
     appBarTheme: const AppBarTheme(centerTitle: false),
     inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder()),
+    // Explicit colors: the default dark filled button rendered without a readable label.
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
+        iconColor: scheme.onPrimary,
+      ),
+    ),
   );
 }

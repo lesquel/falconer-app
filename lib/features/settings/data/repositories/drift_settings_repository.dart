@@ -16,6 +16,7 @@ class DriftSettingsRepository implements SettingsRepository {
       fontSize: double.tryParse(m['font'] ?? '') ?? d.fontSize,
       keyPreset: PresetName.values.where((p) => p.name == m['preset']).firstOrNull ?? d.keyPreset,
       herdrPrefix: m['herdr_prefix'] ?? d.herdrPrefix,
+      keepConnected: m['keep_connected'] != 'false',
     );
   }
 
@@ -33,6 +34,7 @@ class DriftSettingsRepository implements SettingsRepository {
       SettingRowsCompanion.insert(key: 'font', value: '${s.fontSize}'),
       SettingRowsCompanion.insert(key: 'preset', value: s.keyPreset.name),
       SettingRowsCompanion.insert(key: 'herdr_prefix', value: s.herdrPrefix),
+      SettingRowsCompanion.insert(key: 'keep_connected', value: '${s.keepConnected}'),
     ]),
   );
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,13 +9,13 @@ import '../../../../app/di.dart';
 import '../../../../shared/domain/failure.dart';
 import '../../../../shared/ui/organisms/failure_panel.dart';
 import '../../../keyboard/domain/entities/key_presets.dart';
-import '../../../keyboard/domain/entities/modifier_state.dart';
 import '../../../keyboard/presentation/views/extra_keys_bar.dart';
-import '../../../sessions/domain/entities/remote_session.dart';
 import '../../../settings/domain/entities/app_settings.dart';
 import '../../data/datasources/connectivity_signals.dart';
-import '../../data/datasources/xterm_emulator.dart';
 import '../../domain/usecases/terminal_runner.dart';
+import '../controllers/terminal_session.dart';
+import '../controllers/terminal_session_pool.dart';
+import '../views/session_ended_panel.dart';
 import '../views/terminal_screen_view.dart';
 
 class TerminalContainer extends ConsumerStatefulWidget {
@@ -28,29 +29,45 @@ class TerminalContainer extends ConsumerStatefulWidget {
 }
 
 class _TerminalContainerState extends ConsumerState<TerminalContainer> with WidgetsBindingObserver {
-  final _emu = XtermEmulator();
-  late final TerminalRunner _runner;
+  late final String _key;
+  late final TerminalSession _session;
+  late final TerminalSessionPool<TerminalSession> _pool;
+  final _focus = FocusNode();
   StreamSubscription<void>? _net;
   StreamSubscription<TerminalPhase>? _phaseSub;
-  TerminalPhase _phase = TerminalPhase.idle;
-  ModifierState _mods = const ModifierState();
+  late TerminalPhase _phase;
   bool _uploading = false;
+
+  TerminalRunner get _runner => _session.runner;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    final s = RemoteSession.fromJson({'name': widget.session, 'kind': widget.kind});
-    _runner = TerminalRunner(
-      hostId: widget.hostId,
-      connections: ref.read(hostConnectionsProvider),
-      emulator: _ModifiedInput(_emu, () => _mods, (m) => setState(() => _mods = m)),
-      attachCommand: s?.attachCommand,
+    _key = terminalSessionKey(widget.hostId, widget.kind, widget.session);
+    _pool = ref.read(terminalSessionPoolProvider);
+    final fresh = !_pool.contains(_key);
+    _session = _pool.obtain(
+      _key,
+      () => TerminalSession.create(
+        hostId: widget.hostId,
+        connections: ref.read(hostConnectionsProvider),
+        session: widget.session,
+        kind: widget.kind,
+      ),
     );
+    _phase = _runner.phase;
+    _session.modifiers.addListener(_onMods);
     _phaseSub = _runner.phases.listen((p) => setState(() => _phase = p));
     _net = networkRegained().listen((_) => _runner.wake());
-    WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_runner.start()));
+    if (fresh) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_runner.start()));
+    } else {
+      _runner.wake();
+    }
   }
+
+  void _onMods() => setState(() {});
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -62,10 +79,32 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     WidgetsBinding.instance.removeObserver(this);
     unawaited(_net?.cancel());
     unawaited(_phaseSub?.cancel());
-    unawaited(_runner.dispose());
-    unawaited(_emu.dispose());
+    _session.modifiers.removeListener(_onMods);
+    _focus.dispose();
+    final keep = ref.read(settingsProvider).value?.keepConnected ?? true;
+    if (!keep) unawaited(_pool.release(_key));
     super.dispose();
   }
+
+  void _toggleKeyboard() {
+    if (_focus.hasFocus) {
+      _focus.unfocus();
+    } else {
+      _focus.requestFocus();
+      unawaited(SystemChannels.textInput.invokeMethod<void>('TextInput.show'));
+    }
+  }
+
+  void _zoom(AppSettings s, double delta) => unawaited(
+    ref.read(settingsRepositoryProvider).save(s.copyWith(fontSize: s.fontSize + delta)),
+  );
+
+  Future<void> _disconnect() async {
+    await _pool.release(_key);
+    if (mounted) _leave();
+  }
+
+  void _leave() => context.canPop() ? context.pop() : context.go('/hosts/${widget.hostId}');
 
   Future<void> _upload(bool images) async {
     final source = ref.read(fileSourceProvider);
@@ -95,9 +134,20 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
       settings.keyPreset,
       herdrPrefix: settings.herdrPrefixSequence,
     );
+    final mods = _session.modifiers.value;
     final failure = _phase == TerminalPhase.failed ? _runner.failure : null;
+    final Widget? overlay = failure != null
+        ? FailurePanel(
+            failure: failure,
+            onBack: _leave,
+            onRetry: failure is HostKeyMismatchFailure ? null : () => _runner.wake(restart: true),
+          )
+        : _phase == TerminalPhase.closed
+        ? SessionEndedPanel(onReconnect: () => _runner.wake(restart: true), onBack: _leave)
+        : null;
     return Scaffold(
       appBar: AppBar(
+        leading: BackButton(onPressed: _leave),
         title: Text(widget.session ?? host?.alias ?? 'Terminal'),
         actions: [
           IconButton(
@@ -110,46 +160,45 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
             icon: const Icon(Icons.attach_file),
             onPressed: _uploading ? null : () => _upload(false),
           ),
+          IconButton(
+            tooltip: 'Disconnect',
+            icon: const Icon(Icons.link_off),
+            onPressed: _disconnect,
+          ),
         ],
       ),
       body: TerminalScreenView(
-        terminal: _emu.terminal,
+        terminal: _session.emulator.terminal,
+        focusNode: _focus,
         phase: _phase,
         fontSize: settings.fontSize,
-        overlay: failure == null
-            ? null
-            : FailurePanel(
-                failure: failure,
-                onBack: () => context.pop(),
-                onRetry: failure is HostKeyMismatchFailure
-                    ? null
-                    : () => _runner.wake(restart: true),
-              ),
+        overlay: overlay,
         keysBar: ExtraKeysBar(
           base: KeyPresets.base,
           preset: preset,
-          modifiers: _mods,
+          modifiers: mods,
           onKey: (seq) => _runner.send(seq),
-          onModifier: (m) => setState(() => _mods = _mods.toggle(m)),
-          onModifierLock: (m) => setState(() => _mods = _mods.lock(m)),
+          onModifier: (m) => _session.modifiers.value = mods.toggle(m),
+          onModifierLock: (m) => _session.modifiers.value = mods.lock(m),
+          pinned: [
+            IconButton(
+              tooltip: 'Keyboard',
+              icon: const Icon(Icons.keyboard),
+              onPressed: _toggleKeyboard,
+            ),
+            IconButton(
+              tooltip: 'Smaller text',
+              icon: const Icon(Icons.text_decrease),
+              onPressed: settings.fontSize <= 8 ? null : () => _zoom(settings, -1),
+            ),
+            IconButton(
+              tooltip: 'Larger text',
+              icon: const Icon(Icons.text_increase),
+              onPressed: settings.fontSize >= 32 ? null : () => _zoom(settings, 1),
+            ),
+          ],
         ),
       ),
     );
   }
-}
-
-/// Applies sticky Ctrl/Alt from the bar to soft-keyboard input.
-class _ModifiedInput extends XtermProxy {
-  _ModifiedInput(super.inner, this._mods, this._update);
-  final ModifierState Function() _mods;
-  final void Function(ModifierState) _update;
-
-  @override
-  Stream<String> get input => inner.input.map((s) {
-    final m = _mods();
-    if (!m.any) return s;
-    final (out, next) = m.apply(s);
-    _update(next);
-    return out;
-  });
 }

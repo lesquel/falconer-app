@@ -30,4 +30,26 @@ void main() {
     expect(sent, ['\x1b', '\t', '\x02c']);
     expect(mods, [Modifier.ctrl]);
   });
+
+  testWidgets('pinned controls stay visible at the start of the bar', (t) async {
+    var taps = 0;
+    await t.pumpWidget(
+      app(
+        ExtraKeysBar(
+          base: KeyPresets.base,
+          preset: const [],
+          modifiers: const ModifierState(),
+          onKey: (_) {},
+          onModifier: (_) {},
+          onModifierLock: (_) {},
+          pinned: [IconButton(icon: const Icon(Icons.keyboard), onPressed: () => taps++)],
+        ),
+      ),
+    );
+    final pinned = t.getTopLeft(find.byIcon(Icons.keyboard));
+    final esc = t.getTopLeft(find.text('Esc'));
+    expect(pinned.dx, lessThan(esc.dx));
+    await t.tap(find.byIcon(Icons.keyboard));
+    expect(taps, 1);
+  });
 }
