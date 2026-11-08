@@ -49,7 +49,13 @@ final class PairPayload {
 
   static PairPayload parse(String raw) {
     final uri = Uri.tryParse(raw.trim());
-    if (uri == null || uri.scheme != 'openmosh' || uri.host != 'pair') {
+    if (uri == null ||
+        uri.scheme != 'openmosh' ||
+        uri.host != 'pair' ||
+        uri.userInfo.isNotEmpty ||
+        uri.hasPort ||
+        uri.path.isNotEmpty ||
+        uri.hasFragment) {
       throw PairCodeFailure(PairCodeError.malformed);
     }
     final Map<String, List<String>> all;

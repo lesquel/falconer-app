@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Camera scanner plus a paste field for `openmosh://pair?v=2&…` links.
+/// Camera scanner plus a paste field for `openmosh://pair?v=3&…` links.
 /// The camera stays live while an error is shown, so a new scan replaces it.
 class PairScanView extends StatefulWidget {
   const PairScanView({

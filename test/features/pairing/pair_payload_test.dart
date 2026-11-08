@@ -69,6 +69,10 @@ void main() {
       '${link(valid())}&t=other',
       '${link(valid())}&n=extra',
       '${link(valid())}&v=3',
+      link(valid()).replaceFirst('//pair', '//user@pair'),
+      link(valid()).replaceFirst('//pair', '//pair:99'),
+      link(valid()).replaceFirst('pair?', 'pair/x?'),
+      '${link(valid())}#frag',
     ]) {
       expect(errorOf(raw), PairCodeError.malformed, reason: raw);
     }
