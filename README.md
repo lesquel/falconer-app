@@ -24,7 +24,10 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
   Alt, arrows, `|`, `/`, `~`, `-`, text size −/+ and the tmux or Herdr prefix keys. Chat mode
   composes a whole message with image/file attachments before sending it. Automatic reconnect
   with backoff on network change or app resume, re-attaching the Herdr/tmux session; sessions
-  stay connected in the background unless disabled in Settings.
+  stay connected in the background unless disabled in Settings (up to 4 kept, 3000 lines of
+  scrollback each). In the background a dropped session waits for the app or the network to come
+  back instead of retrying; after 10 minutes in the background every shell and SSH connection
+  closes, and an open terminal reconnects when the app returns. Notifications do not use SSH.
 - **Sessions** — lists Herdr/tmux sessions and agents through the hook and attaches to one.
 - **Paired devices** — the host screen lists every device paired with that host
   (`openmosh-hook devices list`): name, paired date, a stale push endpoint and which one is
