@@ -53,6 +53,14 @@ final class HookCommand {
     return HookCommand._(['devices', 'set-endpoint', deviceId, url, '--json']);
   }
 
+  factory HookCommand.devicesList() => const HookCommand._(['devices', 'list', '--json']);
+
+  /// Removes the device's `authorized_keys` line and its push key (SEC-11).
+  factory HookCommand.devicesRevoke(String deviceId) {
+    _checkId(deviceId);
+    return HookCommand._(['devices', 'revoke', deviceId, '--json']);
+  }
+
   String toShell(String hookPath) => shJoin([hookPath, ...argv]);
 
   /// Script for [execCommand]: the quoted command line, with [stdin] piped in

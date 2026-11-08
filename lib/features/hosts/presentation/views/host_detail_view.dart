@@ -20,6 +20,7 @@ class HostDetailView extends StatelessWidget {
     required this.onAttach,
     required this.onEnablePush,
     this.error,
+    this.devices,
     this.onBack,
     this.onEdit,
     this.onDelete,
@@ -30,6 +31,9 @@ class HostDetailView extends StatelessWidget {
   final List<AgentInfo>? agents;
   final bool loading;
   final Widget? error;
+
+  /// The "Paired devices" section.
+  final Widget? devices;
   final VoidCallback onLoad;
   final VoidCallback onShell;
   final ValueChanged<RemoteSession> onAttach;
@@ -162,6 +166,7 @@ class HostDetailView extends StatelessWidget {
               trailing: StatusBadge(label: a.state.name, tone: _tone(a.state)),
             ),
         ],
+        ?devices,
         const SizedBox(height: 10),
         FingerprintCard(label: 'Pinned host key', fingerprint: host.fingerprint),
       ],
