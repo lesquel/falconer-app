@@ -20,6 +20,15 @@ thiserror = "2.0.21"
 tokio = { version = "1.54.1", features = ["rt-multi-thread", "sync", "time", "macros", "net", "io-util", "fs"] }
 zeroize = "1.9.1"
 
+# Smaller, faster native library. cargokit builds Android release with
+# `cargo build --release`, so this profile applies. Never `panic = "abort"`:
+# flutter_rust_bridge relies on unwinding to turn panics into Dart errors.
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = "symbols"
+
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
 
