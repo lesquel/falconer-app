@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/atoms/mono_text.dart';
 import '../../domain/entities/ssh_key_info.dart';
 
@@ -17,14 +18,12 @@ class KeysView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     if (keys.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(32),
-          child: Text(
-            'No keys yet. Pairing creates this device\'s key, or generate/import one.',
-            textAlign: TextAlign.center,
-          ),
+          padding: const EdgeInsets.all(32),
+          child: Text(l.keysEmpty, textAlign: TextAlign.center),
         ),
       );
     }
@@ -46,12 +45,12 @@ class KeysView extends StatelessWidget {
                         child: Text(k.label, style: Theme.of(context).textTheme.titleMedium),
                       ),
                       IconButton(
-                        tooltip: 'Copy public key',
+                        tooltip: l.copyPublicKey,
                         icon: const Icon(Icons.copy),
                         onPressed: () => onCopyPublic(k),
                       ),
                       IconButton(
-                        tooltip: 'Delete',
+                        tooltip: l.delete,
                         icon: const Icon(Icons.delete_outline),
                         onPressed: () => onDelete(k),
                       ),

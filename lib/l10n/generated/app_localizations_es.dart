@@ -820,4 +820,209 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errAlreadyAnswered => 'Este evento ya se respondió.';
+
+  @override
+  String get terminalTitle => 'Terminal';
+
+  @override
+  String get terminalShell => 'shell';
+
+  @override
+  String terminalHostShell(String host) {
+    return '$host · shell';
+  }
+
+  @override
+  String terminalHostSession(String host, String kind) {
+    return '$host · $kind';
+  }
+
+  @override
+  String get terminalHostFallback => 'equipo';
+
+  @override
+  String get terminalSessionFallback => 'sesión';
+
+  @override
+  String get fullScreen => 'Pantalla completa';
+
+  @override
+  String get exitFullScreen => 'Salir de pantalla completa';
+
+  @override
+  String get disconnect => 'Desconectar';
+
+  @override
+  String get terminalChat => 'Chat';
+
+  @override
+  String get typeInTerminal => 'Escribir en la terminal';
+
+  @override
+  String get keyboard => 'Teclado';
+
+  @override
+  String get smallerText => 'Texto más pequeño';
+
+  @override
+  String get largerText => 'Texto más grande';
+
+  @override
+  String get paste => 'Pegar';
+
+  @override
+  String get addShortcut => 'Agregar atajo';
+
+  @override
+  String get copy => 'Copiar';
+
+  @override
+  String get clearSelection => 'Borrar selección';
+
+  @override
+  String get copied => 'Copiado';
+
+  @override
+  String removeShortcutTitle(String label) {
+    return '¿Quitar \"$label\"?';
+  }
+
+  @override
+  String get remove => 'Quitar';
+
+  @override
+  String get attachPhotos => 'Fotos';
+
+  @override
+  String get attachFile => 'Archivo';
+
+  @override
+  String get connecting => 'Conectando…';
+
+  @override
+  String get reconnecting => 'Reconectando…';
+
+  @override
+  String get chatAttach => 'Adjuntar imágenes o archivos';
+
+  @override
+  String get chatHint => 'Escribe al agente…';
+
+  @override
+  String get chatClose => 'Cerrar chat';
+
+  @override
+  String get chatSend => 'Enviar';
+
+  @override
+  String chatRemoveAttachment(String name) {
+    return 'Quitar $name';
+  }
+
+  @override
+  String get sessionEndedTitle => 'La sesión terminó.';
+
+  @override
+  String get sessionEndedBody => 'La shell del equipo se cerró. Iníciala de nuevo o vuelve atrás.';
+
+  @override
+  String get reconnect => 'Reconectar';
+
+  @override
+  String get shortcutCtrlKey => 'Ctrl + tecla';
+
+  @override
+  String get shortcutText => 'Texto';
+
+  @override
+  String get shortcutLetter => 'Letra';
+
+  @override
+  String get shortcutTextToSend => 'Texto a enviar';
+
+  @override
+  String get shortcutLabelOptional => 'Etiqueta (opcional)';
+
+  @override
+  String get shortcutPressEnter => 'Pulsar Enter después del texto';
+
+  @override
+  String get shortcutAdd => 'Agregar';
+
+  @override
+  String shortcutAddNamed(String label) {
+    return 'Agregar $label';
+  }
+
+  @override
+  String get moreKeys => 'Más teclas';
+
+  @override
+  String get fewerKeys => 'Menos teclas';
+
+  @override
+  String get keysTitle => 'Claves';
+
+  @override
+  String get keysEmpty =>
+      'Aún no hay claves. Al emparejar se crea la clave de este dispositivo; también puedes generar o importar una.';
+
+  @override
+  String get generateKey => 'Generar clave';
+
+  @override
+  String get importKey => 'Importar clave';
+
+  @override
+  String get copyPublicKey => 'Copiar clave pública';
+
+  @override
+  String get publicKeyCopied => 'Clave pública copiada';
+
+  @override
+  String generatedKeyLabel(String date) {
+    return 'Clave $date';
+  }
+
+  @override
+  String get importedKeyLabel => 'Clave importada';
+
+  @override
+  String deleteKeyTitle(String label) {
+    return '¿Eliminar $label?';
+  }
+
+  @override
+  String get deleteKeyBody =>
+      'Los equipos que usan esta clave dejarán de conectarse hasta que los vuelvas a emparejar.';
+
+  @override
+  String get importKeyTitle => 'Importar clave ssh-ed25519';
+
+  @override
+  String get keyLabel => 'Etiqueta';
+
+  @override
+  String get pastePrivateKey => 'Pega la clave privada de OpenSSH';
+
+  @override
+  String get importAction => 'Importar';
+
+  @override
+  String get lockedTitle => 'OpenMosh está bloqueado';
+
+  @override
+  String get lockedBody => 'Verifica que eres tú para continuar.';
+
+  @override
+  String get unlock => 'Desbloquear';
+
+  @override
+  String get lockPromptUnlock => 'Desbloquear OpenMosh';
+
+  @override
+  String get lockPromptTurnOn => 'Activar el bloqueo de OpenMosh';
+
+  @override
+  String get lockPromptTurnOff => 'Desactivar el bloqueo de OpenMosh';
 }

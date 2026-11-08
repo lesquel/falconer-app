@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openmosh/features/lock/domain/app_lock.dart';
 import 'package:openmosh/features/lock/presentation/app_lock_gate.dart';
+import 'package:openmosh/l10n/l10n.dart';
 import 'package:openmosh/shared/ui/atoms/mole_logo.dart';
 
 import '../features/hosts/paired_devices_test.dart' show ScriptedAuth;
@@ -108,5 +109,22 @@ void main() {
     await t.pump();
     expect(lock.locked, isTrue);
     expect(focus.hasFocus, isFalse);
+  });
+
+  testWidgets('under Spanish the lock screen and the system prompt are localized', (t) async {
+    await t.pumpWidget(
+      MaterialApp(
+        locale: const Locale('es'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: supportedAppLocales,
+        // Same wiring as the app: the gate sits in the app builder.
+        builder: (_, child) => AppLockGate(lock: lock, enabled: true, child: child!),
+        home: const Text('secret'),
+      ),
+    );
+    await t.pump();
+    expect(find.text('OpenMosh está bloqueado'), findsOneWidget);
+    expect(find.text('Desbloquear'), findsOneWidget);
+    expect(auth.reasons, ['Desbloquear OpenMosh']);
   });
 }

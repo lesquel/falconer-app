@@ -815,4 +815,209 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errAlreadyAnswered => 'This event was already answered.';
+
+  @override
+  String get terminalTitle => 'Terminal';
+
+  @override
+  String get terminalShell => 'shell';
+
+  @override
+  String terminalHostShell(String host) {
+    return '$host · shell';
+  }
+
+  @override
+  String terminalHostSession(String host, String kind) {
+    return '$host · $kind';
+  }
+
+  @override
+  String get terminalHostFallback => 'host';
+
+  @override
+  String get terminalSessionFallback => 'session';
+
+  @override
+  String get fullScreen => 'Full screen';
+
+  @override
+  String get exitFullScreen => 'Exit full screen';
+
+  @override
+  String get disconnect => 'Disconnect';
+
+  @override
+  String get terminalChat => 'Chat';
+
+  @override
+  String get typeInTerminal => 'Type in the terminal';
+
+  @override
+  String get keyboard => 'Keyboard';
+
+  @override
+  String get smallerText => 'Smaller text';
+
+  @override
+  String get largerText => 'Larger text';
+
+  @override
+  String get paste => 'Paste';
+
+  @override
+  String get addShortcut => 'Add shortcut';
+
+  @override
+  String get copy => 'Copy';
+
+  @override
+  String get clearSelection => 'Clear selection';
+
+  @override
+  String get copied => 'Copied';
+
+  @override
+  String removeShortcutTitle(String label) {
+    return 'Remove \"$label\"?';
+  }
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get attachPhotos => 'Photos';
+
+  @override
+  String get attachFile => 'File';
+
+  @override
+  String get connecting => 'Connecting…';
+
+  @override
+  String get reconnecting => 'Reconnecting…';
+
+  @override
+  String get chatAttach => 'Attach images or files';
+
+  @override
+  String get chatHint => 'Message the agent…';
+
+  @override
+  String get chatClose => 'Close chat';
+
+  @override
+  String get chatSend => 'Send';
+
+  @override
+  String chatRemoveAttachment(String name) {
+    return 'Remove $name';
+  }
+
+  @override
+  String get sessionEndedTitle => 'The session ended.';
+
+  @override
+  String get sessionEndedBody => 'The shell on the computer exited. Start it again or go back.';
+
+  @override
+  String get reconnect => 'Reconnect';
+
+  @override
+  String get shortcutCtrlKey => 'Ctrl + key';
+
+  @override
+  String get shortcutText => 'Text';
+
+  @override
+  String get shortcutLetter => 'Letter';
+
+  @override
+  String get shortcutTextToSend => 'Text to send';
+
+  @override
+  String get shortcutLabelOptional => 'Label (optional)';
+
+  @override
+  String get shortcutPressEnter => 'Press Enter after the text';
+
+  @override
+  String get shortcutAdd => 'Add';
+
+  @override
+  String shortcutAddNamed(String label) {
+    return 'Add $label';
+  }
+
+  @override
+  String get moreKeys => 'More keys';
+
+  @override
+  String get fewerKeys => 'Fewer keys';
+
+  @override
+  String get keysTitle => 'Keys';
+
+  @override
+  String get keysEmpty =>
+      'No keys yet. Pairing creates this device\'s key, or generate/import one.';
+
+  @override
+  String get generateKey => 'Generate key';
+
+  @override
+  String get importKey => 'Import key';
+
+  @override
+  String get copyPublicKey => 'Copy public key';
+
+  @override
+  String get publicKeyCopied => 'Public key copied';
+
+  @override
+  String generatedKeyLabel(String date) {
+    return 'Key $date';
+  }
+
+  @override
+  String get importedKeyLabel => 'Imported key';
+
+  @override
+  String deleteKeyTitle(String label) {
+    return 'Delete $label?';
+  }
+
+  @override
+  String get deleteKeyBody =>
+      'Hosts that use this key will stop connecting until you pair them again.';
+
+  @override
+  String get importKeyTitle => 'Import ssh-ed25519 key';
+
+  @override
+  String get keyLabel => 'Label';
+
+  @override
+  String get pastePrivateKey => 'Paste the OpenSSH private key';
+
+  @override
+  String get importAction => 'Import';
+
+  @override
+  String get lockedTitle => 'OpenMosh is locked';
+
+  @override
+  String get lockedBody => 'Verify it is you to continue.';
+
+  @override
+  String get unlock => 'Unlock';
+
+  @override
+  String get lockPromptUnlock => 'Unlock OpenMosh';
+
+  @override
+  String get lockPromptTurnOn => 'Turn on the OpenMosh lock';
+
+  @override
+  String get lockPromptTurnOff => 'Turn off the OpenMosh lock';
 }

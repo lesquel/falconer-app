@@ -529,5 +529,246 @@
   "errNotUsableKey": "That is not a usable ssh-ed25519 private key.",
   "errLockStaysOff": "Could not verify you, so the lock stays off. Set up a fingerprint, face or screen lock on this phone, then try again.",
   "errLockStaysOn": "Could not verify you, so the lock stays on.",
-  "errAlreadyAnswered": "This event was already answered."
+  "errAlreadyAnswered": "This event was already answered.",
+  "terminalTitle": "Terminal",
+  "@terminalTitle": {
+    "description": "Terminal app bar title when there is no session or host name."
+  },
+  "terminalShell": "shell",
+  "@terminalShell": {
+    "description": "Terminal subtitle for a plain shell."
+  },
+  "terminalHostShell": "{host} · shell",
+  "@terminalHostShell": {
+    "description": "Terminal subtitle: host name and a plain shell.",
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "terminalHostSession": "{host} · {kind}",
+  "@terminalHostSession": {
+    "description": "Terminal subtitle: host name and session kind (tmux, herdr…).",
+    "placeholders": {
+      "host": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "terminalHostFallback": "host",
+  "@terminalHostFallback": {
+    "description": "Placeholder in the terminal subtitle while the host is loading."
+  },
+  "terminalSessionFallback": "session",
+  "@terminalSessionFallback": {
+    "description": "Placeholder in the terminal subtitle when the session kind is unknown."
+  },
+  "fullScreen": "Full screen",
+  "@fullScreen": {
+    "description": "Terminal toolbar tooltip."
+  },
+  "exitFullScreen": "Exit full screen",
+  "@exitFullScreen": {
+    "description": "Terminal corner button tooltip."
+  },
+  "disconnect": "Disconnect",
+  "@disconnect": {
+    "description": "Terminal toolbar tooltip."
+  },
+  "terminalChat": "Chat",
+  "@terminalChat": {
+    "description": "Keys grid button that opens the chat composer."
+  },
+  "typeInTerminal": "Type in the terminal",
+  "@typeInTerminal": {
+    "description": "Keys grid button that closes the chat composer."
+  },
+  "keyboard": "Keyboard",
+  "@keyboard": {
+    "description": "Keys grid button that opens or closes the on-screen keyboard."
+  },
+  "smallerText": "Smaller text",
+  "@smallerText": {
+    "description": "Terminal font size button."
+  },
+  "largerText": "Larger text",
+  "@largerText": {
+    "description": "Terminal font size button."
+  },
+  "paste": "Paste",
+  "@paste": {
+    "description": "Pastes the clipboard into the terminal."
+  },
+  "addShortcut": "Add shortcut",
+  "@addShortcut": {
+    "description": "Adds a saved shortcut key; also the dialog title."
+  },
+  "copy": "Copy",
+  "@copy": {
+    "description": "Copies the selected terminal text."
+  },
+  "clearSelection": "Clear selection",
+  "@clearSelection": {
+    "description": "Clears the terminal text selection."
+  },
+  "copied": "Copied",
+  "@copied": {
+    "description": "Snackbar after copying terminal text."
+  },
+  "removeShortcutTitle": "Remove \"{label}\"?",
+  "@removeShortcutTitle": {
+    "description": "Confirms removing a saved shortcut key.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "remove": "Remove",
+  "attachPhotos": "Photos",
+  "@attachPhotos": {
+    "description": "Attachment source in the chat sheet."
+  },
+  "attachFile": "File",
+  "@attachFile": {
+    "description": "Attachment source in the chat sheet."
+  },
+  "connecting": "Connecting…",
+  "@connecting": {
+    "description": "Terminal banner."
+  },
+  "reconnecting": "Reconnecting…",
+  "@reconnecting": {
+    "description": "Terminal banner."
+  },
+  "chatAttach": "Attach images or files",
+  "@chatAttach": {
+    "description": "Chat composer button tooltip."
+  },
+  "chatHint": "Message the agent…",
+  "@chatHint": {
+    "description": "Chat composer input hint."
+  },
+  "chatClose": "Close chat",
+  "@chatClose": {
+    "description": "Chat composer button tooltip."
+  },
+  "chatSend": "Send",
+  "@chatSend": {
+    "description": "Chat composer send button tooltip."
+  },
+  "chatRemoveAttachment": "Remove {name}",
+  "@chatRemoveAttachment": {
+    "description": "Tooltip on an attachment thumbnail.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionEndedTitle": "The session ended.",
+  "sessionEndedBody": "The shell on the computer exited. Start it again or go back.",
+  "reconnect": "Reconnect",
+  "shortcutCtrlKey": "Ctrl + key",
+  "@shortcutCtrlKey": {
+    "description": "Shortcut dialog segment."
+  },
+  "shortcutText": "Text",
+  "@shortcutText": {
+    "description": "Shortcut dialog segment."
+  },
+  "shortcutLetter": "Letter",
+  "@shortcutLetter": {
+    "description": "Shortcut dialog field label for the Ctrl letter."
+  },
+  "shortcutTextToSend": "Text to send",
+  "@shortcutTextToSend": {
+    "description": "Shortcut dialog field label."
+  },
+  "shortcutLabelOptional": "Label (optional)",
+  "@shortcutLabelOptional": {
+    "description": "Shortcut dialog field label."
+  },
+  "shortcutPressEnter": "Press Enter after the text",
+  "@shortcutPressEnter": {
+    "description": "Shortcut dialog checkbox."
+  },
+  "shortcutAdd": "Add",
+  "@shortcutAdd": {
+    "description": "Shortcut dialog confirm button while the shortcut is incomplete."
+  },
+  "shortcutAddNamed": "Add {label}",
+  "@shortcutAddNamed": {
+    "description": "Shortcut dialog confirm button naming the shortcut.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "moreKeys": "More keys",
+  "@moreKeys": {
+    "description": "Keys grid toggle tooltip."
+  },
+  "fewerKeys": "Fewer keys",
+  "@fewerKeys": {
+    "description": "Keys grid toggle tooltip."
+  },
+  "keysTitle": "Keys",
+  "@keysTitle": {
+    "description": "Title of the SSH keys screen."
+  },
+  "keysEmpty": "No keys yet. Pairing creates this device's key, or generate/import one.",
+  "generateKey": "Generate key",
+  "importKey": "Import key",
+  "copyPublicKey": "Copy public key",
+  "publicKeyCopied": "Public key copied",
+  "generatedKeyLabel": "Key {date}",
+  "@generatedKeyLabel": {
+    "description": "Default name of a generated key; date is YYYY-MM-DD.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "importedKeyLabel": "Imported key",
+  "@importedKeyLabel": {
+    "description": "Default name of an imported key."
+  },
+  "deleteKeyTitle": "Delete {label}?",
+  "@deleteKeyTitle": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteKeyBody": "Hosts that use this key will stop connecting until you pair them again.",
+  "importKeyTitle": "Import ssh-ed25519 key",
+  "keyLabel": "Label",
+  "@keyLabel": {
+    "description": "Name field of the import key dialog."
+  },
+  "pastePrivateKey": "Paste the OpenSSH private key",
+  "importAction": "Import",
+  "lockedTitle": "OpenMosh is locked",
+  "lockedBody": "Verify it is you to continue.",
+  "unlock": "Unlock",
+  "lockPromptUnlock": "Unlock OpenMosh",
+  "@lockPromptUnlock": {
+    "description": "System biometric prompt reason."
+  },
+  "lockPromptTurnOn": "Turn on the OpenMosh lock",
+  "@lockPromptTurnOn": {
+    "description": "System biometric prompt reason."
+  },
+  "lockPromptTurnOff": "Turn off the OpenMosh lock",
+  "@lockPromptTurnOff": {
+    "description": "System biometric prompt reason."
+  }
 }

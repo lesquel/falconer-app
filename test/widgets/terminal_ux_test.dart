@@ -9,6 +9,8 @@ import 'package:openmosh/features/terminal/presentation/views/shortcut_dialog.da
 import 'package:openmosh/features/terminal/presentation/views/terminal_screen_view.dart';
 import 'package:xterm/xterm.dart';
 
+import '../support/l10n_app.dart';
+
 Widget _app(Widget child) => MaterialApp(home: Scaffold(body: child));
 
 void main() {
@@ -90,5 +92,24 @@ void main() {
     await t.pump(const Duration(milliseconds: 500));
     expect(scales.last, closeTo(2, 0.01));
     expect(ended, isTrue);
+  });
+
+  testWidgets('the shortcut dialog renders in Spanish under the es locale', (t) async {
+    await t.pumpWidget(
+      l10nApp(
+        locale: const Locale('es'),
+        home: Scaffold(
+          body: Builder(
+            builder: (c) =>
+                TextButton(onPressed: () => showShortcutDialog(c), child: const Text('open')),
+          ),
+        ),
+      ),
+    );
+    await t.tap(find.text('open'));
+    await t.pumpAndSettle();
+    expect(find.text('Agregar atajo'), findsOneWidget);
+    expect(find.text('Ctrl + tecla'), findsOneWidget);
+    expect(find.text('Cancelar'), findsOneWidget);
   });
 }

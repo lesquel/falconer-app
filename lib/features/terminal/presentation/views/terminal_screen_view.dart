@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:xterm/xterm.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
 import '../../domain/usecases/terminal_runner.dart';
 
@@ -49,16 +50,16 @@ class TerminalScreenView extends StatelessWidget {
   /// A control pinned to the terminal's top-right corner (exit full screen).
   final Widget? corner;
 
-  String? get _banner => switch (phase) {
-    TerminalPhase.connecting => 'Connecting…',
-    TerminalPhase.reconnecting => 'Reconnecting…',
+  String? _banner(AppLocalizations l) => switch (phase) {
+    TerminalPhase.connecting => l.connecting,
+    TerminalPhase.reconnecting => l.reconnecting,
     _ => null,
   };
 
   @override
   Widget build(BuildContext context) {
     final c = MoshColors.of(context);
-    final banner = _banner;
+    final banner = _banner(context.l10n);
     return Column(
       children: [
         if (banner != null)

@@ -8,11 +8,28 @@ import '../../keys/domain/repositories/key_vault.dart';
 
 const lockAfterBackground = Duration(seconds: 60);
 
+/// Reasons shown in the system verification prompt. Presentation supplies
+/// the localized texts; the defaults are English.
+final class LockPrompts {
+  const LockPrompts({
+    this.unlock = 'Unlock OpenMosh',
+    this.turnOn = 'Turn on the OpenMosh lock',
+    this.turnOff = 'Turn off the OpenMosh lock',
+  });
+
+  final String unlock;
+  final String turnOn;
+  final String turnOff;
+}
+
 final class AppLock {
   AppLock({required this.auth, required this.now});
 
   final UserAuthenticator auth;
   final Clock now;
+
+  /// Set by the lock gate from the current locale.
+  LockPrompts prompts = const LockPrompts();
 
   bool _locked = false;
   DateTime? _backgroundSince;
@@ -38,9 +55,7 @@ final class AppLock {
   /// locked out on the next start). Returns null when the change may be
   /// saved, else why it may not.
   Future<String?> verifyToggle({required bool enable}) async {
-    final ok = await auth.authenticate(
-      enable ? 'Turn on the OpenMosh lock' : 'Turn off the OpenMosh lock',
-    );
+    final ok = await auth.authenticate(enable ? prompts.turnOn : prompts.turnOff);
     if (ok) {
       // The prompt may have backgrounded the app; the user was just verified.
       _backgroundSince = null;
@@ -55,7 +70,7 @@ final class AppLock {
   /// Returns true when the app is unlocked afterwards.
   Future<bool> unlock() async {
     if (!_locked) return true;
-    if (await auth.authenticate('Unlock OpenMosh')) _locked = false;
+    if (await auth.authenticate(prompts.unlock)) _locked = false;
     return !_locked;
   }
 }

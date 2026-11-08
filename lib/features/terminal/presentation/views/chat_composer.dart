@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
 import '../controllers/chat_attachment.dart';
 
@@ -51,6 +52,7 @@ class _ChatComposerState extends State<ChatComposer> {
   @override
   Widget build(BuildContext context) {
     final c = MoshColors.of(context);
+    final l = context.l10n;
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 8, 10, 0),
       child: Material(
@@ -80,7 +82,7 @@ class _ChatComposerState extends State<ChatComposer> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   IconButton(
-                    tooltip: 'Attach images or files',
+                    tooltip: l.chatAttach,
                     icon: const Icon(Icons.add),
                     onPressed: widget.busy ? null : widget.onAttach,
                   ),
@@ -94,19 +96,16 @@ class _ChatComposerState extends State<ChatComposer> {
                       keyboardType: TextInputType.multiline,
                       textCapitalization: TextCapitalization.sentences,
                       onChanged: widget.onChanged,
-                      decoration: const InputDecoration(
-                        hintText: 'Message the agent…',
-                        isDense: true,
-                      ),
+                      decoration: InputDecoration(hintText: l.chatHint, isDense: true),
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Close chat',
+                    tooltip: l.chatClose,
                     icon: const Icon(Icons.close),
                     onPressed: widget.onClose,
                   ),
                   IconButton.filled(
-                    tooltip: 'Send',
+                    tooltip: l.chatSend,
                     style: IconButton.styleFrom(
                       backgroundColor: c.accent,
                       foregroundColor: c.onAccent,
@@ -173,7 +172,7 @@ class _Thumb extends StatelessWidget {
           top: -12,
           right: -12,
           child: Tooltip(
-            message: 'Remove ${attachment.name}',
+            message: context.l10n.chatRemoveAttachment(attachment.name),
             child: InkWell(
               onTap: onRemove,
               customBorder: const CircleBorder(),

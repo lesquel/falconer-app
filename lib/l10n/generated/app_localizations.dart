@@ -1490,6 +1490,384 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This event was already answered.'**
   String get errAlreadyAnswered;
+
+  /// Terminal app bar title when there is no session or host name.
+  ///
+  /// In en, this message translates to:
+  /// **'Terminal'**
+  String get terminalTitle;
+
+  /// Terminal subtitle for a plain shell.
+  ///
+  /// In en, this message translates to:
+  /// **'shell'**
+  String get terminalShell;
+
+  /// Terminal subtitle: host name and a plain shell.
+  ///
+  /// In en, this message translates to:
+  /// **'{host} · shell'**
+  String terminalHostShell(String host);
+
+  /// Terminal subtitle: host name and session kind (tmux, herdr…).
+  ///
+  /// In en, this message translates to:
+  /// **'{host} · {kind}'**
+  String terminalHostSession(String host, String kind);
+
+  /// Placeholder in the terminal subtitle while the host is loading.
+  ///
+  /// In en, this message translates to:
+  /// **'host'**
+  String get terminalHostFallback;
+
+  /// Placeholder in the terminal subtitle when the session kind is unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'session'**
+  String get terminalSessionFallback;
+
+  /// Terminal toolbar tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Full screen'**
+  String get fullScreen;
+
+  /// Terminal corner button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit full screen'**
+  String get exitFullScreen;
+
+  /// Terminal toolbar tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get disconnect;
+
+  /// Keys grid button that opens the chat composer.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get terminalChat;
+
+  /// Keys grid button that closes the chat composer.
+  ///
+  /// In en, this message translates to:
+  /// **'Type in the terminal'**
+  String get typeInTerminal;
+
+  /// Keys grid button that opens or closes the on-screen keyboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Keyboard'**
+  String get keyboard;
+
+  /// Terminal font size button.
+  ///
+  /// In en, this message translates to:
+  /// **'Smaller text'**
+  String get smallerText;
+
+  /// Terminal font size button.
+  ///
+  /// In en, this message translates to:
+  /// **'Larger text'**
+  String get largerText;
+
+  /// Pastes the clipboard into the terminal.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get paste;
+
+  /// Adds a saved shortcut key; also the dialog title.
+  ///
+  /// In en, this message translates to:
+  /// **'Add shortcut'**
+  String get addShortcut;
+
+  /// Copies the selected terminal text.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copy;
+
+  /// Clears the terminal text selection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get clearSelection;
+
+  /// Snackbar after copying terminal text.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get copied;
+
+  /// Confirms removing a saved shortcut key.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove \"{label}\"?'**
+  String removeShortcutTitle(String label);
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// Attachment source in the chat sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get attachPhotos;
+
+  /// Attachment source in the chat sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'File'**
+  String get attachFile;
+
+  /// Terminal banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get connecting;
+
+  /// Terminal banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnecting…'**
+  String get reconnecting;
+
+  /// Chat composer button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach images or files'**
+  String get chatAttach;
+
+  /// Chat composer input hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Message the agent…'**
+  String get chatHint;
+
+  /// Chat composer button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Close chat'**
+  String get chatClose;
+
+  /// Chat composer send button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get chatSend;
+
+  /// Tooltip on an attachment thumbnail.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}'**
+  String chatRemoveAttachment(String name);
+
+  /// No description provided for @sessionEndedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The session ended.'**
+  String get sessionEndedTitle;
+
+  /// No description provided for @sessionEndedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The shell on the computer exited. Start it again or go back.'**
+  String get sessionEndedBody;
+
+  /// No description provided for @reconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnect'**
+  String get reconnect;
+
+  /// Shortcut dialog segment.
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl + key'**
+  String get shortcutCtrlKey;
+
+  /// Shortcut dialog segment.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get shortcutText;
+
+  /// Shortcut dialog field label for the Ctrl letter.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter'**
+  String get shortcutLetter;
+
+  /// Shortcut dialog field label.
+  ///
+  /// In en, this message translates to:
+  /// **'Text to send'**
+  String get shortcutTextToSend;
+
+  /// Shortcut dialog field label.
+  ///
+  /// In en, this message translates to:
+  /// **'Label (optional)'**
+  String get shortcutLabelOptional;
+
+  /// Shortcut dialog checkbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Press Enter after the text'**
+  String get shortcutPressEnter;
+
+  /// Shortcut dialog confirm button while the shortcut is incomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get shortcutAdd;
+
+  /// Shortcut dialog confirm button naming the shortcut.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {label}'**
+  String shortcutAddNamed(String label);
+
+  /// Keys grid toggle tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'More keys'**
+  String get moreKeys;
+
+  /// Keys grid toggle tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Fewer keys'**
+  String get fewerKeys;
+
+  /// Title of the SSH keys screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Keys'**
+  String get keysTitle;
+
+  /// No description provided for @keysEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No keys yet. Pairing creates this device\'s key, or generate/import one.'**
+  String get keysEmpty;
+
+  /// No description provided for @generateKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate key'**
+  String get generateKey;
+
+  /// No description provided for @importKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Import key'**
+  String get importKey;
+
+  /// No description provided for @copyPublicKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy public key'**
+  String get copyPublicKey;
+
+  /// No description provided for @publicKeyCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Public key copied'**
+  String get publicKeyCopied;
+
+  /// Default name of a generated key; date is YYYY-MM-DD.
+  ///
+  /// In en, this message translates to:
+  /// **'Key {date}'**
+  String generatedKeyLabel(String date);
+
+  /// Default name of an imported key.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported key'**
+  String get importedKeyLabel;
+
+  /// No description provided for @deleteKeyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {label}?'**
+  String deleteKeyTitle(String label);
+
+  /// No description provided for @deleteKeyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Hosts that use this key will stop connecting until you pair them again.'**
+  String get deleteKeyBody;
+
+  /// No description provided for @importKeyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import ssh-ed25519 key'**
+  String get importKeyTitle;
+
+  /// Name field of the import key dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get keyLabel;
+
+  /// No description provided for @pastePrivateKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the OpenSSH private key'**
+  String get pastePrivateKey;
+
+  /// No description provided for @importAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get importAction;
+
+  /// No description provided for @lockedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenMosh is locked'**
+  String get lockedTitle;
+
+  /// No description provided for @lockedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify it is you to continue.'**
+  String get lockedBody;
+
+  /// No description provided for @unlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get unlock;
+
+  /// System biometric prompt reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock OpenMosh'**
+  String get lockPromptUnlock;
+
+  /// System biometric prompt reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on the OpenMosh lock'**
+  String get lockPromptTurnOn;
+
+  /// System biometric prompt reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off the OpenMosh lock'**
+  String get lockPromptTurnOff;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

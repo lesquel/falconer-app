@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/atoms/key_cap.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
 import '../../domain/entities/extra_key.dart';
@@ -92,7 +93,7 @@ class ExtraKeysBar extends StatelessWidget {
       if (onToggleExpanded != null)
         KeyGridButton(
           key: const Key('more_keys'),
-          tooltip: expanded ? 'Fewer keys' : 'More keys',
+          tooltip: expanded ? context.l10n.fewerKeys : context.l10n.moreKeys,
           selected: expanded,
           icon: expanded ? Icons.unfold_less : Icons.unfold_more,
           onPressed: onToggleExpanded!,

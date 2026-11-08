@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/molecules/themed_mole.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
 
@@ -13,6 +14,7 @@ class LockView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = MoshColors.of(context);
+    final l = context.l10n;
     return Material(
       color: c.background,
       child: SafeArea(
@@ -25,13 +27,13 @@ class LockView extends StatelessWidget {
                 const ThemedMole(size: 150, semanticLabel: null),
                 const SizedBox(height: 16),
                 Text(
-                  'OpenMosh is locked',
+                  l.lockedTitle,
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: c.foreground),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Verify it is you to continue.',
+                  l.lockedBody,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: c.muted),
                 ),
@@ -39,7 +41,7 @@ class LockView extends StatelessWidget {
                 FilledButton.icon(
                   onPressed: busy ? null : onUnlock,
                   icon: const Icon(Icons.lock_open),
-                  label: const Text('Unlock'),
+                  label: Text(l.unlock),
                 ),
               ],
             ),

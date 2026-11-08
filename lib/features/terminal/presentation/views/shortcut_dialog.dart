@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../../keyboard/domain/entities/custom_keys.dart';
 import '../../../keyboard/domain/entities/extra_key.dart';
 
@@ -34,16 +35,17 @@ class _ShortcutDialogState extends State<ShortcutDialog> {
   @override
   Widget build(BuildContext context) {
     final key = _key;
+    final l = context.l10n;
     return AlertDialog(
-      title: const Text('Add shortcut'),
+      title: Text(l.addShortcut),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SegmentedButton<bool>(
-            segments: const [
-              ButtonSegment(value: true, label: Text('Ctrl + key')),
-              ButtonSegment(value: false, label: Text('Text')),
+            segments: [
+              ButtonSegment(value: true, label: Text(l.shortcutCtrlKey)),
+              ButtonSegment(value: false, label: Text(l.shortcutText)),
             ],
             selected: {_ctrl},
             onSelectionChanged: (v) => setState(() {
@@ -59,7 +61,7 @@ class _ShortcutDialogState extends State<ShortcutDialog> {
             maxLength: _ctrl ? 1 : null,
             textCapitalization: _ctrl ? TextCapitalization.characters : TextCapitalization.none,
             decoration: InputDecoration(
-              labelText: _ctrl ? 'Letter' : 'Text to send',
+              labelText: _ctrl ? l.shortcutLetter : l.shortcutTextToSend,
               hintText: _ctrl ? 'C' : 'git status',
             ),
             onChanged: (_) => setState(() {}),
@@ -67,23 +69,23 @@ class _ShortcutDialogState extends State<ShortcutDialog> {
           if (!_ctrl) ...[
             TextField(
               controller: _label,
-              decoration: const InputDecoration(labelText: 'Label (optional)'),
+              decoration: InputDecoration(labelText: l.shortcutLabelOptional),
               onChanged: (_) => setState(() {}),
             ),
             CheckboxListTile(
               contentPadding: EdgeInsets.zero,
               value: _enter,
-              title: const Text('Press Enter after the text'),
+              title: Text(l.shortcutPressEnter),
               onChanged: (v) => setState(() => _enter = v ?? false),
             ),
           ],
         ],
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l.cancel)),
         FilledButton(
           onPressed: key == null ? null : () => Navigator.of(context).pop(key),
-          child: Text(key == null ? 'Add' : 'Add ${key.label}'),
+          child: Text(key == null ? l.shortcutAdd : l.shortcutAddNamed(key.label)),
         ),
       ],
     );

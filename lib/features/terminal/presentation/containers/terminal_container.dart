@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:xterm/xterm.dart';
 
 import '../../../../app/di.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../../shared/domain/failure.dart';
 import '../../../../shared/ui/atoms/circle_icon_button.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
@@ -158,7 +159,7 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     _selection.clearSelection();
     await Clipboard.setData(ClipboardData(text: text));
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Copied')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.copied)));
     }
   }
 
@@ -176,13 +177,14 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
 
   Future<void> _removeShortcut(AppSettings s, int i) async {
     final label = s.customKeys[i].label;
+    final l = context.l10n;
     final ok = await showDialog<bool>(
       context: context,
       builder: (d) => AlertDialog(
-        title: Text('Remove "$label"?'),
+        title: Text(l.removeShortcutTitle(label)),
         actions: [
-          TextButton(onPressed: () => Navigator.of(d).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(d).pop(true), child: const Text('Remove')),
+          TextButton(onPressed: () => Navigator.of(d).pop(false), child: Text(l.cancel)),
+          FilledButton(onPressed: () => Navigator.of(d).pop(true), child: Text(l.remove)),
         ],
       ),
     );
@@ -206,6 +208,7 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
   Future<List<ChatAttachment>> _uploadFiles(bool images) async {
     final source = ref.read(fileSourceProvider);
     final messenger = ScaffoldMessenger.of(context);
+    final l = context.l10n;
     setState(() => _uploading = true);
     try {
       final files = images ? await source.pickImages() : [?(await source.pick(imagesOnly: false))];
@@ -225,7 +228,7 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
       }
       return done;
     } on AppFailure catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text(e.message)));
+      messenger.showSnackBar(SnackBar(content: Text(l.failureMessage(e.message))));
       return const [];
     } on FileSystemException {
       return const [];
@@ -235,6 +238,7 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
   }
 
   Future<void> _attachToChat() async {
+    final l = context.l10n;
     final images = await showModalBottomSheet<bool>(
       context: context,
       showDragHandle: true,
@@ -244,12 +248,12 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Photos'),
+              title: Text(l.attachPhotos),
               onTap: () => Navigator.of(sheet).pop(true),
             ),
             ListTile(
               leading: const Icon(Icons.attach_file),
-              title: const Text('File'),
+              title: Text(l.attachFile),
               onTap: () => Navigator.of(sheet).pop(false),
             ),
           ],
@@ -286,9 +290,13 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
         ? SessionEndedPanel(onReconnect: () => _runner.wake(restart: true), onBack: _leave)
         : null;
     final c = MoshColors.of(context);
+    final l = context.l10n;
     final subtitle = widget.session == null
-        ? (host == null ? 'shell' : '${host.alias} · shell')
-        : '${host?.alias ?? 'host'} · ${widget.kind ?? 'session'}';
+        ? (host == null ? l.terminalShell : l.terminalHostShell(host.alias))
+        : l.terminalHostSession(
+            host?.alias ?? l.terminalHostFallback,
+            widget.kind ?? l.terminalSessionFallback,
+          );
     return Scaffold(
       appBar: _fullScreen
           ? null
@@ -302,7 +310,7 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
                     children: [
                       CircleIconButton(
                         icon: Icons.chevron_left,
-                        tooltip: 'Back',
+                        tooltip: l.back,
                         onPressed: _leave,
                       ),
                       const SizedBox(width: 10),
@@ -312,7 +320,7 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              widget.session ?? host?.alias ?? 'Terminal',
+                              widget.session ?? host?.alias ?? l.terminalTitle,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
@@ -327,12 +335,12 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
                         ),
                       ),
                       IconButton(
-                        tooltip: 'Full screen',
+                        tooltip: l.fullScreen,
                         icon: const Icon(Icons.fullscreen),
                         onPressed: _toggleFullScreen,
                       ),
                       IconButton(
-                        tooltip: 'Disconnect',
+                        tooltip: l.disconnect,
                         icon: const Icon(Icons.link_off),
                         onPressed: _disconnect,
                       ),
@@ -356,7 +364,7 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
             : _SelectionBar(onCopy: _copySelection, onClear: _selection.clearSelection),
         corner: _fullScreen
             ? IconButton.filledTonal(
-                tooltip: 'Exit full screen',
+                tooltip: l.exitFullScreen,
                 icon: const Icon(Icons.fullscreen_exit),
                 onPressed: _toggleFullScreen,
               )
@@ -391,34 +399,34 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
           onShortcutLongPress: (i) => unawaited(_removeShortcut(settings, i)),
           shortcutExtras: [
             IconButton(
-              tooltip: 'Paste',
+              tooltip: l.paste,
               icon: const Icon(Icons.content_paste),
               onPressed: () => unawaited(_pasteClipboard()),
             ),
             IconButton(
-              tooltip: 'Add shortcut',
+              tooltip: l.addShortcut,
               icon: const Icon(Icons.add),
               onPressed: () => unawaited(_addShortcut(settings)),
             ),
           ],
           pinned: [
             KeyGridButton(
-              tooltip: _session.chatOpen ? 'Type in the terminal' : 'Chat',
+              tooltip: _session.chatOpen ? l.typeInTerminal : l.terminalChat,
               selected: _session.chatOpen,
               icon: Icons.chat_bubble_outline,
               selectedIcon: Icons.chat_bubble,
               onPressed: _toggleChat,
             ),
-            KeyGridButton(tooltip: 'Keyboard', icon: Icons.keyboard, onPressed: _toggleKeyboard),
+            KeyGridButton(tooltip: l.keyboard, icon: Icons.keyboard, onPressed: _toggleKeyboard),
           ],
           trailing: [
             IconButton(
-              tooltip: 'Smaller text',
+              tooltip: l.smallerText,
               icon: const Icon(Icons.text_decrease),
               onPressed: settings.fontSize <= 8 ? null : () => _zoom(settings, -1),
             ),
             IconButton(
-              tooltip: 'Larger text',
+              tooltip: l.largerText,
               icon: const Icon(Icons.text_increase),
               onPressed: settings.fontSize >= 32 ? null : () => _zoom(settings, 1),
             ),
@@ -437,6 +445,7 @@ class _SelectionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = MoshColors.of(context);
+    final l = context.l10n;
     return Align(
       alignment: Alignment.topCenter,
       child: Material(
@@ -449,11 +458,11 @@ class _SelectionBar extends StatelessWidget {
             TextButton.icon(
               style: TextButton.styleFrom(foregroundColor: c.onInverse),
               icon: const Icon(Icons.copy, size: 18),
-              label: const Text('Copy'),
+              label: Text(l.copy),
               onPressed: onCopy,
             ),
             IconButton(
-              tooltip: 'Clear selection',
+              tooltip: l.clearSelection,
               color: c.onInverse,
               icon: const Icon(Icons.close, size: 18),
               onPressed: onClear,

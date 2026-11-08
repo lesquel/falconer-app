@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../../shared/ui/tokens/mosh_colors.dart';
 import '../domain/app_lock.dart';
 import 'views/lock_view.dart';
@@ -35,6 +36,7 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
   @override
   void didUpdateWidget(AppLockGate old) {
     super.didUpdateWidget(old);
+    if (old.lock != widget.lock) _localizePrompts();
     _maybeStart();
   }
 
@@ -90,6 +92,22 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
       case AppLifecycleState.inactive || AppLifecycleState.detached:
         break;
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _localizePrompts();
+  }
+
+  /// The system prompt texts follow the app language.
+  void _localizePrompts() {
+    final l = context.l10n;
+    widget.lock.prompts = LockPrompts(
+      unlock: l.lockPromptUnlock,
+      turnOn: l.lockPromptTurnOn,
+      turnOff: l.lockPromptTurnOff,
+    );
   }
 
   @override
