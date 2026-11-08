@@ -9,6 +9,7 @@ import '../features/inbox/presentation/containers/inbox_container.dart';
 import '../features/keys/presentation/containers/keys_container.dart';
 import '../features/pairing/presentation/containers/pairing_container.dart';
 import '../features/settings/presentation/containers/settings_container.dart';
+import '../features/terminal/presentation/containers/terminal_container.dart';
 import 'home_shell.dart';
 
 final _id = RegExp(r'^[A-Za-z0-9_-]{1,128}$');
@@ -38,6 +39,14 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
         GoRoute(path: '/hosts/new', builder: (_, _) => const HostFormContainer()),
         GoRoute(path: '/hosts/:id', builder: (_, s) => HostDetailContainer(hostId: s.pathParameters['id']!)),
         GoRoute(path: '/hosts/:id/edit', builder: (_, s) => HostFormContainer(hostId: s.pathParameters['id']!)),
+        GoRoute(
+          path: '/terminal/:id',
+          builder: (_, s) => TerminalContainer(
+            hostId: s.pathParameters['id']!,
+            session: s.uri.queryParameters['session'],
+            kind: s.uri.queryParameters['kind'],
+          ),
+        ),
         GoRoute(
           path: '/inbox/:host/:event',
           builder: (_, s) => EventConfirmContainer(
