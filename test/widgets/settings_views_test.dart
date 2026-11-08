@@ -9,7 +9,13 @@ void main() {
   testWidgets('settings: previews are off by default and can be enabled', (t) async {
     AppSettings? changed;
     await t.pumpWidget(
-      app(SettingsView(settings: const AppSettings(), onChanged: (s) => changed = s)),
+      app(
+        SettingsView(
+          settings: const AppSettings(),
+          onChanged: (s) => changed = s,
+          onAppLockChanged: (_) {},
+        ),
+      ),
     );
     final sw = t.widget<SwitchListTile>(find.byKey(const Key('previews')));
     expect(sw.value, isFalse);
@@ -20,7 +26,13 @@ void main() {
   testWidgets('settings: sessions stay connected by default and can be turned off', (t) async {
     AppSettings? changed;
     await t.pumpWidget(
-      app(SettingsView(settings: const AppSettings(), onChanged: (s) => changed = s)),
+      app(
+        SettingsView(
+          settings: const AppSettings(),
+          onChanged: (s) => changed = s,
+          onAppLockChanged: (_) {},
+        ),
+      ),
     );
     final sw = t.widget<SwitchListTile>(find.byKey(const Key('keep_connected')));
     expect(sw.value, isTrue);
@@ -28,17 +40,25 @@ void main() {
     expect(changed!.keepConnected, isFalse);
   });
 
-  testWidgets('settings: the app lock is off by default and can be turned on', (t) async {
+  testWidgets('settings: the app lock is off by default; its switch asks to toggle it', (t) async {
     AppSettings? changed;
+    bool? toggled;
     await t.pumpWidget(
-      app(SettingsView(settings: const AppSettings(), onChanged: (s) => changed = s)),
+      app(
+        SettingsView(
+          settings: const AppSettings(),
+          onChanged: (s) => changed = s,
+          onAppLockChanged: (v) => toggled = v,
+        ),
+      ),
     );
     final sw = find.byKey(const Key('app_lock'));
     await t.scrollUntilVisible(sw, 200);
     expect(t.widget<SwitchListTile>(sw).value, isFalse);
     expect(find.text('Lock OpenMosh'), findsOneWidget);
     await t.tap(sw);
-    expect(changed!.appLock, isTrue);
+    expect(toggled, isTrue);
+    expect(changed, isNull, reason: 'the container saves only after verification');
   });
 
   test('font size is clamped to 8..32', () {

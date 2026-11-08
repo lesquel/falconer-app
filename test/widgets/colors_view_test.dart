@@ -74,6 +74,7 @@ void main() {
         SettingsView(
           settings: const AppSettings(),
           onChanged: (_) {},
+          onAppLockChanged: (_) {},
           onOpenColors: () => opened++,
         ),
       ),

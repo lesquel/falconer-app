@@ -60,4 +60,21 @@ void main() {
     lock.resumed(enabled: true);
     expect(lock.locked, isTrue);
   });
+
+  test('turning the lock off requires a successful verification', () async {
+    auth.allow = false;
+    expect(await lock.verifyToggle(enable: false), isNotNull);
+    auth.allow = true;
+    expect(await lock.verifyToggle(enable: false), isNull);
+    expect(auth.reasons, ['Turn off the OpenMosh lock', 'Turn off the OpenMosh lock']);
+  });
+
+  test('turning the lock on first checks that the user can be verified', () async {
+    auth.allow = false;
+    final why = await lock.verifyToggle(enable: true);
+    expect(why, contains('stays off'));
+    auth.allow = true;
+    expect(await lock.verifyToggle(enable: true), isNull);
+    expect(auth.reasons, ['Turn on the OpenMosh lock', 'Turn on the OpenMosh lock']);
+  });
 }

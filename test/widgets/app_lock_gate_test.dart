@@ -75,4 +75,38 @@ void main() {
     await t.pump();
     expect(contentVisible(t), isFalse);
   });
+
+  testWidgets('locking takes the keyboard focus away from the hidden content', (t) async {
+    auth.allow = true;
+    final focus = FocusNode();
+    addTearDown(focus.dispose);
+    await t.pumpWidget(
+      MaterialApp(
+        home: AppLockGate(
+          lock: lock,
+          enabled: true,
+          child: Material(child: TextField(focusNode: focus)),
+        ),
+      ),
+    );
+    await t.pump();
+    await t.pump();
+    focus.requestFocus();
+    await t.pump();
+    expect(focus.hasFocus, isTrue);
+
+    auth.allow = false;
+    for (final s in [AppLifecycleState.inactive, AppLifecycleState.hidden]) {
+      t.binding.handleAppLifecycleStateChanged(s);
+    }
+    t.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    now = now.add(const Duration(seconds: 61));
+    for (final s in [AppLifecycleState.hidden, AppLifecycleState.inactive]) {
+      t.binding.handleAppLifecycleStateChanged(s);
+    }
+    t.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await t.pump();
+    expect(lock.locked, isTrue);
+    expect(focus.hasFocus, isFalse);
+  });
 }

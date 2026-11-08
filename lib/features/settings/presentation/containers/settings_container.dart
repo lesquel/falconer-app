@@ -16,8 +16,20 @@ class SettingsContainer extends ConsumerWidget {
       body: SettingsView(
         settings: s,
         onChanged: ref.read(settingsRepositoryProvider).save,
+        onAppLockChanged: (v) => _toggleLock(context, ref, v),
         onOpenColors: () => context.push('/settings/colors'),
       ),
     );
+  }
+
+  Future<void> _toggleLock(BuildContext context, WidgetRef ref, bool enable) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final why = await ref.read(appLockProvider).verifyToggle(enable: enable);
+    if (why != null) {
+      messenger.showSnackBar(SnackBar(content: Text(why)));
+      return;
+    }
+    final current = ref.read(settingsProvider).value ?? const AppSettings();
+    await ref.read(settingsRepositoryProvider).save(current.copyWith(appLock: enable));
   }
 }

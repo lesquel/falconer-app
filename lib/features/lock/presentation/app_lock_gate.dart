@@ -49,8 +49,15 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
     if (_started || enabled == null) return;
     _started = true;
     widget.lock.coldStart(enabled: enabled);
-    if (widget.lock.locked) _promptAfterFrame();
+    if (widget.lock.locked) {
+      _dropFocus();
+      _promptAfterFrame();
+    }
   }
+
+  /// Offstage content keeps its focus; a hardware keyboard could still type
+  /// into a hidden terminal.
+  void _dropFocus() => FocusManager.instance.primaryFocus?.unfocus();
 
   void _promptAfterFrame() =>
       WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_unlock()));
@@ -76,6 +83,7 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
         final was = widget.lock.locked;
         widget.lock.resumed(enabled: enabled);
         if (!was && widget.lock.locked) {
+          _dropFocus();
           setState(() {});
           _promptAfterFrame();
         }

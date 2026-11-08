@@ -12,11 +12,15 @@ class SettingsView extends StatelessWidget {
     super.key,
     required this.settings,
     required this.onChanged,
+    required this.onAppLockChanged,
     this.onOpenColors,
   });
 
   final AppSettings settings;
   final ValueChanged<AppSettings> onChanged;
+
+  /// The lock setting is saved by the container after user verification.
+  final ValueChanged<bool> onAppLockChanged;
   final VoidCallback? onOpenColors;
 
   static String themeLabel(ThemePreference p) => switch (p) {
@@ -101,10 +105,10 @@ class SettingsView extends StatelessWidget {
             title: const Text('Lock OpenMosh'),
             subtitle: const Text(
               'Ask for your fingerprint, face or screen lock when OpenMosh opens and after '
-              'a minute in the background.',
+              'a minute in the background. Turning it on or off asks for it too.',
             ),
             value: s.appLock,
-            onChanged: (v) => onChanged(s.copyWith(appLock: v)),
+            onChanged: onAppLockChanged,
           ),
         ]),
         card([

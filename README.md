@@ -33,7 +33,9 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
   access to that host.
 - **App lock** — optional, off by default (*Settings → Lock OpenMosh*). When on, OpenMosh asks
   for user verification when it opens and after more than 60 s in the background; until then
-  the screen shows only the mole.
+  the screen shows only the mole and nothing keeps the keyboard focus. Turning the lock on or off
+  asks for that verification too (turning it on fails, and the lock stays off, when the phone
+  has no fingerprint, face or screen lock).
 - **Inbox** — encrypted pushes are decrypted on the phone; approve, deny or reply from the inbox
   or from a notification (which opens a confirm screen; nothing is sent from the lock screen).
 - **Uploads** — pick an image or file, upload it over SFTP to `~/.openmosh/uploads/` and paste

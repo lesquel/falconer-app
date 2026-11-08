@@ -32,6 +32,26 @@ final class AppLock {
     }
   }
 
+  /// Verifies the user before the "Lock OpenMosh" setting changes: turning
+  /// it off must not be possible for someone holding an unlocked phone, and
+  /// turning it on first proves a credential exists (else the user would be
+  /// locked out on the next start). Returns null when the change may be
+  /// saved, else why it may not.
+  Future<String?> verifyToggle({required bool enable}) async {
+    final ok = await auth.authenticate(
+      enable ? 'Turn on the OpenMosh lock' : 'Turn off the OpenMosh lock',
+    );
+    if (ok) {
+      // The prompt may have backgrounded the app; the user was just verified.
+      _backgroundSince = null;
+      return null;
+    }
+    return enable
+        ? 'Could not verify you, so the lock stays off. Set up a fingerprint, face or screen '
+              'lock on this phone, then try again.'
+        : 'Could not verify you, so the lock stays on.';
+  }
+
   /// Returns true when the app is unlocked afterwards.
   Future<bool> unlock() async {
     if (!_locked) return true;
