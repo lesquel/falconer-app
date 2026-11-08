@@ -3,18 +3,45 @@ name: release
 # Builds signed per-ABI release APKs for a `v*` tag and attaches them, with
 # SHA256SUMS and its minisign signature (public key RWTiZ1vxHn/jWfqAEjobeqloI9cL9pOA0/in+ayyCgPqT0gYDRKR1Ox5),
 # to the GitHub release of that tag.
+#
+# Hardening: actions pinned to commit SHAs, no caches (a poisoned cache cannot
+# reach a release), dependency audits before anything is signed, the lockfiles
+# enforced, and the minisign key in its own job that only receives SHA256SUMS.
 on:
   push:
     tags: ["v*"]
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: cargo deny and cargo audit
+        working-directory: rust
+        run: |
+          cargo install cargo-deny --version 0.20.2 --locked
+          cargo install cargo-audit --version 0.22.2 --locked
+          cargo deny --locked check advisories bans licenses sources
+          cargo audit
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version: stable
+          cache: false
+      - name: osv-scanner
+        run: |
+          go install github.com/google/osv-scanner/v2/cmd/osv-scanner@v2.7.0
+          "$(go env GOPATH)/bin/osv-scanner" scan --lockfile=pubspec.lock
+
   apk:
+    needs: audit
     runs-on: ubuntu-latest
     steps:
       - name: Free disk space
@@ -22,27 +49,26 @@ jobs:
         run: |
           sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost /opt/hostedtoolcache/CodeQL /usr/share/swift /usr/local/lib/node_modules
           df -h /
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
-      - uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           channel: stable
           flutter-version: 3.47.9
-          cache: true
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: rust
-      - uses: actions/setup-java@v4
+          cache: false
+      - name: Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal \
+            --target aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
+          rustup default stable
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
         with:
           distribution: temurin
           java-version: "17"
       - name: Test
         run: |
-          flutter pub get
+          flutter pub get --enforce-lockfile
           flutter test
       - name: Release keystore
         env:
@@ -56,6 +82,7 @@ jobs:
           echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
           echo "OPENMOSH_KEYSTORE_PATH=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
       - name: Build APKs
+        # Cargokit builds the Rust core with --locked (rust_builder/cargokit).
         env:
           OPENMOSH_KEYSTORE_PASSWORD: ${{ secrets.OPENMOSH_KEYSTORE_PASSWORD }}
           OPENMOSH_KEY_ALIAS: ${{ secrets.OPENMOSH_KEY_ALIAS }}
@@ -65,26 +92,72 @@ jobs:
           --obfuscate --split-debug-info=build/symbols
       - name: Collect
         run: |
+          rm -f "$RUNNER_TEMP/release.jks"
           mkdir dist
           v="${GITHUB_REF_NAME}"
           for abi in arm64-v8a armeabi-v7a x86_64; do
             cp "build/app/outputs/flutter-apk/app-$abi-release.apk" "dist/openmosh-$v-$abi.apk"
           done
           (cd dist && sha256sum *.apk > SHA256SUMS)
-          rm -f "$RUNNER_TEMP/release.jks"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: apks
+          path: dist/*.apk
+          if-no-files-found: error
+          retention-days: 1
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sums
+          path: dist/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 1
+
+  sign:
+    # The only job that sees the minisign key: no checkout, no build, no
+    # third-party code beyond download-artifact; it receives SHA256SUMS only.
+    needs: apk
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: sums
+          path: dist
+      - name: Install rsign2
+        # rsign2 is minisign-compatible; Ubuntu's minisign cannot read unencrypted keys.
+        # Installed before the key is written, from the locked dependency tree.
+        run: cargo install rsign2 --version 0.6.7 --locked
       - name: Sign checksums (minisign, key id 59E37F1EF15B67E2)
         env:
           MINISIGN_SECRET_KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
         run: |
-          # rsign2 is minisign-compatible; Ubuntu's minisign cannot read unencrypted keys.
-          cargo install rsign2 --version 0.6.7 --locked
           umask 077
           printf '%s\n' "$MINISIGN_SECRET_KEY" > "$RUNNER_TEMP/minisign.key"
           rsign sign -W -s "$RUNNER_TEMP/minisign.key" -t "openmosh-app $GITHUB_REF_NAME" dist/SHA256SUMS < /dev/null
           rm -f "$RUNNER_TEMP/minisign.key"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: signature
+          path: dist/SHA256SUMS.minisig
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    needs: sign
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Check the APKs match the signed checksums
+        working-directory: dist
+        run: sha256sum --check --strict SHA256SUMS
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           # v1.2.0-rc.1 and similar test builds are pre-releases, never "latest".
           pre=""

@@ -164,6 +164,8 @@ class RustBuilder {
             ? 'zigbuild'
             : 'build',
         ...extraArgs,
+        // OpenMosh: build exactly the dependencies in Cargo.lock (supply chain).
+        if (!extraArgs.contains('--locked')) '--locked',
         '--manifest-path',
         manifestPath,
         '-p',
