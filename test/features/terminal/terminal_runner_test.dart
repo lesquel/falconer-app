@@ -134,11 +134,13 @@ void main() {
     unawaited(runner.start());
     await pump();
     conns.single.closed = true;
+    conns.single.closeReason = 'Connection reset by peer';
     await shells.single.out.close();
     await pump();
     await pump();
     expect(shells.length, 2);
     expect(emu.resets, 1, reason: "the old session's screen is cleared before re-attaching");
+    expect(emu.notices, contains('[connection lost: Connection reset by peer — reconnecting…]'));
     expect(shells.last.written, isEmpty);
     shells.last.out.add(Uint8List.fromList(utf8.encode('\$ ')));
     await pump();

@@ -25,6 +25,7 @@ pub async fn probe_host_fingerprint(host: String, port: u16) -> anyhow::Result<S
 #[frb(opaque)]
 pub struct SshClient {
     handle: Arc<Handle<PinningHandler>>,
+    closed: client::CloseReason,
 }
 
 impl SshClient {
@@ -38,9 +39,11 @@ impl SshClient {
         private_openssh: String,
     ) -> anyhow::Result<SshClient> {
         let private = Zeroizing::new(private_openssh);
-        let handle = client::connect(&host, port, &user, &pinned_fingerprint, &private).await?;
+        let (handle, closed) =
+            client::connect(&host, port, &user, &pinned_fingerprint, &private).await?;
         Ok(SshClient {
             handle: Arc::new(handle),
+            closed,
         })
     }
 
@@ -69,6 +72,13 @@ impl SshClient {
     #[frb(sync)]
     pub fn is_closed(&self) -> bool {
         self.handle.is_closed()
+    }
+
+    /// Why the connection ended, once it has: a server disconnect or the
+    /// transport error (short, no secrets).
+    #[frb(sync)]
+    pub fn close_reason(&self) -> Option<String> {
+        self.closed.lock().ok().and_then(|c| c.clone())
     }
 
     pub async fn disconnect(&self) {

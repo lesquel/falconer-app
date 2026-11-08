@@ -101,6 +101,8 @@ class FakeConnection implements SshConnection {
   final List<String> commands = [];
   final List<List<int>?> stdins = [];
   bool closed = false;
+  @override
+  String? closeReason;
 
   /// Scripts written to `sh -s` on stdin (hook calls are shell-independent).
   List<String> get scripts => [for (final s in stdins) s == null ? '' : utf8.decode(s)];

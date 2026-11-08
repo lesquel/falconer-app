@@ -12,9 +12,14 @@ use crate::keys::decode_private;
 
 pub const CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
 
+/// Why the session ended (a server disconnect or a transport error), kept
+/// so the app can show it when a terminal drops.
+pub type CloseReason = Arc<Mutex<Option<String>>>;
+
 pub struct PinningHandler {
     policy: PinPolicy,
     slot: VerdictSlot,
+    closed: CloseReason,
 }
 
 impl client::Handler for PinningHandler {
@@ -30,6 +35,23 @@ impl client::Handler for PinningHandler {
             *s = Some(verdict);
         }
         Ok(ok)
+    }
+
+    async fn disconnected(
+        &mut self,
+        reason: client::DisconnectReason<Self::Error>,
+    ) -> Result<(), Self::Error> {
+        let (text, result) = match reason {
+            client::DisconnectReason::ReceivedDisconnect(info) => (
+                format!("server closed the connection ({:?})", info.reason_code),
+                Ok(()),
+            ),
+            client::DisconnectReason::Error(e) => (e.to_string(), Err(e)),
+        };
+        if let Ok(mut c) = self.closed.lock() {
+            *c = Some(sanitize(&text));
+        }
+        result
     }
 }
 
@@ -47,11 +69,13 @@ async fn handshake(
     host: &str,
     port: u16,
     policy: PinPolicy,
-) -> CoreResult<(Handle<PinningHandler>, VerdictSlot)> {
+) -> CoreResult<(Handle<PinningHandler>, CloseReason)> {
     let slot: VerdictSlot = Arc::new(Mutex::new(None));
+    let closed: CloseReason = Arc::new(Mutex::new(None));
     let handler = PinningHandler {
         policy,
         slot: slot.clone(),
+        closed: closed.clone(),
     };
     let fut = client::connect(config(), (host, port), handler);
     let res = tokio::time::timeout(CONNECT_TIMEOUT, fut)
@@ -59,7 +83,7 @@ async fn handshake(
         .map_err(|_| CoreError::Timeout)?;
     let verdict = slot.lock().ok().and_then(|s| s.clone());
     match (res, verdict) {
-        (Ok(h), Some(Verdict::Accept)) => Ok((h, slot)),
+        (Ok(h), Some(Verdict::Accept)) => Ok((h, closed)),
         (_, Some(Verdict::Mismatch { expected, actual })) => {
             Err(CoreError::HostKeyMismatch { expected, actual })
         }
@@ -85,7 +109,7 @@ pub async fn connect(
     user: &str,
     pinned_fingerprint: &str,
     private_openssh: &str,
-) -> CoreResult<Handle<PinningHandler>> {
+) -> CoreResult<(Handle<PinningHandler>, CloseReason)> {
     if !pinned_fingerprint.starts_with("SHA256:") {
         return Err(CoreError::HostKeyMismatch {
             expected: pinned_fingerprint.to_string(),
@@ -93,7 +117,7 @@ pub async fn connect(
         });
     }
     let key = decode_private(private_openssh)?;
-    let (mut session, _) =
+    let (mut session, closed) =
         handshake(host, port, PinPolicy::Pinned(pinned_fingerprint.into())).await?;
     let auth = session
         .authenticate_publickey(user, PrivateKeyWithHashAlg::new(Arc::new(key), None))
@@ -102,7 +126,7 @@ pub async fn connect(
     if !auth.success() {
         return Err(CoreError::AuthFailed);
     }
-    Ok(session)
+    Ok((session, closed))
 }
 
 /// Keeps error text short and single-line; russh errors contain no secrets

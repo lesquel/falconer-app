@@ -90,6 +90,9 @@ final class _RustConnection implements SshConnection {
   bool get isClosed => _client.isClosed();
 
   @override
+  String? get closeReason => _client.closeReason();
+
+  @override
   Future<void> close() => _client.disconnect();
 }
 

@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import '../../../../shared/domain/failure.dart';
+import '../../../../shared/logging/redacting_logger.dart';
 import '../../../../shared/ssh/domain/ssh_ports.dart';
 import '../../../hosts/domain/usecases/host_connections.dart';
 import '../entities/backoff_policy.dart';
@@ -110,7 +111,13 @@ final class TerminalRunner {
           _set(TerminalPhase.closed);
           break;
         }
-        emulator.notice('[connection lost, reconnecting…]');
+        final why = conn.closeReason;
+        Log.warning('ssh', 'connection lost: ${why ?? 'unknown'}');
+        emulator.notice(
+          why == null
+              ? '[connection lost, reconnecting…]'
+              : '[connection lost: $why — reconnecting…]',
+        );
       } on HostKeyMismatchFailure catch (e) {
         _fail(e);
         break;

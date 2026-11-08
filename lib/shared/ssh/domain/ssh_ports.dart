@@ -42,6 +42,9 @@ abstract interface class SshConnection {
   /// Uploads into `~/.openmosh/uploads/`; returns the remote absolute path.
   Future<String> upload(String localPath, String remoteName);
   bool get isClosed;
+
+  /// Why the connection ended, once [isClosed]; null when unknown.
+  String? get closeReason;
   Future<void> close();
 }
 

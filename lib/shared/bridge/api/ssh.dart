@@ -32,6 +32,10 @@ abstract class ShellSession implements RustOpaqueInterface {
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<SshClient>>
 abstract class SshClient implements RustOpaqueInterface {
+  /// Why the connection ended, once it has: a server disconnect or the
+  /// transport error (short, no secrets).
+  String? closeReason();
+
   /// Fails with `host_key_mismatch` when the server key differs from
   /// `pinned_fingerprint`. Callers must not offer a way to continue.
   static Future<SshClient> connect({
