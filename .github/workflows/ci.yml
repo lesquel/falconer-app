@@ -15,6 +15,11 @@ jobs:
   flutter:
     runs-on: ubuntu-latest
     steps:
+      - name: Free disk space
+        # The Rust core is built for three Android ABIs; the default runner image runs out of disk.
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost /opt/hostedtoolcache/CodeQL /usr/share/swift /usr/local/lib/node_modules
+          df -h /
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
