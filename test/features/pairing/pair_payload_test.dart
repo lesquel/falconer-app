@@ -98,4 +98,18 @@ void main() {
     expect(errorOf(link(valid()..['ip'] = '100.64.0.1')), isNull);
     expect(errorOf(link(valid()..['ip'] = '100.127.255.254')), isNull);
   });
+
+  test('exp that is not a positive in-range integer is malformed, never a crash', () {
+    for (final exp in <Object?>[0, -1, 1.5, null, true, 900 + 86400 + 1, 1 << 62, -(1 << 62)]) {
+      expect(errorOf(link(valid()..['exp'] = exp)), PairCodeError.malformed, reason: '$exp');
+    }
+    expect(errorOf(link(valid()..['exp'] = 900 + 86400)), isNull);
+  });
+
+  test('ip octets must be plain decimal digits', () {
+    for (final ip in ['100.64.0. 1', '100.64.+0.1', '100.64.0.1 ', '100.064.0.1', '100.64..1']) {
+      expect(errorOf(link(valid()..['ip'] = ip)), isNot(isNull), reason: ip);
+      expect(errorOf(link(valid()..['ip'] = ip)), isNot(PairCodeError.expired), reason: ip);
+    }
+  });
 }

@@ -41,6 +41,9 @@ final class PairPayload {
 
   static const version = 1;
 
+  /// Codes live 5 minutes; anything claiming to live longer than a day is not ours.
+  static const maxLifetimeSecs = 86400;
+
   final String alias;
   final String address;
   final String ip;
@@ -80,7 +83,10 @@ final class PairPayload {
     final sshPort = _port(json, 'ssh_port');
     final pairPort = _port(json, 'port');
     final exp = json['exp'];
-    if (exp is! int) throw PairCodeFailure(PairCodeError.malformed);
+    final nowSecs = now.millisecondsSinceEpoch ~/ 1000;
+    if (exp is! int || exp <= 0 || exp > nowSecs + maxLifetimeSecs) {
+      throw PairCodeFailure(PairCodeError.malformed);
+    }
 
     if (!isTailnetIpv4(ip)) throw PairCodeFailure(PairCodeError.notTailnet);
     final expiresAt = DateTime.fromMillisecondsSinceEpoch(exp * 1000, isUtc: true);

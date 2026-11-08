@@ -105,6 +105,33 @@ void main() {
     expect(notifier.shown, isEmpty);
   });
 
+  test('a push with a bad ts, seq or kind type is discarded, never thrown', () async {
+    final bad = <Map<String, Object?>>[
+      wire()..['ts'] = 1 << 62,
+      wire()..['ts'] = -1,
+      wire()..['ts'] = '1700000000',
+      wire()..['seq'] = -1,
+      wire()..['seq'] = 1.5,
+      wire()..['kind'] = 7,
+      wire()..['id'] = 7,
+    ];
+    for (final m in bad) {
+      opener.next = m;
+      expect(await handle(body('kid1')), isNull, reason: '$m');
+    }
+    expect(inbox.rows, isEmpty);
+    expect(notifier.shown, isEmpty);
+  });
+
+  test('a push without ts or seq still maps with defaults', () async {
+    opener.next = wire()
+      ..remove('ts')
+      ..remove('seq');
+    final e = await handle(body('kid1'));
+    expect(e!.seq, 0);
+    expect(e.at, DateTime.fromMillisecondsSinceEpoch(0, isUtc: true));
+  });
+
   test('a duplicate push is not notified twice', () async {
     opener.next = wire();
     await handle(body('kid1'));

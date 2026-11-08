@@ -104,8 +104,16 @@ void main() {
         HostDraft(alias: 'a', address: 'bad host', port: 22, user: 'u'),
         HostDraft(alias: 'a', address: 'h', port: 0, user: 'u'),
         HostDraft(alias: 'a', address: 'h', port: 22, user: 'u;id'),
+        HostDraft(alias: 'a', address: '999.1.1.1', port: 22, user: 'u'),
+        HostDraft(alias: 'a', address: '100.064.0.1', port: 22, user: 'u'),
       ]) {
         expect(() => d.validated(), throwsA(isA<ValidationFailure>()));
+      }
+    });
+
+    test('dotted-quad and host-name addresses still validate', () {
+      for (final a in ['100.64.0.1', '192.168.1.10', 'pi.tail1.ts.net', 'fe80::1']) {
+        expect(HostDraft(alias: 'a', address: a, port: 22, user: 'u').validated().address, a);
       }
     });
 
