@@ -53,7 +53,7 @@ class _TerminalScrollGestureHandlerState
   @override
   void initState() {
     widget.terminal.addListener(_onTerminalUpdated);
-    isAltBuffer = widget.terminal.isUsingAltBuffer;
+    isAltBuffer = _wantsWheel();
     super.initState();
   }
 
@@ -68,14 +68,22 @@ class _TerminalScrollGestureHandlerState
     if (oldWidget.terminal != widget.terminal) {
       oldWidget.terminal.removeListener(_onTerminalUpdated);
       widget.terminal.addListener(_onTerminalUpdated);
-      isAltBuffer = widget.terminal.isUsingAltBuffer;
+      isAltBuffer = _wantsWheel();
     }
     super.didUpdateWidget(oldWidget);
   }
 
+  /// OpenMosh patch: gestures become wheel events in the alternate screen,
+  /// and also whenever the application asked for mouse reports. A stray
+  /// "leave alternate screen" from inside a multiplexer pane otherwise
+  /// stopped scrolling everywhere.
+  bool _wantsWheel() =>
+      widget.terminal.isUsingAltBuffer || widget.terminal.mouseMode != MouseMode.none;
+
   void _onTerminalUpdated() {
-    if (isAltBuffer != widget.terminal.isUsingAltBuffer) {
-      isAltBuffer = widget.terminal.isUsingAltBuffer;
+    final wants = _wantsWheel();
+    if (isAltBuffer != wants) {
+      isAltBuffer = wants;
       setState(() {});
     }
   }

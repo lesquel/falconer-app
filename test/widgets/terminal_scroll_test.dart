@@ -112,4 +112,30 @@ void main() {
     expect(focus.hasFocus, isFalse);
     expect(t.testTextInput.isVisible, isFalse);
   });
+
+  testWidgets(
+    'with mouse reporting on, scrolling reaches the app even outside the alternate screen',
+    (t) async {
+      // A stray "leave alternate screen" from a pane (e.g. an agent drawing
+      // images) must not stop the wheel from reaching Herdr.
+      final terminal = Terminal();
+      final out = <String>[];
+      terminal.onOutput = out.add;
+      await t.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TerminalView(terminal, textStyle: const TerminalStyle(fontSize: 10)),
+          ),
+        ),
+      );
+      terminal.write('\x1b[?1049h\x1b[?1000h\x1b[?1006h');
+      terminal.write('\x1b[?1049l');
+      await t.pump();
+      out.clear();
+      final view = t.getTopLeft(find.byType(TerminalView));
+      await t.dragFrom(view + const Offset(5, 5), const Offset(0, 60));
+      await t.pump();
+      expect(out.where((s) => s.startsWith('\x1b[<6')), isNotEmpty);
+    },
+  );
 }
