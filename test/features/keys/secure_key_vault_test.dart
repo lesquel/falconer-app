@@ -132,6 +132,45 @@ void main() {
     );
   });
 
+  Future<void> addRow(String id) => db
+      .into(db.keyRows)
+      .insert(
+        KeyRowsCompanion.insert(
+          id: id,
+          label: id,
+          publicKey: 'ssh-ed25519 AAAA $id',
+          fingerprint: 'SHA256:$id',
+          imported: false,
+          createdAt: 0,
+        ),
+      );
+
+  test('eager migration moves every v0.1 key and never writes the old namespace', () async {
+    await addRow('k1');
+    await addRow('k2');
+    await addRow('k3');
+    legacy.values['ssh:k1'] = 'OLD1';
+    legacy.values['ssh:k2'] = 'STALE';
+    bound.values['ssh:k2'] = 'NEW2';
+    bound.values['ssh:k3'] = 'NEW3';
+    expect(await vault.hasLegacyKeys(), isTrue);
+    expect(await vault.migrateLegacyKeys(), 1);
+    expect(bound.values, {'ssh:k1': 'OLD1', 'ssh:k2': 'NEW2', 'ssh:k3': 'NEW3'});
+    expect(legacy.values, isEmpty);
+    expect(legacy.writes, 0);
+    expect(auth.calls, 0, reason: 'the bound write shows the hardware prompt');
+    expect(await vault.hasLegacyKeys(), isFalse);
+  });
+
+  test('a failed eager migration keeps the v0.1 key', () async {
+    await addRow('k1');
+    legacy.values['ssh:k1'] = 'OLD1';
+    bound.fail = PlatformException(code: 'x', message: 'cancelled');
+    await expectLater(vault.migrateLegacyKeys(), throwsA(isA<UserCancelledFailure>()));
+    expect(legacy.values, {'ssh:k1': 'OLD1'});
+    expect(await vault.hasLegacyKeys(), isTrue);
+  });
+
   test('delete removes the key from both namespaces', () async {
     bound.values['ssh:k1'] = 'A';
     legacy.values['ssh:k1'] = 'B';

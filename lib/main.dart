@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,14 +30,21 @@ Future<void> main(List<String> args) async {
   final launch = await push.notifier.launchPayload();
   final router = _router = buildRouter(initialLocation: launch ?? '/');
 
+  final container = ProviderContainer(
+    overrides: [
+      databaseProvider.overrideWithValue(push.db),
+      secureStorageProvider.overrideWithValue(push.storage),
+      pushEndpointsProvider.overrideWithValue(push.endpoints),
+      notifierProvider.overrideWithValue(push.notifier),
+    ],
+  );
+  // A v0.1 key still outside the auth-bound namespace moves at the next
+  // successful user verification.
+  unawaited(container.read(legacyKeyMigrationProvider).checkOnStartup());
+
   runApp(
-    ProviderScope(
-      overrides: [
-        databaseProvider.overrideWithValue(push.db),
-        secureStorageProvider.overrideWithValue(push.storage),
-        pushEndpointsProvider.overrideWithValue(push.endpoints),
-        notifierProvider.overrideWithValue(push.notifier),
-      ],
+    UncontrolledProviderScope(
+      container: container,
       child: OpenMoshApp(router: router),
     ),
   );

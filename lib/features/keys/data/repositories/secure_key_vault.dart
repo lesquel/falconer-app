@@ -106,6 +106,35 @@ class SecureKeyVault implements KeyVault {
     await _storage.deleteLegacySshPrivate(id);
     return v;
   }
+
+  Future<List<String>> _legacyIds() async {
+    final ids = await (_db.selectOnly(
+      _db.keyRows,
+    )..addColumns([_db.keyRows.id])).map((r) => r.read(_db.keyRows.id)!).get();
+    return [
+      for (final id in ids)
+        if (await _storage.hasLegacySshPrivate(id)) id,
+    ];
+  }
+
+  @override
+  Future<bool> hasLegacyKeys() async => (await _legacyIds()).isNotEmpty;
+
+  /// A copy left behind next to a bound key is only removed.
+  @override
+  Future<int> migrateLegacyKeys() async {
+    var moved = 0;
+    for (final id in await _legacyIds()) {
+      if (!await _storage.hasBoundSshPrivate(id)) {
+        final v = await _storage.readLegacySshPrivate(id);
+        if (v == null) continue;
+        await _storage.writeSshPrivate(id, v);
+        moved++;
+      }
+      await _storage.deleteLegacySshPrivate(id);
+    }
+    return moved;
+  }
 }
 
 class SecurePushKeyStore implements PushKeyStore {

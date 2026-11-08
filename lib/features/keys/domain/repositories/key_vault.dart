@@ -21,6 +21,15 @@ abstract interface class KeyVault {
   /// Requires user authentication every call. Throws
   /// `UserCancelledFailure` when the prompt is dismissed.
   Future<String> unlockPrivate(String id, {required String reason});
+
+  /// True when a key still lives in the v0.1 namespace (not auth-bound).
+  /// No prompt.
+  Future<bool> hasLegacyKeys();
+
+  /// Moves every v0.1 key into the auth-bound namespace; each write shows
+  /// the hardware prompt. Returns how many keys moved. A key whose write
+  /// fails stays where it was.
+  Future<int> migrateLegacyKeys();
 }
 
 /// X25519 key that decrypts pushes. Not biometric-gated: the background

@@ -49,6 +49,23 @@ class FakeVault implements KeyVault {
   int unlocks = 0;
   bool cancel = false;
 
+  /// Keys still in the v0.1 namespace.
+  int legacyKeys = 0;
+  int migrations = 0;
+  AppFailure? migrationFailure;
+
+  @override
+  Future<bool> hasLegacyKeys() async => legacyKeys > 0;
+
+  @override
+  Future<int> migrateLegacyKeys() async {
+    migrations++;
+    if (migrationFailure != null) throw migrationFailure!;
+    final n = legacyKeys;
+    legacyKeys = 0;
+    return n;
+  }
+
   @override
   Future<String> unlockPrivate(String id, {required String reason}) async {
     if (cancel) throw const UserCancelledFailure();

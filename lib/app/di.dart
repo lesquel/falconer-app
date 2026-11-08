@@ -24,6 +24,7 @@ import '../features/keys/data/datasources/secure_key_storage.dart';
 import '../features/keys/data/repositories/secure_key_vault.dart';
 import '../features/keys/domain/entities/ssh_key_info.dart';
 import '../features/keys/domain/repositories/key_vault.dart';
+import '../features/keys/domain/usecases/legacy_key_migration.dart';
 import '../features/lock/domain/app_lock.dart';
 import '../features/pairing/data/repositories/tcp_pairing_gateway.dart';
 import '../features/pairing/domain/repositories/pairing_gateway.dart';
@@ -58,7 +59,12 @@ final notifierProvider = Provider<EventNotifier>((ref) => _mustOverride('notifie
 
 // Adapters.
 final secureStorageProvider = Provider<SecureKeyStorage>((ref) => SecureKeyStorage());
-final authenticatorProvider = Provider<UserAuthenticator>((ref) => LocalAuthAuthenticator());
+
+/// The bare prompt. The key vault uses it for its own legacy unlock path, so
+/// the migrating wrapper below never re-enters the vault mid-unlock.
+final platformAuthenticatorProvider = Provider<UserAuthenticator>(
+  (ref) => LocalAuthAuthenticator(),
+);
 final sshConnectorProvider = Provider<SshConnector>((ref) => const RustSshConnector());
 final pairingGatewayProvider = Provider<PairingGateway>((ref) => const TcpPairingGateway());
 final fileSourceProvider = Provider<FileSource>((ref) => const FilePickerSource());
@@ -68,10 +74,20 @@ final keyVaultProvider = Provider<KeyVault>(
     ref.watch(databaseProvider),
     ref.watch(secureStorageProvider),
     const KeysBridge(),
-    ref.watch(authenticatorProvider),
+    ref.watch(platformAuthenticatorProvider),
     newId: newId,
   ),
 );
+final legacyKeyMigrationProvider = Provider<MigratingAuthenticator>(
+  (ref) =>
+      MigratingAuthenticator(ref.watch(platformAuthenticatorProvider), ref.watch(keyVaultProvider)),
+);
+
+/// User verification for sensitive actions; also moves v0.1 keys once.
+final authenticatorProvider = Provider<UserAuthenticator>(
+  (ref) => ref.watch(legacyKeyMigrationProvider),
+);
+
 final pushKeysProvider = Provider<PushKeyStore>(
   (ref) => SecurePushKeyStore(ref.watch(secureStorageProvider)),
 );
