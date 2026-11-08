@@ -33,6 +33,17 @@ final class TerminalSession {
   final TerminalRunner runner;
   final ValueNotifier<ModifierState> modifiers;
 
+  /// Chat composer state, kept while the session lives.
+  bool chatOpen = false;
+  String draft = '';
+
+  /// Sends a composed message: one paste (bracketed when the app asks for
+  /// it, so newlines do not submit early), then Enter.
+  Future<void> sendMessage(String text) async {
+    emulator.terminal.paste(text);
+    await runner.send('\r');
+  }
+
   Future<void> dispose() async {
     await runner.dispose();
     await emulator.dispose();

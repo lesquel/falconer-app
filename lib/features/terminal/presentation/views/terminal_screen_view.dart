@@ -12,6 +12,7 @@ class TerminalScreenView extends StatelessWidget {
     required this.keysBar,
     this.overlay,
     this.focusNode,
+    this.composer,
   });
 
   final Terminal terminal;
@@ -20,6 +21,9 @@ class TerminalScreenView extends StatelessWidget {
   final Widget keysBar;
   final Widget? overlay;
   final FocusNode? focusNode;
+
+  /// Chat composer shown above the keys bar, when open.
+  final Widget? composer;
 
   String? get _banner => switch (phase) {
     TerminalPhase.connecting => 'Connecting…',
@@ -54,6 +58,7 @@ class TerminalScreenView extends StatelessWidget {
                 keyboardType: TextInputType.visiblePassword,
               ),
         ),
+        ?composer,
         keysBar,
       ],
     );

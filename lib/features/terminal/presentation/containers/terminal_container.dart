@@ -15,6 +15,7 @@ import '../../data/datasources/connectivity_signals.dart';
 import '../../domain/usecases/terminal_runner.dart';
 import '../controllers/terminal_session.dart';
 import '../controllers/terminal_session_pool.dart';
+import '../views/chat_composer.dart';
 import '../views/session_ended_panel.dart';
 import '../views/terminal_screen_view.dart';
 
@@ -106,7 +107,8 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
 
   void _leave() => context.canPop() ? context.pop() : context.go('/hosts/${widget.hostId}');
 
-  Future<void> _upload(bool images) async {
+  /// Uploads picked files; returns the remote paths separated by spaces.
+  Future<String?> _uploadPaths(bool images) async {
     final source = ref.read(fileSourceProvider);
     final messenger = ScaffoldMessenger.of(context);
     setState(() => _uploading = true);
@@ -122,12 +124,49 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
           await source.discard(file);
         }
       }
-      if (pasted.isNotEmpty) await _runner.send(pasted.join(' '));
+      return pasted.isEmpty ? null : pasted.join(' ');
     } on AppFailure catch (e) {
       messenger.showSnackBar(SnackBar(content: Text(e.message)));
+      return null;
     } finally {
       if (mounted) setState(() => _uploading = false);
     }
+  }
+
+  Future<void> _upload(bool images) async {
+    final text = await _uploadPaths(images);
+    if (text != null) await _runner.send(text);
+  }
+
+  Future<String?> _attachToChat() async {
+    final images = await showModalBottomSheet<bool>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheet) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('Photos'),
+              onTap: () => Navigator.of(sheet).pop(true),
+            ),
+            ListTile(
+              leading: const Icon(Icons.attach_file),
+              title: const Text('File'),
+              onTap: () => Navigator.of(sheet).pop(false),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (images == null) return null;
+    return _uploadPaths(images);
+  }
+
+  void _toggleChat() {
+    setState(() => _session.chatOpen = !_session.chatOpen);
+    if (_session.chatOpen) _focus.unfocus();
   }
 
   @override
@@ -177,6 +216,16 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
         phase: _phase,
         fontSize: settings.fontSize,
         overlay: overlay,
+        composer: _session.chatOpen
+            ? ChatComposer(
+                initialText: _session.draft,
+                busy: _uploading,
+                onChanged: (t) => _session.draft = t,
+                onSend: (t) => unawaited(_session.sendMessage(t)),
+                onAttach: _attachToChat,
+                onClose: _toggleChat,
+              )
+            : null,
         keysBar: ExtraKeysBar(
           base: KeyPresets.base,
           preset: preset,
@@ -185,6 +234,13 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
           onModifier: (m) => _session.modifiers.value = mods.toggle(m),
           onModifierLock: (m) => _session.modifiers.value = mods.lock(m),
           pinned: [
+            IconButton(
+              tooltip: _session.chatOpen ? 'Type in the terminal' : 'Chat',
+              isSelected: _session.chatOpen,
+              icon: const Icon(Icons.chat_bubble_outline),
+              selectedIcon: const Icon(Icons.chat_bubble),
+              onPressed: _toggleChat,
+            ),
             IconButton(
               tooltip: 'Keyboard',
               icon: const Icon(Icons.keyboard),
