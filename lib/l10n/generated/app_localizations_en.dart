@@ -1192,4 +1192,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pairConfirmOnComputer =>
       'Confirm on your computer: type y in the terminal where openmosh-hook pair is running.';
+
+  @override
+  String get enterKey => 'Enter';
 }

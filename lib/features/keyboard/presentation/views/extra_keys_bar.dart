@@ -257,7 +257,8 @@ class ArrowCross extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             key('\x1b[D', Icons.keyboard_arrow_left, l.arrowLeft),
-            gap,
+            // Enter in the middle: submits the prompt in any agent.
+            key('\r', Icons.keyboard_return, l.enterKey),
             key('\x1b[C', Icons.keyboard_arrow_right, l.arrowRight),
           ],
         ),

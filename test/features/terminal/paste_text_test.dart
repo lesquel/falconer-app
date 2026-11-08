@@ -76,4 +76,16 @@ void main() {
     await sub.cancel();
     await emu.dispose();
   });
+
+  test("the soft keyboard's Enter (a newline) reaches the terminal as Enter", () async {
+    final emu = XtermEmulator();
+    final out = <String>[];
+    final sub = emu.input.listen(out.add);
+    emu.terminal.textInput('\n');
+    emu.terminal.textInput('ls\n');
+    await Future<void>.delayed(Duration.zero);
+    expect(out, ['\r', 'ls\r']);
+    await sub.cancel();
+    await emu.dispose();
+  });
 }

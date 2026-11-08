@@ -964,5 +964,9 @@
   "pairConfirmOnComputer": "Confirm on your computer: type y in the terminal where openmosh-hook pair is running.",
   "@pairConfirmOnComputer": {
     "description": "Shown while pairing waits for the host user's y/N confirmation."
+  },
+  "enterKey": "Enter",
+  "@enterKey": {
+    "description": "Accessibility label of the Enter key in the arrow cross."
   }
 }

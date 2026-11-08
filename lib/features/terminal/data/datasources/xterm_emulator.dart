@@ -96,6 +96,11 @@ class _SafeTerminal extends Terminal {
   @override
   void paste(String text) => super.paste(sanitizePaste(text));
 
+  /// Typed text. The soft keyboard's Enter arrives as a newline; terminals
+  /// send Enter as a carriage return, which is what agents treat as submit.
   @override
-  void textInput(String text) => super.textInput(text.length > 1 ? sanitizePaste(text) : text);
+  void textInput(String text) {
+    final typed = text.replaceAll('\r\n', '\r').replaceAll('\n', '\r');
+    super.textInput(typed.length > 1 ? sanitizePaste(typed) : typed);
+  }
 }

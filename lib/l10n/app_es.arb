@@ -341,5 +341,6 @@
   "showLess": "Ver menos",
   "keyPassphrase": "Frase de contraseña (si la clave tiene una)",
   "chooseKeyFile": "Elegir archivo",
-  "pairConfirmOnComputer": "Confirma en tu computadora: escribe y en la terminal donde corre openmosh-hook pair."
+  "pairConfirmOnComputer": "Confirma en tu computadora: escribe y en la terminal donde corre openmosh-hook pair.",
+  "enterKey": "Enter"
 }

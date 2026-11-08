@@ -18,7 +18,7 @@ void main() {
       'send  ',
       'wait 950',
       'send \x1b[200~look at these\nAttached image: /u/a.jpg\nAttached image: /u/b.jpg\x1b[201~',
-      'wait 80',
+      'wait 400',
       'send enter',
     ]);
   });

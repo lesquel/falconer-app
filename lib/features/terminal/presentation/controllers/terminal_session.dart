@@ -18,7 +18,7 @@ const attachSettleEach = Duration(milliseconds: 250);
 
 /// Pause between the pasted text and Enter, so the agent treats Enter as a
 /// submit, not as part of the paste.
-const submitPause = Duration(milliseconds: 80);
+const submitPause = Duration(milliseconds: 400);
 
 /// Paste [files] (each followed by a space), wait for the agent to attach
 /// them, paste [text] and, when [submit], press Enter.

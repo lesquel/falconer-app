@@ -2144,6 +2144,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm on your computer: type y in the terminal where openmosh-hook pair is running.'**
   String get pairConfirmOnComputer;
+
+  /// Accessibility label of the Enter key in the arrow cross.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter'**
+  String get enterKey;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
