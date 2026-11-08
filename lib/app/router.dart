@@ -7,6 +7,7 @@ import '../features/hosts/presentation/containers/hosts_container.dart';
 import '../features/inbox/presentation/containers/event_confirm_container.dart';
 import '../features/inbox/presentation/containers/inbox_container.dart';
 import '../features/keys/presentation/containers/keys_container.dart';
+import '../features/pairing/presentation/containers/pairing_container.dart';
 import '../features/settings/presentation/containers/settings_container.dart';
 import 'home_shell.dart';
 
@@ -33,6 +34,7 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
             StatefulShellBranch(routes: [GoRoute(path: '/settings', builder: (_, _) => const SettingsContainer())]),
           ],
         ),
+        GoRoute(path: '/pair', builder: (_, _) => const PairingContainer()),
         GoRoute(path: '/hosts/new', builder: (_, _) => const HostFormContainer()),
         GoRoute(path: '/hosts/:id', builder: (_, s) => HostDetailContainer(hostId: s.pathParameters['id']!)),
         GoRoute(path: '/hosts/:id/edit', builder: (_, s) => HostFormContainer(hostId: s.pathParameters['id']!)),
