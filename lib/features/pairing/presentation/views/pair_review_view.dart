@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/l10n.dart';
+import '../../../../shared/domain/mask.dart';
+import '../../../../shared/ui/atoms/sensitive_text.dart';
 import '../../../../shared/ui/organisms/thumb_page.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
 import '../../domain/entities/pair_payload.dart';
@@ -50,7 +52,7 @@ class _PairReviewViewState extends State<PairReviewView> {
     final l = context.l10n;
     return ThumbPage(
       eyebrow: l.newComputer,
-      title: Text(l.pairWith(c.ip)),
+      title: SensitiveText(c.ip, masked: maskAddress(c.ip), format: l.pairWith),
       subtitle: l.pairReviewSubtitle,
       children: [
         TextField(

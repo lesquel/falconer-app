@@ -1156,4 +1156,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get openHerdrHint =>
       'Opens the Herdr session with mirroring: the computer follows the tab and workspace you pick here.';
+
+  @override
+  String get showSensitive => 'Show';
+
+  @override
+  String get hideSensitive => 'Hide';
+
+  @override
+  String get showToCompare => 'Show to compare';
+
+  @override
+  String get copyPublicKeyTitle => 'Copy the public key?';
+
+  @override
+  String get copyPublicKeyBody =>
+      'It is marked as sensitive on the clipboard. Paste it only on computers you trust.';
 }

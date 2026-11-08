@@ -1161,4 +1161,20 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get openHerdrHint =>
       'Abre la sesión de Herdr con espejo: la computadora sigue la pestaña y el workspace que elijas aquí.';
+
+  @override
+  String get showSensitive => 'Mostrar';
+
+  @override
+  String get hideSensitive => 'Ocultar';
+
+  @override
+  String get showToCompare => 'Mostrar para comparar';
+
+  @override
+  String get copyPublicKeyTitle => '¿Copiar la clave pública?';
+
+  @override
+  String get copyPublicKeyBody =>
+      'Se marca como sensible en el portapapeles. Pégala solo en computadoras de confianza.';
 }

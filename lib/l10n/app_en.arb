@@ -920,5 +920,25 @@
   },
   "@openHerdrHint": {
     "description": "Tooltip of the Open Herdr action."
+  },
+  "showSensitive": "Show",
+  "@showSensitive": {
+    "description": "Tooltip of the eye button that reveals a hidden address, key or fingerprint."
+  },
+  "hideSensitive": "Hide",
+  "@hideSensitive": {
+    "description": "Tooltip of the eye button that hides a revealed address, key or fingerprint."
+  },
+  "showToCompare": "Show to compare",
+  "@showToCompare": {
+    "description": "Tooltip of the eye button on a fingerprint the user must compare with the computer."
+  },
+  "copyPublicKeyTitle": "Copy the public key?",
+  "@copyPublicKeyTitle": {
+    "description": "Confirmation before copying a public key to the clipboard."
+  },
+  "copyPublicKeyBody": "It is marked as sensitive on the clipboard. Paste it only on computers you trust.",
+  "@copyPublicKeyBody": {
+    "description": "Body of the copy public key confirmation."
   }
 }

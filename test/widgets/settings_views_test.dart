@@ -130,4 +130,17 @@ void main() {
     await t.pump();
     expect(changed?.themePreference, ThemePreference.light);
   });
+
+  testWidgets('settings: the language picker sits next to the theme, visible without scrolling', (
+    t,
+  ) async {
+    await t.pumpWidget(
+      app(SettingsView(settings: const AppSettings(), onChanged: (_) {}, onAppLockChanged: (_) {})),
+    );
+    expect(find.byKey(const Key('language')).hitTestable(), findsOneWidget);
+    expect(find.byType(DropdownButton<AppLanguage>), findsOneWidget, reason: 'no second row');
+    final theme = t.getTopLeft(find.byKey(const Key('theme_switch')));
+    final lang = t.getTopLeft(find.byKey(const Key('language')));
+    expect(lang.dy - theme.dy, lessThan(120));
+  });
 }

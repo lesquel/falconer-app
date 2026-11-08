@@ -330,5 +330,10 @@
   "notifyTo": "Hasta",
   "appTheme": "Tema",
   "openHerdr": "Abrir Herdr",
-  "openHerdrHint": "Abre la sesión de Herdr con espejo: la computadora sigue la pestaña y el workspace que elijas aquí."
+  "openHerdrHint": "Abre la sesión de Herdr con espejo: la computadora sigue la pestaña y el workspace que elijas aquí.",
+  "showSensitive": "Mostrar",
+  "hideSensitive": "Ocultar",
+  "showToCompare": "Mostrar para comparar",
+  "copyPublicKeyTitle": "¿Copiar la clave pública?",
+  "copyPublicKeyBody": "Se marca como sensible en el portapapeles. Pégala solo en computadoras de confianza."
 }

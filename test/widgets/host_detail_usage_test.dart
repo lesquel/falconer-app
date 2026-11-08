@@ -56,4 +56,27 @@ void main() {
     await t.pumpWidget(view(null));
     expect(find.byKey(const Key('open_herdr')), findsNothing);
   });
+
+  testWidgets('the host screen masks the address and the pinned host key', (t) async {
+    final host = testHost();
+    await t.pumpWidget(
+      l10nApp(
+        home: Scaffold(
+          body: HostDetailView(
+            host: host,
+            sessions: null,
+            agents: null,
+            loading: false,
+            onLoad: () {},
+            onShell: () {},
+            onAttach: (_) {},
+            onEnablePush: () {},
+          ),
+        ),
+      ),
+    );
+    expect(find.text('${host.user}@${host.address}:${host.port}'), findsNothing);
+    expect(find.text('${host.user}@••••:${host.port}'), findsOneWidget);
+    expect(find.text(host.fingerprint), findsNothing);
+  });
 }

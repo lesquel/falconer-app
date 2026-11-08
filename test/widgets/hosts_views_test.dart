@@ -35,6 +35,10 @@ void main() {
       ),
     );
     expect(find.text('work'), findsOneWidget);
+    expect(find.text('me@100.100.1.2:22'), findsNothing);
+    expect(find.text('me@••••:22'), findsOneWidget);
+    await t.tap(find.byTooltip('Show'));
+    await t.pump();
     expect(find.text('me@100.100.1.2:22'), findsOneWidget);
     expect(find.text('push'), findsOneWidget);
   });
@@ -87,6 +91,9 @@ void main() {
         ),
       ),
     );
+    expect(find.text('SHA256:abc'), findsNothing);
+    await t.tap(find.byTooltip('Show to compare'));
+    await t.pump();
     expect(find.text('SHA256:abc'), findsOneWidget);
     expect(trusted, isFalse);
     await t.tap(find.textContaining('trust and save'));

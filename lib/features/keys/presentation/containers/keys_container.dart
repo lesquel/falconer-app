@@ -110,6 +110,7 @@ class _ImportKeyDialog extends StatefulWidget {
 class _ImportKeyDialogState extends State<_ImportKeyDialog> {
   late final _label = TextEditingController(text: context.l10n.importedKeyLabel);
   final _pem = TextEditingController();
+  bool _showPem = false;
 
   @override
   void dispose() {
@@ -133,14 +134,24 @@ class _ImportKeyDialogState extends State<_ImportKeyDialog> {
           ),
           const SizedBox(height: 8),
           TextField(
+            key: const Key('private_key_field'),
             controller: _pem,
-            minLines: 4,
-            maxLines: 8,
+            obscureText: !_showPem,
+            // An obscured field is one line; revealed, the key wraps.
+            minLines: _showPem ? 4 : 1,
+            maxLines: _showPem ? 8 : 1,
             autocorrect: false,
             enableSuggestions: false,
             keyboardType: TextInputType.visiblePassword,
             style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
-            decoration: InputDecoration(labelText: l.pastePrivateKey),
+            decoration: InputDecoration(
+              labelText: l.pastePrivateKey,
+              suffixIcon: IconButton(
+                tooltip: _showPem ? l.hideSensitive : l.showSensitive,
+                icon: Icon(_showPem ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+                onPressed: () => setState(() => _showPem = !_showPem),
+              ),
+            ),
           ),
         ],
       ),

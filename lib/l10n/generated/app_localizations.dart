@@ -2078,6 +2078,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Opens the Herdr session with mirroring: the computer follows the tab and workspace you pick here.'**
   String get openHerdrHint;
+
+  /// Tooltip of the eye button that reveals a hidden address, key or fingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get showSensitive;
+
+  /// Tooltip of the eye button that hides a revealed address, key or fingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get hideSensitive;
+
+  /// Tooltip of the eye button on a fingerprint the user must compare with the computer.
+  ///
+  /// In en, this message translates to:
+  /// **'Show to compare'**
+  String get showToCompare;
+
+  /// Confirmation before copying a public key to the clipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the public key?'**
+  String get copyPublicKeyTitle;
+
+  /// Body of the copy public key confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'It is marked as sensitive on the clipboard. Paste it only on computers you trust.'**
+  String get copyPublicKeyBody;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

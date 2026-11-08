@@ -35,6 +35,9 @@ class _HostFormViewState extends State<HostFormView> {
   late final _user = TextEditingController(text: widget.initial?.user);
   late String? _keyId = widget.initialKeyId;
 
+  /// An existing host's address starts hidden; a new one is typed in clear.
+  late bool _hideAddress = (widget.initial?.address ?? '').isNotEmpty;
+
   @override
   void dispose() {
     for (final c in [_alias, _address, _port, _user]) {
@@ -57,9 +60,19 @@ class _HostFormViewState extends State<HostFormView> {
         TextField(
           controller: _address,
           enabled: !widget.lockAddress,
-          decoration: InputDecoration(labelText: l.fieldAddress, hintText: 'box.tailnet.ts.net'),
+          obscureText: _hideAddress,
+          decoration: InputDecoration(
+            labelText: l.fieldAddress,
+            hintText: 'box.tailnet.ts.net',
+            suffixIcon: IconButton(
+              tooltip: _hideAddress ? l.showSensitive : l.hideSensitive,
+              icon: Icon(_hideAddress ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+              onPressed: () => setState(() => _hideAddress = !_hideAddress),
+            ),
+          ),
           keyboardType: TextInputType.url,
           autocorrect: false,
+          enableSuggestions: false,
         ),
         const SizedBox(height: 12),
         TextField(

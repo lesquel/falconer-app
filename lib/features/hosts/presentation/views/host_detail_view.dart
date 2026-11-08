@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/l10n.dart';
+import '../../../../shared/domain/mask.dart';
+import '../../../../shared/ui/atoms/sensitive_text.dart';
 import '../../../../shared/ui/atoms/status_badge.dart';
 import '../../../../shared/ui/molecules/fingerprint_card.dart';
 import '../../../../shared/ui/molecules/mosh_tile.dart';
@@ -78,7 +80,14 @@ class HostDetailView extends StatelessWidget {
     final l = context.l10n;
     return ThumbPage(
       onBack: onBack,
-      caption: '${host.user}@${host.address}:${host.port}',
+      captionChild: SensitiveText(
+        '${host.user}@${host.address}:${host.port}',
+        masked: maskEndpoint(host.user, host.address, host.port),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.right,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: c.muted),
+      ),
       actions: [
         if (onEdit != null)
           IconButton(tooltip: l.editHost, icon: const Icon(Icons.edit_outlined), onPressed: onEdit),

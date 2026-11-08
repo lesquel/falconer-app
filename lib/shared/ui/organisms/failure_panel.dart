@@ -32,8 +32,16 @@ class FailurePanel extends StatelessWidget {
           const SizedBox(height: 8),
           Text(l.hostKeyChangedBody, textAlign: TextAlign.center),
           const SizedBox(height: 16),
-          FingerprintCard(label: l.fingerprintPinned, fingerprint: f.expected),
-          FingerprintCard(label: l.fingerprintPresented, fingerprint: f.actual),
+          FingerprintCard(
+            label: l.fingerprintPinned,
+            fingerprint: f.expected,
+            revealLabel: l.showToCompare,
+          ),
+          FingerprintCard(
+            label: l.fingerprintPresented,
+            fingerprint: f.actual,
+            revealLabel: l.showToCompare,
+          ),
           if (onBack != null) ...[
             const SizedBox(height: 16),
             OutlinedButton(onPressed: onBack, child: Text(l.back)),

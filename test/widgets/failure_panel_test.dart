@@ -21,6 +21,11 @@ void main() {
       ),
     );
     expect(find.text('Host key changed'), findsOneWidget);
+    expect(find.text('SHA256:pinned'), findsNothing, reason: 'masked until revealed');
+    expect(find.byTooltip('Show to compare'), findsNWidgets(2));
+    await t.tap(find.byTooltip('Show to compare').first);
+    await t.tap(find.byTooltip('Show to compare').last);
+    await t.pump();
     expect(find.text('SHA256:pinned'), findsOneWidget);
     expect(find.text('SHA256:other'), findsOneWidget);
     expect(find.text('Retry'), findsNothing);

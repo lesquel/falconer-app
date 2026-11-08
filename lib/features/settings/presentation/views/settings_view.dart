@@ -85,7 +85,7 @@ class SettingsView extends StatelessWidget {
             ),
           ),
         ),
-        // Light / dark at a glance; Colors keeps the accent and terminal.
+        // Light / dark and language at a glance; Colors keeps the accent and terminal.
         card([
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -119,6 +119,31 @@ class SettingsView extends StatelessWidget {
                     showSelectedIcon: false,
                     onSelectionChanged: (v) => onChanged(s.copyWith(themePreference: v.first)),
                   ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  key: const Key('language'),
+                  children: [
+                    const Icon(Icons.translate, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(l.language, style: const TextStyle(fontWeight: FontWeight.w700)),
+                    ),
+                    DropdownButton<AppLanguage>(
+                      value: s.language,
+                      underline: const SizedBox.shrink(),
+                      borderRadius: BorderRadius.circular(MoshRadii.key),
+                      items: [
+                        for (final lang in AppLanguage.values)
+                          DropdownMenuItem(
+                            key: Key('language_${lang.name}'),
+                            value: lang,
+                            child: Text(l.languageName(lang)),
+                          ),
+                      ],
+                      onChanged: (v) => v == null ? null : onChanged(s.copyWith(language: v)),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -194,27 +219,6 @@ class SettingsView extends StatelessWidget {
                   DropdownMenuItem(value: ch, child: Text('Ctrl+${ch.toUpperCase()}')),
               ],
               onChanged: (v) => v == null ? null : onChanged(s.copyWith(herdrPrefix: v)),
-            ),
-          ),
-        ]),
-        card([
-          ListTile(
-            key: const Key('language'),
-            leading: const Icon(Icons.translate),
-            title: Text(l.language),
-            trailing: DropdownButton<AppLanguage>(
-              value: s.language,
-              underline: const SizedBox.shrink(),
-              borderRadius: BorderRadius.circular(MoshRadii.key),
-              items: [
-                for (final lang in AppLanguage.values)
-                  DropdownMenuItem(
-                    key: Key('language_${lang.name}'),
-                    value: lang,
-                    child: Text(l.languageName(lang)),
-                  ),
-              ],
-              onChanged: (v) => v == null ? null : onChanged(s.copyWith(language: v)),
             ),
           ),
         ]),

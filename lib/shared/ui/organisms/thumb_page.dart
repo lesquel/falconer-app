@@ -17,6 +17,7 @@ class ThumbPage extends StatelessWidget {
     this.backIcon = Icons.chevron_left,
     this.backTooltip,
     this.caption,
+    this.captionChild,
     this.actions = const [],
     this.children = const [],
     this.bottomGap = 24,
@@ -34,6 +35,9 @@ class ThumbPage extends StatelessWidget {
 
   /// Small text on the right of the top bar.
   final String? caption;
+
+  /// Replaces [caption] with a widget (a masked address with its eye).
+  final Widget? captionChild;
   final List<Widget> actions;
   final List<Widget> children;
   final double bottomGap;
@@ -42,7 +46,7 @@ class ThumbPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = MoshColors.of(context);
     final t = Theme.of(context).textTheme;
-    final hasBar = onBack != null || caption != null || actions.isNotEmpty;
+    final hasBar = onBack != null || caption != null || captionChild != null || actions.isNotEmpty;
     final bar = Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
       child: Row(
@@ -54,7 +58,9 @@ class ThumbPage extends StatelessWidget {
               onPressed: onBack,
             ),
           const Spacer(),
-          if (caption != null)
+          if (captionChild != null)
+            Flexible(flex: 6, child: captionChild!)
+          else if (caption != null)
             Flexible(
               flex: 4,
               child: Padding(

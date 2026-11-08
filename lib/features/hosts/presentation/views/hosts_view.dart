@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/l10n.dart';
+import '../../../../shared/domain/mask.dart';
+import '../../../../shared/ui/atoms/sensitive_text.dart';
 import '../../../../shared/ui/atoms/status_badge.dart';
 import '../../../../shared/ui/atoms/time_ago.dart';
 import '../../../../shared/ui/molecules/mosh_tile.dart';
@@ -309,8 +311,9 @@ class _HostCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 2),
-          Text(
+          SensitiveText(
             '${h.user}@${h.address}:${h.port}',
+            masked: maskEndpoint(h.user, h.address, h.port),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(fontSize: 13, color: c.muted),

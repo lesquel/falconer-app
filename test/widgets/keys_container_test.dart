@@ -55,7 +55,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.byTooltip('Import key'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField).last, 'PRIVATE KEY');
+    await tester.enterText(find.byKey(const Key('private_key_field')), 'PRIVATE KEY');
   }
 
   testWidgets('cancelling the import dialog clears the clipboard', (tester) async {
@@ -72,5 +72,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(vault.imported, ['PRIVATE KEY']);
     expect(clipboardWrites, ['']);
+  });
+
+  testWidgets('the pasted private key is hidden until the eye reveals it', (tester) async {
+    await openImport(tester);
+    final field = find.byKey(const Key('private_key_field'));
+    expect(tester.widget<TextField>(field).obscureText, isTrue);
+    await tester.tap(find.descendant(of: field, matching: find.byTooltip('Show')));
+    await tester.pump();
+    expect(tester.widget<TextField>(field).obscureText, isFalse);
   });
 }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/l10n.dart';
-import '../../../../shared/ui/atoms/mono_text.dart';
+import '../../../../shared/domain/mask.dart';
+import '../../../../shared/ui/atoms/sensitive_text.dart';
 import '../../domain/entities/ssh_key_info.dart';
 
 class KeysView extends StatelessWidget {
@@ -13,8 +14,26 @@ class KeysView extends StatelessWidget {
   });
 
   final List<SshKeyInfo> keys;
+
+  /// Called after the user confirms the copy.
   final ValueChanged<SshKeyInfo> onCopyPublic;
   final ValueChanged<SshKeyInfo> onDelete;
+
+  Future<void> _confirmCopy(BuildContext context, SshKeyInfo k) async {
+    final l = context.l10n;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(l.copyPublicKeyTitle),
+        content: Text(l.copyPublicKeyBody),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(l.copy)),
+        ],
+      ),
+    );
+    if (ok == true) onCopyPublic(k);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +66,7 @@ class KeysView extends StatelessWidget {
                       IconButton(
                         tooltip: l.copyPublicKey,
                         icon: const Icon(Icons.copy),
-                        onPressed: () => onCopyPublic(k),
+                        onPressed: () => _confirmCopy(context, k),
                       ),
                       IconButton(
                         tooltip: l.delete,
@@ -56,10 +75,14 @@ class KeysView extends StatelessWidget {
                       ),
                     ],
                   ),
-                  MonoText(k.fingerprint),
-                  const SizedBox(height: 4),
-                  Text(
+                  SensitiveText(
+                    k.fingerprint,
+                    masked: maskFingerprint(k.fingerprint),
+                    style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+                  ),
+                  SensitiveText(
                     k.publicKey,
+                    masked: maskPublicKey(k.publicKey),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
