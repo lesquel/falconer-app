@@ -12,10 +12,14 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 DeviceKeyMaterial generateEd25519Key({required String comment}) =>
     RustLib.instance.api.crateApiKeysGenerateEd25519Key(comment: comment);
 
-DeviceKeyMaterial importPrivateKey({required String privateOpenssh}) => RustLib
-    .instance
-    .api
-    .crateApiKeysImportPrivateKey(privateOpenssh: privateOpenssh);
+/// `passphrase` decrypts a protected key; `None` or empty for a plain one.
+DeviceKeyMaterial importPrivateKey({
+  required String privateOpenssh,
+  String? passphrase,
+}) => RustLib.instance.api.crateApiKeysImportPrivateKey(
+  privateOpenssh: privateOpenssh,
+  passphrase: passphrase,
+);
 
 String publicKeyFingerprint({required String publicOpenssh}) => RustLib
     .instance

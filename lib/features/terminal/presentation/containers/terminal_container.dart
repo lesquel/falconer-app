@@ -183,7 +183,8 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     if (range == null) return;
     final text = _session.emulator.terminal.buffer.getText(range).trimRight();
     _selection.clearSelection();
-    await Clipboard.setData(ClipboardData(text: text));
+    // Terminal output can hold secrets: keep it out of keyboard previews.
+    await ref.read(secureClipboardProvider).copySensitive(text);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.copied)));
     }

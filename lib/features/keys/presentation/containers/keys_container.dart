@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/di.dart';
@@ -23,20 +22,24 @@ class KeysContainer extends ConsumerWidget {
   }
 
   Future<void> _import(BuildContext context, WidgetRef ref) async {
-    final result = await showDialog<({String label, String pem})>(
+    final result = await showDialog<({String label, String pem, String passphrase})>(
       context: context,
-      builder: (_) => const _ImportKeyDialog(),
+      builder: (_) => _ImportKeyDialog(pickFile: ref.read(keyFilePickerProvider).pickKeyText),
     );
     // The private key may have been pasted from the clipboard: clear it
     // whether the dialog was confirmed or cancelled.
-    await Clipboard.setData(const ClipboardData(text: ''));
+    await ref.read(secureClipboardProvider).clear();
     if (result == null || !context.mounted) return;
     final fallback = context.l10n.importedKeyLabel;
     await _guard(
       context,
       () => ref
           .read(keyVaultProvider)
-          .import(result.label.isEmpty ? fallback : result.label, result.pem),
+          .import(
+            result.label.isEmpty ? fallback : result.label,
+            result.pem,
+            passphrase: result.passphrase.isEmpty ? null : result.passphrase,
+          ),
     );
   }
 
@@ -86,7 +89,7 @@ class KeysContainer extends ConsumerWidget {
           keys: list,
           onCopyPublic: (k) async {
             final m = ScaffoldMessenger.of(context);
-            await Clipboard.setData(ClipboardData(text: k.publicKey));
+            await ref.read(secureClipboardProvider).copySensitive(k.publicKey);
             m.showSnackBar(SnackBar(content: Text(l.publicKeyCopied)));
           },
           onDelete: (k) => _delete(context, ref, k),
@@ -101,7 +104,10 @@ class KeysContainer extends ConsumerWidget {
 /// Owns its controllers so they are disposed only after the dialog route is
 /// gone; the pasted key is cleared from the field on dispose.
 class _ImportKeyDialog extends StatefulWidget {
-  const _ImportKeyDialog();
+  const _ImportKeyDialog({required this.pickFile});
+
+  /// Reads a key file from the system picker; null when nothing was chosen.
+  final Future<String?> Function() pickFile;
 
   @override
   State<_ImportKeyDialog> createState() => _ImportKeyDialogState();
@@ -110,14 +116,27 @@ class _ImportKeyDialog extends StatefulWidget {
 class _ImportKeyDialogState extends State<_ImportKeyDialog> {
   late final _label = TextEditingController(text: context.l10n.importedKeyLabel);
   final _pem = TextEditingController();
+  final _passphrase = TextEditingController();
   bool _showPem = false;
+  String? _error;
 
   @override
   void dispose() {
     _pem.clear();
     _pem.dispose();
+    _passphrase.clear();
+    _passphrase.dispose();
     _label.dispose();
     super.dispose();
+  }
+
+  Future<void> _chooseFile() async {
+    try {
+      final text = await widget.pickFile();
+      if (text != null && mounted) setState(() => (_pem.text = text, _error = null));
+    } on AppFailure catch (e) {
+      if (mounted) setState(() => _error = e.message);
+    }
   }
 
   @override
@@ -125,6 +144,7 @@ class _ImportKeyDialogState extends State<_ImportKeyDialog> {
     final l = context.l10n;
     return AlertDialog(
       title: Text(l.importKeyTitle),
+      scrollable: true,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -153,12 +173,42 @@ class _ImportKeyDialogState extends State<_ImportKeyDialog> {
               ),
             ),
           ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              key: const Key('choose_key_file'),
+              icon: const Icon(Icons.folder_open_outlined),
+              label: Text(l.chooseKeyFile),
+              onPressed: _chooseFile,
+            ),
+          ),
+          TextField(
+            key: const Key('key_passphrase'),
+            controller: _passphrase,
+            obscureText: true,
+            autocorrect: false,
+            enableSuggestions: false,
+            keyboardType: TextInputType.visiblePassword,
+            decoration: InputDecoration(labelText: l.keyPassphrase),
+          ),
+          if (_error != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                l.failureMessage(_error!),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            ),
         ],
       ),
       actions: [
         TextButton(onPressed: () => Navigator.pop(context), child: Text(l.cancel)),
         FilledButton(
-          onPressed: () => Navigator.pop(context, (label: _label.text.trim(), pem: _pem.text)),
+          onPressed: () => Navigator.pop(context, (
+            label: _label.text.trim(),
+            pem: _pem.text,
+            passphrase: _passphrase.text,
+          )),
           child: Text(l.importAction),
         ),
       ],

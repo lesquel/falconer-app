@@ -801,7 +801,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errDataTooLarge => 'The data is too large.';
 
   @override
-  String get errNotUnencryptedKey => 'That is not an unencrypted ssh-ed25519 private key.';
+  String get errKeyImportFailed =>
+      'That is not an ssh-ed25519 private key, or the passphrase is wrong.';
 
   @override
   String get errNotUsableKey => 'That is not a usable ssh-ed25519 private key.';
@@ -1181,4 +1182,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get showLess => 'Show less';
+
+  @override
+  String get keyPassphrase => 'Passphrase (if the key has one)';
+
+  @override
+  String get chooseKeyFile => 'Choose file';
 }

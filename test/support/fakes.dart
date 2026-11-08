@@ -90,7 +90,8 @@ class FakeVault implements KeyVault {
   @override
   Future<SshKeyInfo> generate(String label) => throw UnimplementedError();
   @override
-  Future<SshKeyInfo> import(String label, String privateOpenssh) => throw UnimplementedError();
+  Future<SshKeyInfo> import(String label, String privateOpenssh, {String? passphrase}) =>
+      throw UnimplementedError();
   @override
   Stream<List<SshKeyInfo>> watchAll() => const Stream.empty();
 }

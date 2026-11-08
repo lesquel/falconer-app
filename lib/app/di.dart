@@ -26,6 +26,7 @@ import '../features/keys/data/repositories/secure_key_vault.dart';
 import '../features/keys/domain/entities/ssh_key_info.dart';
 import '../features/keys/domain/repositories/key_vault.dart';
 import '../features/keys/domain/usecases/legacy_key_migration.dart';
+import '../features/keys/data/datasources/key_file_picker.dart';
 import '../features/lock/domain/app_lock.dart';
 import '../features/lock/domain/user_presence.dart';
 import '../features/pairing/data/repositories/tcp_pairing_gateway.dart';
@@ -38,6 +39,7 @@ import '../features/settings/domain/repositories/settings_repository.dart';
 import '../features/uploads/data/datasources/file_picker_source.dart';
 import '../features/uploads/domain/repositories/file_source.dart';
 import '../features/uploads/domain/usecases/upload_file.dart';
+import '../shared/data/secure_clipboard.dart';
 import '../shared/domain/monotonic.dart';
 import '../shared/data/app_database.dart';
 import '../features/usage/domain/usecases/load_agent_usage.dart';
@@ -86,6 +88,12 @@ final legacyKeyMigrationProvider = Provider<MigratingAuthenticator>(
   (ref) =>
       MigratingAuthenticator(ref.watch(platformAuthenticatorProvider), ref.watch(keyVaultProvider)),
 );
+
+/// Clipboard for keys and terminal copies (sensitive, cleared for real).
+final secureClipboardProvider = Provider<SecureClipboard>((ref) => const SecureClipboard());
+
+/// System file picker for private key files.
+final keyFilePickerProvider = Provider<KeyFilePicker>((ref) => const KeyFilePicker());
 
 /// Monotonic time for security windows.
 final monotonicClockProvider = Provider<Elapsed>((ref) => monotonicClock());

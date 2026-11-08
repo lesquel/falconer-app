@@ -135,6 +135,7 @@ abstract class RustLibApi extends BaseApi {
 
   DeviceKeyMaterial crateApiKeysImportPrivateKey({
     required String privateOpenssh,
+    String? passphrase,
   });
 
   Future<void> crateApiKeysInitApp();
@@ -635,12 +636,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @override
   DeviceKeyMaterial crateApiKeysImportPrivateKey({
     required String privateOpenssh,
+    String? passphrase,
   }) {
     return handler.executeSync(
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(privateOpenssh, serializer);
+          sse_encode_opt_String(passphrase, serializer);
           return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 14)!;
         },
         codec: SseCodec(
@@ -648,7 +651,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: sse_decode_AnyhowException,
         ),
         constMeta: kCrateApiKeysImportPrivateKeyConstMeta,
-        argValues: [privateOpenssh],
+        argValues: [privateOpenssh, passphrase],
         apiImpl: this,
       ),
     );
@@ -657,7 +660,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiKeysImportPrivateKeyConstMeta =>
       const TaskConstMeta(
         debugName: "import_private_key",
-        argNames: ["privateOpenssh"],
+        argNames: ["privateOpenssh", "passphrase"],
       );
 
   @override

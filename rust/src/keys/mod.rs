@@ -27,14 +27,21 @@ pub fn generate_ed25519(comment: &str) -> CoreResult<KeyMaterial> {
     material(&key)
 }
 
-pub fn import_private(openssh: &str) -> CoreResult<KeyMaterial> {
-    let key = decode_private(openssh)?;
+/// Imports an OpenSSH ed25519 key, decrypting it with [passphrase] when it
+/// is protected. The result is re-encoded without encryption: it is stored in
+/// Keystore-backed storage behind user verification.
+pub fn import_private(openssh: &str, passphrase: Option<&str>) -> CoreResult<KeyMaterial> {
+    let key = decode_with(openssh, passphrase.filter(|p| !p.is_empty()))?;
     material(&key)
 }
 
 pub fn decode_private(openssh: &str) -> CoreResult<PrivateKey> {
-    let key = russh::keys::decode_secret_key(openssh, None)
-        .map_err(|_| CoreError::InvalidKey("unreadable or encrypted private key".into()))?;
+    decode_with(openssh, None)
+}
+
+fn decode_with(openssh: &str, passphrase: Option<&str>) -> CoreResult<PrivateKey> {
+    let key = russh::keys::decode_secret_key(openssh, passphrase)
+        .map_err(|_| CoreError::InvalidKey("unreadable private key or wrong passphrase".into()))?;
     if key.algorithm() != russh::keys::Algorithm::Ed25519 {
         return Err(CoreError::InvalidKey(
             "only ssh-ed25519 keys are supported".into(),
@@ -89,7 +96,7 @@ mod tests {
         assert!(m.private_openssh.contains("BEGIN OPENSSH PRIVATE KEY"));
         assert!(m.fingerprint.starts_with("SHA256:"));
         assert!(!m.fingerprint.ends_with('='));
-        let again = import_private(&m.private_openssh).unwrap();
+        let again = import_private(&m.private_openssh, None).unwrap();
         assert_eq!(again.public_openssh, m.public_openssh);
         assert_eq!(again.fingerprint, m.fingerprint);
         assert_eq!(
@@ -105,10 +112,49 @@ mod tests {
         assert_ne!(a.fingerprint, b.fingerprint);
     }
 
+    // `ssh-keygen -t ed25519 -N 'correct horse' -C fixture`, a throwaway key.
+    const ENC: &str = "-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAACmFlczI1Ni1jdHIAAAAGYmNyeXB0AAAAGAAAABCmrFjB/C
+PW9O5jlJae2uI3AAAAIAAAAAEAAAAzAAAAC3NzaC1lZDI1NTE5AAAAIIO+7N5fVfjXDfx9
+bB2wZjB7fDXImDYiPSnb8rudKerXAAAAkBLh+GzH/W6nn+UreV3tuaJdtj//i1U6Rtt0uJ
+nouYWKfQBkKUAxSXf9zYs/zsw863HHBUZGZ86vp8ARiXNDv40qjkO2wumss74F4ahPAbKT
+xBODKGhWUdCx8ecZA0ms4oSY+stYd3H2L+ZvxZF2U70L3HYzDjqssf+lgRW8XEz7AYcSiZ
+vIoJUliEfvEblJDQ==
+-----END OPENSSH PRIVATE KEY-----
+";
+    const ENC_FP: &str = "SHA256:e3XaXzU3klK3a3Rh54xGCpIDjiLQjlfDuionKtiXkAg";
+
+    #[test]
+    fn passphrase_protected_key_imports_with_its_passphrase() {
+        let m = import_private(ENC, Some("correct horse")).unwrap();
+        assert_eq!(m.fingerprint, ENC_FP);
+        // Stored decrypted: later connections need no passphrase.
+        let again = import_private(&m.private_openssh, None).unwrap();
+        assert_eq!(again.fingerprint, ENC_FP);
+    }
+
+    #[test]
+    fn passphrase_protected_key_needs_the_right_passphrase() {
+        assert_eq!(
+            import_private(ENC, None).err().map(|e| e.code()),
+            Some("invalid_key")
+        );
+        assert_eq!(
+            import_private(ENC, Some("wrong")).err().map(|e| e.code()),
+            Some("invalid_key")
+        );
+    }
+
+    #[test]
+    fn an_empty_passphrase_means_none() {
+        let m = generate_ed25519("x").unwrap();
+        assert!(import_private(&m.private_openssh, Some("")).is_ok());
+    }
+
     #[test]
     fn import_rejects_garbage() {
         assert_eq!(
-            import_private("not a key").err().map(|e| e.code()),
+            import_private("not a key", None).err().map(|e| e.code()),
             Some("invalid_key")
         );
         assert!(public_fingerprint("ssh-ed25519 !!!").is_err());

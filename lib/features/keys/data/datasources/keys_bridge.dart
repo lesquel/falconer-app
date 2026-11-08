@@ -11,6 +11,8 @@ final class KeyMaterial {
   final String fingerprint;
 }
 
+const keyImportFailed = 'That is not an ssh-ed25519 private key, or the passphrase is wrong.';
+
 class KeysBridge {
   const KeysBridge();
 
@@ -19,12 +21,12 @@ class KeysBridge {
     return KeyMaterial(m.privateOpenssh, m.publicOpenssh, m.fingerprint);
   }
 
-  KeyMaterial import(String privateOpenssh) {
+  KeyMaterial import(String privateOpenssh, {String? passphrase}) {
     try {
-      final m = rs.importPrivateKey(privateOpenssh: privateOpenssh);
+      final m = rs.importPrivateKey(privateOpenssh: privateOpenssh, passphrase: passphrase);
       return KeyMaterial(m.privateOpenssh, m.publicOpenssh, m.fingerprint);
     } catch (_) {
-      throw const ValidationFailure('That is not an unencrypted ssh-ed25519 private key.');
+      throw const ValidationFailure(keyImportFailed);
     }
   }
 }

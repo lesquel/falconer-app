@@ -26,10 +26,15 @@ pub fn generate_ed25519_key(comment: String) -> anyhow::Result<DeviceKeyMaterial
     Ok(keys::generate_ed25519(&comment)?.into())
 }
 
+/// `passphrase` decrypts a protected key; `None` or empty for a plain one.
 #[frb(sync)]
-pub fn import_private_key(private_openssh: String) -> anyhow::Result<DeviceKeyMaterial> {
+pub fn import_private_key(
+    private_openssh: String,
+    passphrase: Option<String>,
+) -> anyhow::Result<DeviceKeyMaterial> {
     let private = zeroize::Zeroizing::new(private_openssh);
-    Ok(keys::import_private(&private)?.into())
+    let passphrase = passphrase.map(zeroize::Zeroizing::new);
+    Ok(keys::import_private(&private, passphrase.as_deref().map(String::as_str))?.into())
 }
 
 #[frb(sync)]

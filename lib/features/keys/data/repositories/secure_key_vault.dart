@@ -79,8 +79,12 @@ class SecureKeyVault implements KeyVault {
       _store(newId(), label, _bridge.generate('openmosh:$label'), imported: false);
 
   @override
-  Future<SshKeyInfo> import(String label, String privateOpenssh) =>
-      _store(newId(), label, _bridge.import(privateOpenssh), imported: true);
+  Future<SshKeyInfo> import(String label, String privateOpenssh, {String? passphrase}) => _store(
+    newId(),
+    label,
+    _bridge.import(privateOpenssh, passphrase: passphrase),
+    imported: true,
+  );
 
   @override
   Future<void> delete(String id) async {

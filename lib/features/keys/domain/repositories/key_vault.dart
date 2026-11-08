@@ -15,7 +15,9 @@ abstract interface class KeyVault {
   /// Creates the device Ed25519 key if missing.
   Future<SshKeyInfo> ensureDeviceKey({required String comment});
   Future<SshKeyInfo> generate(String label);
-  Future<SshKeyInfo> import(String label, String privateOpenssh);
+
+  /// [passphrase] decrypts a protected key; it is not kept.
+  Future<SshKeyInfo> import(String label, String privateOpenssh, {String? passphrase});
   Future<void> delete(String id);
 
   /// Requires user authentication every call. Throws

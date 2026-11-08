@@ -771,10 +771,12 @@ fn wire__crate__api__keys__import_private_key_impl(
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_private_openssh = <String>::sse_decode(&mut deserializer);
+            let api_passphrase = <Option<String>>::sse_decode(&mut deserializer);
             deserializer.end();
             transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                 (move || {
-                    let output_ok = crate::api::keys::import_private_key(api_private_openssh)?;
+                    let output_ok =
+                        crate::api::keys::import_private_key(api_private_openssh, api_passphrase)?;
                     std::result::Result::Ok(output_ok)
                 })(),
             )

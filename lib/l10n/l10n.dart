@@ -116,7 +116,7 @@ extension FailureL10n on AppLocalizations {
     'The period must be 1–31 days.' => errUsagePeriod,
     'Upload failed.' => errUploadFailed,
     'The data is too large.' => errDataTooLarge,
-    'That is not an unencrypted ssh-ed25519 private key.' => errNotUnencryptedKey,
+    'That is not an ssh-ed25519 private key, or the passphrase is wrong.' => errKeyImportFailed,
     'That is not a usable ssh-ed25519 private key.' => errNotUsableKey,
     'Could not verify you, so the lock stays off. Set up a fingerprint, face or screen '
         'lock on this phone, then try again.' =>

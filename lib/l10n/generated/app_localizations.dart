@@ -1461,11 +1461,11 @@ abstract class AppLocalizations {
   /// **'The data is too large.'**
   String get errDataTooLarge;
 
-  /// No description provided for @errNotUnencryptedKey.
+  /// No description provided for @errKeyImportFailed.
   ///
   /// In en, this message translates to:
-  /// **'That is not an unencrypted ssh-ed25519 private key.'**
-  String get errNotUnencryptedKey;
+  /// **'That is not an ssh-ed25519 private key, or the passphrase is wrong.'**
+  String get errKeyImportFailed;
 
   /// No description provided for @errNotUsableKey.
   ///
@@ -2126,6 +2126,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show less'**
   String get showLess;
+
+  /// Optional passphrase field of the import key dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Passphrase (if the key has one)'**
+  String get keyPassphrase;
+
+  /// Import key dialog: pick the private key file with the system file picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose file'**
+  String get chooseKeyFile;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -525,7 +525,7 @@
   "errHookUnexpectedOutput": "openmosh-hook returned unexpected output.",
   "errUploadFailed": "Upload failed.",
   "errDataTooLarge": "The data is too large.",
-  "errNotUnencryptedKey": "That is not an unencrypted ssh-ed25519 private key.",
+  "errKeyImportFailed": "That is not an ssh-ed25519 private key, or the passphrase is wrong.",
   "errNotUsableKey": "That is not a usable ssh-ed25519 private key.",
   "errLockStaysOff": "Could not verify you, so the lock stays off. Set up a fingerprint, face or screen lock on this phone, then try again.",
   "errLockStaysOn": "Could not verify you, so the lock stays on.",
@@ -952,5 +952,13 @@
   "showLess": "Show less",
   "@showLess": {
     "description": "Collapses the agent request on the confirm screen."
+  },
+  "keyPassphrase": "Passphrase (if the key has one)",
+  "@keyPassphrase": {
+    "description": "Optional passphrase field of the import key dialog."
+  },
+  "chooseKeyFile": "Choose file",
+  "@chooseKeyFile": {
+    "description": "Import key dialog: pick the private key file with the system file picker."
   }
 }
