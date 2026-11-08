@@ -102,6 +102,27 @@ void main() {
     expect(gateway.sent, isNull);
   });
 
+  test('SSH pairing reply alias is cleaned; an oversized one is refused', () async {
+    await hosts.save(testHost(hookPath: '/h/openmosh-hook'));
+    var alias = '\u202Ebox\u200B';
+    final conn = FakeConnection(
+      (cmd, _) => ok({'device_id': 'd9', 'alias': alias, 'hpk': b64uEncode(List.filled(32, 1))}),
+    );
+    final run = PairOverSsh(
+      connections: HostConnections(
+        hosts: hosts,
+        vault: FakeVault(),
+        connector: FakeConnector(() => conn),
+      ),
+      hosts: hosts,
+      pushKeys: FakePushKeys(),
+      endpoints: endpoints,
+    );
+    expect((await run('h1', deviceName: 'Phone')).alias, 'box');
+    alias = 'x' * 65;
+    await expectLater(run('h1', deviceName: 'Phone'), throwsA(isA<PairingFailure>()));
+  });
+
   test('SSH pairing sends name, push key and endpoint on stdin and stores the reply', () async {
     await hosts.save(testHost(hookPath: '/h/openmosh-hook'));
     final conn = FakeConnection(

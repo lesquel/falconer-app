@@ -15,7 +15,7 @@ lib/
 │   ├── router.dart               # go_router routes (ids in paths are validated)
 │   ├── home_shell.dart, app.dart, theme.dart
 ├── shared/
-│   ├── domain/                   # failures, POSIX quoting, b64u, tailnet address rules
+│   ├── domain/                   # failures, POSIX quoting, b64u, IPv4/tailnet rules, label cleaning
 │   ├── crypto/                   # X25519 / HKDF / XChaCha20-Poly1305 (pure Dart)
 │   ├── hook/domain/              # openmosh-hook commands, envelope parser, HookClient
 │   ├── ssh/domain/               # SshConnector / SshConnection / ShellChannel ports

@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import '../../../../shared/domain/b64u.dart';
+import '../../../../shared/domain/display_text.dart';
 import '../../../../shared/domain/failure.dart';
 import '../../../../shared/domain/tailnet.dart';
 
@@ -71,7 +72,8 @@ final class PairPayload {
     if (json is! Map<String, Object?>) throw PairCodeFailure(PairCodeError.malformed);
     if (json['v'] != version) throw PairCodeFailure(PairCodeError.unsupportedVersion);
 
-    final alias = _str(json, 'alias', max: 64);
+    final alias = sanitizeLabel(_str(json, 'alias', max: 64));
+    if (alias == null || alias.isEmpty) throw PairCodeFailure(PairCodeError.malformed);
     final address = _str(json, 'addr', max: 253);
     final ip = _str(json, 'ip', max: 15);
     final sshUser = _str(json, 'ssh_user', max: 64);

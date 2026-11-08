@@ -99,5 +99,44 @@ void main() {
       );
       expect(PairCrypto.openResponse('garbage', key), throwsA(isA<PairingFailure>()));
     });
+
+    Future<PairResponse> replyWith(Map<String, Object?> body) async {
+      final host = await c.newX25519KeyPair();
+      final req = await PairCrypto.sealRequest(
+        hostPublicKey: await c.x25519PublicBytes(host),
+        token: c.randomBytes(32),
+        plaintext: utf8.encode('{}'),
+      );
+      final n = c.randomBytes(c.nonceLength);
+      final ct = await c.seal(
+        key: req.responseKey,
+        nonce: n,
+        plaintext: utf8.encode(jsonEncode(body)),
+        aad: 'openmosh/pair/v1',
+      );
+      final line = jsonEncode({'v': 1, 'n': b64uEncode(n), 'c': b64uEncode(ct)});
+      return PairCrypto.openResponse(line, req.responseKey);
+    }
+
+    test('reply alias is stripped of control, format and separator characters', () async {
+      final r = await replyWith({
+        'device_id': 'd1',
+        'alias': '\u202Ework\u200Bstation\uFEFF\u2028\u0007\u2066',
+      });
+      expect(r.alias, 'workstation');
+      expect(r.deviceId, 'd1');
+    });
+
+    test('a plain reply alias is kept as is', () async {
+      final r = await replyWith({'device_id': 'd1', 'alias': 'My Box_2'});
+      expect(r.alias, 'My Box_2');
+    });
+
+    test('a reply alias longer than 64 characters is invalid', () async {
+      await expectLater(
+        replyWith({'device_id': 'd1', 'alias': 'a' * 65}),
+        throwsA(isA<PairingFailure>()),
+      );
+    });
   });
 }

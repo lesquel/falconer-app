@@ -4,6 +4,7 @@ library;
 import 'dart:convert';
 
 import '../../../../shared/domain/b64u.dart';
+import '../../../../shared/domain/display_text.dart';
 import '../../../../shared/domain/failure.dart';
 import '../../../../shared/hook/domain/hook_command.dart';
 import '../../../hosts/domain/entities/host.dart';
@@ -118,13 +119,15 @@ final class PairOverSsh {
     } on FormatException {
       throw const PairingFailure('Unexpected pairing reply.');
     }
-    final alias = data['alias'];
+    final rawAlias = data['alias'];
+    final alias = rawAlias is String ? sanitizeLabel(rawAlias) : '';
+    if (alias == null) throw const PairingFailure('Unexpected pairing reply.');
     final updated = (await hosts.byId(hostId))!.copyWith(
       deviceId: id,
       hostPushKey: hpk,
       endpointSent: endpoint,
       pairedVia: PairedVia.ssh,
-      alias: alias is String && alias.isNotEmpty ? alias : null,
+      alias: alias.isNotEmpty ? alias : null,
     );
     await hosts.save(updated);
     return updated;

@@ -7,6 +7,7 @@ import 'package:cryptography/cryptography.dart';
 
 import '../../../../shared/crypto/openmosh_crypto.dart' as c;
 import '../../../../shared/domain/b64u.dart';
+import '../../../../shared/domain/display_text.dart';
 import '../../../../shared/domain/failure.dart';
 import '../../domain/entities/pairing_messages.dart';
 
@@ -99,6 +100,8 @@ abstract final class PairCrypto {
     final id = body['device_id'];
     final alias = body['alias'];
     if (id is! String || id.isEmpty || alias is! String) throw invalid;
-    return PairResponse(deviceId: id, alias: alias);
+    final cleanAlias = sanitizeLabel(alias);
+    if (cleanAlias == null) throw invalid;
+    return PairResponse(deviceId: id, alias: cleanAlias);
   }
 }

@@ -38,6 +38,7 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
 | Screens | `FLAG_SECURE` on terminal, keys and pairing screens (no screenshots, no recents thumbnail). |
 | Backups | `allowBackup="false"`, backup and data-extraction rules exclude everything. |
 | Network | No HTTP calls from the app. `network_security_config` refuses cleartext except `*.ts.net` (domain configs cannot express the 100.64.0.0/10 range; SSH and pairing use raw TCP inside the tailnet anyway). Pairing refuses codes whose address is outside 100.64.0.0/10. |
+| Pairing input | QR codes and host replies are untrusted: `exp` must be a positive integer at most one day ahead, IPv4 octets must be plain decimal, host-sent aliases are limited to 64 characters and stripped of control, bidi, zero-width and separator characters. The pairing TCP exchange has one 15 s deadline and a 16 KiB reply cap. |
 | Hook calls | Every argument of every `openmosh-hook` command is single-quoted (POSIX) before it reaches the SSH exec channel. |
 | Uploads | Random hex prefix, names reduced to `[A-Za-z0-9._-]`, 50 MB limit, directory `0700`, files `0600`. |
 | No third parties | No Firebase/FCM, Google Play services, ML Kit, analytics or crash SDKs. QR scanning uses zxing-cpp (`flutter_zxing`). Logging goes through a redacting logger. |

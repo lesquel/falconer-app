@@ -106,6 +106,15 @@ void main() {
     expect(errorOf(link(valid()..['exp'] = 900 + 86400)), isNull);
   });
 
+  test('QR alias is cleaned of format and separator characters', () {
+    final p = PairPayload.parse(
+      link(valid()..['alias'] = '\u2067work\u00A0station\uFEFF'),
+      now: now,
+    );
+    expect(p.alias, 'work station');
+    expect(errorOf(link(valid()..['alias'] = '\u200B\u200B')), PairCodeError.malformed);
+  });
+
   test('ip octets must be plain decimal digits', () {
     for (final ip in ['100.64.0. 1', '100.64.+0.1', '100.64.0.1 ', '100.064.0.1', '100.64..1']) {
       expect(errorOf(link(valid()..['ip'] = ip)), isNot(isNull), reason: ip);
