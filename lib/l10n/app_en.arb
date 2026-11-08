@@ -944,5 +944,13 @@
   "verifyToShowTerminal": "Verify it's you to show the open terminal",
   "@verifyToShowTerminal": {
     "description": "Biometric prompt reason before showing a terminal that stayed connected."
+  },
+  "showFullText": "Show full text",
+  "@showFullText": {
+    "description": "Expands a long agent request on the confirm screen."
+  },
+  "showLess": "Show less",
+  "@showLess": {
+    "description": "Collapses the agent request on the confirm screen."
   }
 }

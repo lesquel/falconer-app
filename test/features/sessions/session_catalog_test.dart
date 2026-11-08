@@ -90,4 +90,16 @@ void main() {
     expect(list[0].title, 'Allow edit?');
     expect(list[1].state, AgentState.unknown);
   });
+
+  test('agent titles and paths from the host are cleaned for display', () {
+    final a = AgentInfo.fromJson({
+      'pane_id': 'p1',
+      'agent': 'claude\u202E',
+      'title': 'fix \u2066bug\u2069\x9b',
+      'cwd': '/home/me/\u200Bproj',
+    })!;
+    expect(a.agent, 'claude');
+    expect(a.title, 'fix bug');
+    expect(a.cwd, '/home/me/proj');
+  });
 }

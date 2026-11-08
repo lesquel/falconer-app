@@ -80,21 +80,24 @@ class LocalEventNotifier implements EventNotifier {
       title: content.title,
       body: content.body,
       payload: notificationPayload(e.hostId, e.id),
-      notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(
-          channelId,
-          'Agent events',
-          importance: Importance.high,
-          priority: Priority.high,
-          category: AndroidNotificationCategory.message,
-          visibility: content.lockScreenSafe
-              ? NotificationVisibility.public
-              : NotificationVisibility.private,
-          actions: actions,
-        ),
-      ),
+      notificationDetails: NotificationDetails(android: androidDetails(actions)),
     );
   }
+
+  /// Always VISIBILITY_PRIVATE: a secure lock screen shows only that
+  /// OpenMosh has a notification, never the host alias or agent. The plugin
+  /// cannot attach a custom public version, so Android shows its own
+  /// redacted one ("Contents hidden").
+  static AndroidNotificationDetails androidDetails(List<AndroidNotificationAction> actions) =>
+      AndroidNotificationDetails(
+        channelId,
+        'Agent events',
+        importance: Importance.high,
+        priority: Priority.high,
+        category: AndroidNotificationCategory.message,
+        visibility: NotificationVisibility.private,
+        actions: actions,
+      );
 
   @override
   Future<void> cancel(String hostId, String eventId) =>

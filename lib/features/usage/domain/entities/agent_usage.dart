@@ -4,6 +4,8 @@
 /// int or double, and missing token counts are zero.
 library;
 
+import '../../../../shared/domain/display_text.dart';
+
 /// Token counts of one bucket (a day, a period, a project or a model).
 final class TokenCounts {
   const TokenCounts({
@@ -162,7 +164,12 @@ List<T> _list<T extends Object>(Object? raw, T? Function(Object?) parse) =>
 /// A non-negative whole number from an int or a finite double.
 int? _count(Object? v) => v is num && v.isFinite && v >= 0 ? v.toInt() : null;
 
-String? _text(Object? v) => v is String && v.trim().isNotEmpty ? v : null;
+/// Host-provided names (projects, models, limits), cleaned for display.
+String? _text(Object? v) {
+  if (v is! String) return null;
+  final clean = sanitizeText(v, max: 80);
+  return clean.isEmpty ? null : clean;
+}
 
 DateTime? _time(Object? v) {
   final s = _count(v);

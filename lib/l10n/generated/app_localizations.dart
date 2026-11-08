@@ -2114,6 +2114,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Verify it\'s you to show the open terminal'**
   String get verifyToShowTerminal;
+
+  /// Expands a long agent request on the confirm screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Show full text'**
+  String get showFullText;
+
+  /// Collapses the agent request on the confirm screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get showLess;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

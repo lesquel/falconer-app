@@ -1,6 +1,7 @@
 /// Herdr/tmux sessions and agents reported by `openmosh-hook`.
 library;
 
+import '../../../../shared/domain/display_text.dart';
 import '../../../../shared/domain/posix_shell.dart';
 
 enum SessionKind { herdr, tmux }
@@ -80,10 +81,11 @@ final class AgentInfo {
     final status = raw['status'] ?? raw['agent_status'] ?? raw['state'];
     final state =
         AgentState.values.where((s) => s.name == status).firstOrNull ?? AgentState.unknown;
-    String? s(String k) => raw[k] is String ? raw[k]! as String : null;
+    // Host-provided text: shown on screen, so stripped of bidi and controls.
+    String? s(String k) => raw[k] is String ? sanitizeText(raw[k]! as String, max: 200) : null;
     return AgentInfo(
-      paneId: pane,
-      agent: agent,
+      paneId: sanitizeText(pane, max: 128),
+      agent: sanitizeText(agent, max: 64),
       state: state,
       title: s('terminal_title_stripped') ?? s('title'),
       cwd: s('cwd'),

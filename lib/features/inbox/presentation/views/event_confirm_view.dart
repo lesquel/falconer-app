@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/l10n.dart';
+import '../../../../shared/domain/display_text.dart';
 import '../../../../shared/ui/atoms/mono_text.dart';
+import '../../domain/entities/event_mapper.dart';
 import 'inbox_view.dart';
 import '../../../../shared/ui/molecules/mosh_tile.dart';
 import '../../../../shared/ui/organisms/thumb_page.dart';
@@ -52,6 +54,9 @@ class _EventConfirmViewState extends State<EventConfirmView> {
   final _text = TextEditingController();
   final _replyFocus = FocusNode();
 
+  /// Long summaries start cut like the notification; the user can read all.
+  bool _fullSummary = false;
+
   @override
   void dispose() {
     _text.dispose();
@@ -66,6 +71,7 @@ class _EventConfirmViewState extends State<EventConfirmView> {
     final c = MoshColors.of(context);
     final l = context.l10n;
     final canAnswer = e.needsAction && !widget.busy;
+    final long = e.summary.runes.length > notificationSummaryChars;
     final caption = [widget.hostAlias, e.agent, ?widget.when].join(' · ');
     return ThumbPage(
       onBack: widget.onClose,
@@ -79,7 +85,23 @@ class _EventConfirmViewState extends State<EventConfirmView> {
           MoshTile(
             radius: MoshRadii.tile,
             padding: const EdgeInsets.all(16),
-            child: MonoText(e.summary, size: 15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                MonoText(
+                  long && !_fullSummary
+                      ? truncateText(e.summary, notificationSummaryChars)
+                      : e.summary,
+                  size: 15,
+                ),
+                if (long)
+                  TextButton(
+                    key: const Key('full_summary'),
+                    onPressed: () => setState(() => _fullSummary = !_fullSummary),
+                    child: Text(_fullSummary ? l.showLess : l.showFullText),
+                  ),
+              ],
+            ),
           ),
         if (!e.needsAction)
           Padding(

@@ -2,6 +2,8 @@
 /// The push endpoint URL is not kept: the app only needs its stale flag.
 library;
 
+import '../../../../shared/domain/display_text.dart';
+
 final class PairedDevice {
   const PairedDevice({
     required this.id,
@@ -19,20 +21,18 @@ final class PairedDevice {
   /// The device id this phone got at pairing ([Host.deviceId]).
   final bool isThisPhone;
 
-  static final _control = RegExp(r'[\x00-\x1f\x7f]');
-
   /// Returns null on missing or mistyped fields; never throws.
   static PairedDevice? fromJson(Object? raw, {required String? thisDeviceId}) {
     if (raw is! Map) return null;
     final id = raw['id'];
     final name = raw['name'];
     final at = raw['paired_at'];
-    if (id is! String || id.isEmpty || id.length > 128 || _control.hasMatch(id)) return null;
+    if (!isWireId(id)) return null;
     if (at is! int || at < 0 || at > 253402300799) return null;
-    final label = name is String ? name.replaceAll(_control, '') : '';
+    final label = name is String ? sanitizeText(name, max: 64) : '';
     return PairedDevice(
-      id: id,
-      name: label.isEmpty ? 'Unnamed device' : (label.length > 64 ? label.substring(0, 64) : label),
+      id: id as String,
+      name: label.isEmpty ? 'Unnamed device' : label,
       pairedAt: DateTime.fromMillisecondsSinceEpoch(at * 1000, isUtc: true),
       endpointStale: raw['endpoint_stale'] == true,
       isThisPhone: thisDeviceId != null && id == thisDeviceId,

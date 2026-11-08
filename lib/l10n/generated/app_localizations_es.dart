@@ -1180,4 +1180,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get verifyToShowTerminal => 'Verifica que eres tú para mostrar la terminal abierta';
+
+  @override
+  String get showFullText => 'Ver el texto completo';
+
+  @override
+  String get showLess => 'Ver menos';
 }

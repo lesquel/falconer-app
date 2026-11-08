@@ -108,4 +108,12 @@ void main() {
     });
     expect(r.agents.single.available, isFalse);
   });
+
+  test('project names from the host are cleaned for display', () {
+    expect(
+      ProjectUsage.fromJson({'project': 'app\u202Etxt', 'tokens': <String, Object?>{}})!.project,
+      'apptxt',
+    );
+    expect(ProjectUsage.fromJson({'project': '\u200B', 'tokens': <String, Object?>{}}), isNull);
+  });
 }

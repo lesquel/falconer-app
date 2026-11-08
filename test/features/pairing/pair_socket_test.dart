@@ -51,4 +51,15 @@ void main() {
       throwsA(isA<PairingFailure>().having((e) => e.message, 'message', contains('too large'))),
     );
   });
+
+  test('a reply that is not UTF-8 is a pairing failure', () async {
+    server.listen((s) {
+      s.listen((_) => s.add([0xff, 0xfe, 0x0a]));
+    });
+    const socket = PairSocket(deadline: Duration(seconds: 2));
+    await expectLater(
+      socket.roundTrip('127.0.0.1', server.port, 'hi'),
+      throwsA(isA<PairingFailure>()),
+    );
+  });
 }

@@ -99,4 +99,17 @@ void main() {
     expect(await devices.revoke('h1', me), isTrue);
     expect(conn.closed, isTrue);
   });
+
+  test('device names from the host lose bidi and control characters; bad ids are dropped', () {
+    final d = PairedDevice.fromJson({
+      'id': 'd1',
+      'name': 'Pix\u202Eel\u200B\x1b[2J',
+      'paired_at': 1,
+    }, thisDeviceId: null)!;
+    expect(d.name, 'Pixel[2J');
+    expect(
+      PairedDevice.fromJson({'id': '../d', 'name': 'x', 'paired_at': 1}, thisDeviceId: null),
+      isNull,
+    );
+  });
 }

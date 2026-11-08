@@ -1,22 +1,17 @@
 /// What a notification may reveal (SEC-2 / T-14). Without previews the
 /// notification carries only `<alias>: <agent> needs you` — never the
-/// title or summary — and is safe to show on the lock screen.
+/// title or summary. Every notification is VISIBILITY_PRIVATE, so a secure
+/// lock screen never shows the host alias either.
 library;
 
+import '../../../../shared/domain/display_text.dart';
+import '../../domain/entities/event_mapper.dart';
 import '../../domain/entities/inbox_event.dart';
 
 final class NotificationContent {
-  const NotificationContent({
-    required this.title,
-    required this.body,
-    required this.lockScreenSafe,
-  });
+  const NotificationContent({required this.title, required this.body});
   final String title;
   final String? body;
-
-  /// When false the notification is VISIBILITY_PRIVATE, so a secure lock
-  /// screen shows only that a notification exists.
-  final bool lockScreenSafe;
 }
 
 String genericLine(String alias, String agent) =>
@@ -30,11 +25,10 @@ NotificationContent notificationContent(
   final generic = e.kind == EventKind.done
       ? '$hostAlias: ${e.agent.isEmpty ? 'an agent' : e.agent} finished'
       : genericLine(hostAlias, e.agent);
-  if (!preview) return NotificationContent(title: generic, body: null, lockScreenSafe: true);
+  if (!preview) return NotificationContent(title: generic, body: null);
   return NotificationContent(
     title: e.title.isEmpty ? generic : '$hostAlias · ${e.title}',
-    body: e.summary.isEmpty ? null : e.summary,
-    lockScreenSafe: false,
+    body: e.summary.isEmpty ? null : truncateText(e.summary, notificationSummaryChars),
   );
 }
 
@@ -47,8 +41,9 @@ int notificationId(String hostId, String eventId) {
   return h;
 }
 
-/// Payload routed back to the app; contains ids only.
+/// Payload routed back to the app; contains ids only, each as one encoded
+/// path segment so an id can never add or remove segments.
 String notificationPayload(String hostId, String eventId, [String? action]) => Uri(
-  path: '/inbox/$hostId/$eventId',
+  pathSegments: ['', 'inbox', hostId, eventId],
   queryParameters: action == null ? null : {'action': action},
 ).toString();

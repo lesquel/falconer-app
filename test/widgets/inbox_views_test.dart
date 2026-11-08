@@ -74,4 +74,36 @@ void main() {
     expect(find.text('Run tests?'), findsOneWidget);
     expect(find.text('needs approval'), findsOneWidget);
   });
+
+  testWidgets('a long request starts cut and the full text is one tap away', (t) async {
+    final long = 'a' * 250 + 'END';
+    await t.pumpWidget(
+      app(
+        EventConfirmView(
+          event: InboxEvent.received(
+            id: 'ev1',
+            hostId: 'h1',
+            seq: 1,
+            agent: 'claude',
+            kind: EventKind.approvalRequired,
+            title: 'Run?',
+            summary: long,
+            pane: 'p1',
+            at: DateTime.utc(2026),
+          ),
+          hostAlias: 'work',
+          busy: false,
+          onAllow: () {},
+          onDeny: () {},
+          onText: (_) {},
+          onOpenTerminal: () {},
+        ),
+      ),
+    );
+    expect(find.textContaining('END'), findsNothing);
+    expect(find.textContaining('…'), findsOneWidget);
+    await t.tap(find.text('Show full text'));
+    await t.pump();
+    expect(find.text(long), findsOneWidget);
+  });
 }

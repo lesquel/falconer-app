@@ -1175,4 +1175,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get verifyToShowTerminal => 'Verify it\'s you to show the open terminal';
+
+  @override
+  String get showFullText => 'Show full text';
+
+  @override
+  String get showLess => 'Show less';
 }

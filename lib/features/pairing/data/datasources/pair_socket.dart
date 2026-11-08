@@ -47,7 +47,7 @@ class PairSocket {
     final buf = <int>[];
     await for (final chunk in socket) {
       for (final b in chunk) {
-        if (b == 0x0a) return utf8.decode(buf);
+        if (b == 0x0a) return _decode(buf);
         buf.add(b);
         if (buf.length > maxPairLineBytes) {
           throw const PairingFailure('Pairing reply is too large.');
@@ -55,5 +55,13 @@ class PairSocket {
       }
     }
     throw const PairingFailure('The host closed the connection.');
+  }
+
+  static String _decode(List<int> line) {
+    try {
+      return utf8.decode(line);
+    } on FormatException {
+      throw const PairingFailure('Unexpected pairing reply.');
+    }
   }
 }

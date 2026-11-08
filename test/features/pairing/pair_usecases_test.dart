@@ -173,6 +173,24 @@ void main() {
     await expectLater(run('h1', deviceName: 'Phone'), throwsA(isA<PairingFailure>()));
   });
 
+  test('SSH pairing refuses a device id that is not b64u', () async {
+    await hosts.save(testHost(hookPath: '/h/openmosh-hook'));
+    final conn = FakeConnection(
+      (cmd, _) => ok({'device_id': '../d', 'alias': 'box', 'hpk': b64uEncode(List.filled(32, 1))}),
+    );
+    final run = PairOverSsh(
+      connections: HostConnections(
+        hosts: hosts,
+        vault: FakeVault(),
+        connector: FakeConnector(() => conn),
+      ),
+      hosts: hosts,
+      pushKeys: FakePushKeys(),
+      endpoints: endpoints,
+    );
+    await expectLater(run('h1', deviceName: 'Phone'), throwsA(isA<PairingFailure>()));
+  });
+
   test('SSH pairing sends name, push key and endpoint on stdin and stores the reply', () async {
     await hosts.save(testHost(hookPath: '/h/openmosh-hook'));
     final conn = FakeConnection(

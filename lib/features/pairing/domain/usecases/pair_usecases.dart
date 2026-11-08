@@ -140,7 +140,7 @@ final class PairOverSsh {
     if (data is! Map<String, Object?>) throw const PairingFailure('Unexpected pairing reply.');
     final id = data['device_id'];
     final hpk = data['hpk'];
-    if (id is! String || id.isEmpty || hpk is! String) {
+    if (!isWireId(id, max: 64) || hpk is! String) {
       throw const PairingFailure('Unexpected pairing reply.');
     }
     try {
@@ -152,7 +152,7 @@ final class PairOverSsh {
     final alias = rawAlias is String ? sanitizeLabel(rawAlias) : '';
     if (alias == null) throw const PairingFailure('Unexpected pairing reply.');
     final updated = (await hosts.byId(hostId))!.copyWith(
-      deviceId: id,
+      deviceId: id as String,
       hostPushKey: hpk,
       endpointSent: endpoint,
       pairedVia: PairedVia.ssh,

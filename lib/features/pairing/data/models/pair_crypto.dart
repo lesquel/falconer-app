@@ -104,14 +104,14 @@ abstract final class PairCrypto {
     final user = body['ssh_user'];
     final port = body['ssh_port'];
     final fp = body['ssh_fp'];
-    if (id is! String || id.isEmpty || id.length > 64 || alias is! String) throw invalid;
+    if (!isWireId(id, max: 64) || alias is! String) throw invalid;
     if (user is! String || !_user.hasMatch(user)) throw invalid;
     if (port is! int || port < 1 || port > 65535) throw invalid;
     if (fp is! String || !_fingerprint.hasMatch(fp)) throw invalid;
     final cleanAlias = sanitizeLabel(alias);
     if (cleanAlias == null || cleanAlias.isEmpty) throw invalid;
     return PairResponse(
-      deviceId: id,
+      deviceId: id as String,
       alias: cleanAlias,
       sshUser: user,
       sshPort: port,

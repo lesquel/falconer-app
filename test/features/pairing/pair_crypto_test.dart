@@ -160,6 +160,16 @@ void main() {
       }
     });
 
+    test('reply device ids must be b64u, at most 64 characters', () async {
+      for (final bad in ['../x', 'a/b', 'a b', 'd\u202E', 'a' * 65]) {
+        await expectLater(
+          replyWith({'device_id': bad, 'alias': 'box'}),
+          throwsA(isA<PairingFailure>()),
+          reason: bad,
+        );
+      }
+    });
+
     test('a reply alias longer than 64 characters is invalid', () async {
       await expectLater(
         replyWith({'device_id': 'd1', 'alias': 'a' * 65}),

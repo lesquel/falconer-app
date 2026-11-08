@@ -336,5 +336,7 @@
   "showToCompare": "Mostrar para comparar",
   "copyPublicKeyTitle": "¿Copiar la clave pública?",
   "copyPublicKeyBody": "Se marca como sensible en el portapapeles. Pégala solo en computadoras de confianza.",
-  "verifyToShowTerminal": "Verifica que eres tú para mostrar la terminal abierta"
+  "verifyToShowTerminal": "Verifica que eres tú para mostrar la terminal abierta",
+  "showFullText": "Ver el texto completo",
+  "showLess": "Ver menos"
 }
