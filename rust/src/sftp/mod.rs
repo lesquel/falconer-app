@@ -87,6 +87,9 @@ pub async fn upload(
         )
         .await
         .map_err(s_err)?;
+    // russh-sftp pipelines `File` writes: up to 16 requests (about 32 KB
+    // each, in order) stay in flight and `shutdown` waits for every ack, so
+    // a 64 KB read buffer keeps the window full without our own queue.
     let mut buf = vec![0u8; 64 * 1024];
     let mut sent: u64 = 0;
     loop {
