@@ -1,0 +1,15 @@
+/// Strict POSIX single-quote escaping for commands sent over an SSH exec
+/// channel. SSH has no argv: the remote login shell parses one string, so
+/// every argument (including the program path) is single-quoted.
+library;
+
+/// Quotes [arg] so a POSIX shell sees it as exactly one literal word.
+String shQuote(String arg) {
+  if (arg.contains('\u0000')) {
+    throw ArgumentError('NUL byte in shell argument');
+  }
+  return "'${arg.replaceAll("'", r"'\''")}'";
+}
+
+/// Joins [argv] into a command line where each element is one word.
+String shJoin(List<String> argv) => argv.map(shQuote).join(' ');

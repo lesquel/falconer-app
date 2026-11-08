@@ -1,0 +1,81 @@
+/// Commands of the `openmosh-hook` CLI that the app runs over SSH exec.
+/// Arguments are built as argv and only turned into a shell string by
+/// [HookCommand.toShell], which single-quotes every word.
+library;
+
+import '../../domain/failure.dart';
+import '../../domain/posix_shell.dart';
+
+enum RespondAction { allow, deny, text }
+
+const maxRespondTextBytes = 4096;
+
+final class HookCommand {
+  const HookCommand._(this.argv);
+
+  final List<String> argv;
+
+  /// Run once at pairing; prints the absolute hook path.
+  static const resolvePathScript =
+      r'command -v openmosh-hook || echo "$HOME/.local/bin/openmosh-hook"';
+
+  factory HookCommand.sessionsList() => const HookCommand._(['sessions', 'list', '--json']);
+
+  factory HookCommand.agentsList() => const HookCommand._(['agents', 'list', '--json']);
+
+  factory HookCommand.inboxList({int? since, int? limit}) => HookCommand._([
+        'inbox',
+        'list',
+        '--json',
+        if (since != null) ...['--since', '$since'],
+        if (limit != null) ...['--limit', '$limit'],
+      ]);
+
+  factory HookCommand.respond(String eventId, RespondAction action, {String? text}) {
+    _checkId(eventId);
+    final args = ['respond', eventId, '--action', action.name];
+    if (action == RespondAction.text) {
+      final clean = sanitizeResponseText(text ?? '');
+      if (clean.isEmpty) throw const ValidationFailure('Write a message first.');
+      args.addAll(['--text', clean]);
+    }
+    args.add('--json');
+    return HookCommand._(args);
+  }
+
+  /// Request JSON goes on stdin (TRD §6.4).
+  factory HookCommand.pairSsh() => const HookCommand._(['pair-ssh', '--json']);
+
+  factory HookCommand.setEndpoint(String deviceId, String url) {
+    _checkId(deviceId);
+    return HookCommand._(['devices', 'set-endpoint', deviceId, url]);
+  }
+
+  String toShell(String hookPath) => shJoin([hookPath, ...argv]);
+
+  static void _checkId(String id) {
+    if (id.isEmpty || id.startsWith('-') || id.length > 128) {
+      throw const ValidationFailure('Invalid identifier.');
+    }
+  }
+}
+
+/// Mirrors the host-side rule (T-9): control characters stripped except
+/// `\n`, at most 4 KiB of UTF-8.
+String sanitizeResponseText(String text) {
+  final clean = String.fromCharCodes(
+    text.runes.where((r) => r == 0x0a || !(r < 0x20 || r == 0x7f || (r >= 0x80 && r < 0xa0))),
+  );
+  if (clean.codeUnits.isNotEmpty && _utf8Length(clean) > maxRespondTextBytes) {
+    throw const ValidationFailure('Message is longer than 4 KiB.');
+  }
+  return clean;
+}
+
+int _utf8Length(String s) {
+  var n = 0;
+  for (final r in s.runes) {
+    n += r < 0x80 ? 1 : r < 0x800 ? 2 : r < 0x10000 ? 3 : 4;
+  }
+  return n;
+}
