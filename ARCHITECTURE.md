@@ -14,6 +14,7 @@ lib/
 │   ├── push_runtime.dart         # push pipeline shared by the UI and background engines
 │   ├── router.dart               # go_router routes (ids in paths are validated)
 │   ├── home_shell.dart, app.dart, theme.dart
+├── l10n/                         # English and Spanish ARB files and generated localizations
 ├── shared/
 │   ├── domain/                   # failures, POSIX quoting, b64u, IPv4/tailnet rules, label cleaning
 │   ├── crypto/                   # X25519 / HKDF / XChaCha20-Poly1305 (pure Dart)
@@ -49,12 +50,13 @@ UnifiedPush connector starts without the Rust library loaded.
 | `keys` | Ed25519 keys, biometric unlock, push key, eager v0.1 key move | `KeyVault`, `UserAuthenticator`, `PushKeyStore`, `MigratingAuthenticator` |
 | `lock` | Optional app lock (cold start, > 60 s in background) | `AppLock`, `AppLockGate` |
 | `terminal` | PTY session, reconnect/backoff, re-attach | `TerminalEmulator`, `TerminalRunner`, `BackoffPolicy` |
-| `keyboard` | Extra keys, sticky modifiers, tmux/Herdr presets | `KeyPresets`, `ModifierState` |
+| `keyboard` | Extra keys, sticky modifiers, tmux/Herdr presets, saved shortcuts | `KeyPresets`, `ModifierState` |
 | `sessions` | Herdr/tmux sessions and agents via the hook | `SessionCatalog` |
 | `inbox` | Push receive/decrypt, freshness and replay guard, inbox state machine, answers | `PushEndpointSource`, `PushOpener`, `SyncCursorStore`, `InboxRepository`, `EventNotifier`, `HandlePushMessage`, `RespondToEvent`, `SyncInbox` |
 | `pairing` | QR pairing (TCP, v1 wire contract) and SSH pairing | `PairingGateway`, `PairWithQr`, `PairOverSsh`, `SyncPushEndpoint` |
 | `uploads` | Pick file, SFTP upload, paste path | `FileSource`, `UploadFile` |
-| `settings` | Previews, app lock, app theme, accent, terminal scheme, font, presets | `SettingsRepository`, `AccentColor`, `TerminalScheme` |
+| `settings` | Previews, app lock, app theme, language, accent, terminal scheme, font, presets, notification hours | `SettingsRepository`, `AccentColor`, `TerminalScheme`, `NotificationHours` |
+| `usage` | Agent token usage and plan limits per host, from `openmosh-hook usage` | `LoadAgentUsage`, `UsageReport` |
 
 Cross-feature use goes through domain types only (for example `pairing` uses `hosts`, `keys` and
 `inbox` ports; every feature that talks to a host uses `HostConnections`).

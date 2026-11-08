@@ -4,48 +4,71 @@ Mobile client of [OpenMosh](https://github.com/lesquel/OpenMosh): an SSH termina
 AI coding agents, with end-to-end encrypted push notifications and one-tap approvals.
 **Android first.**
 
-> Status: v0.1. Everything builds and is unit/widget tested; end-to-end behaviour still needs a
-> run on a real phone against a host running `openmosh-hook`.
+> Status: v0.2.0. Android 9+. The release APK for most phones (`arm64-v8a`) is about 15.5 MB.
+> Download it from the [latest release](https://github.com/lesquel/openmosh-app/releases/latest).
 
 ## What it does
 
 - **Hosts and keys** — add, edit and delete hosts; generate an Ed25519 key on the phone or import
-  an existing unencrypted `ssh-ed25519` key; copy the public key. Private keys are encrypted
+  an existing `ssh-ed25519` key (pasted or from a file, plain or passphrase-protected); copy the
+  public key. Private keys are encrypted
   under an auth-bound Android Keystore key: every new SSH connection asks for biometrics or the
   device credential, enforced by the hardware. Requires Android 9+ and a screen lock.
 - **QR pairing** — scan the code printed by `openmosh-hook pair` (or paste the `openmosh://pair`
   link). The phone creates its keys, registers for UnifiedPush and pairs over a one-shot
-  encrypted exchange inside the tailnet. The host's SSH key fingerprint arrives in
-  the host's encrypted, token-authenticated reply and is pinned.
+  encrypted exchange inside the tailnet. The app waits up to 120 s while the host user confirms
+  the phone (`y/N` on the host). The host's SSH key fingerprint arrives in the host's encrypted,
+  token-authenticated reply and is pinned. Without a push distributor the phone still pairs, with
+  notifications off; *Enable notifications* on the host screen turns them on later.
 - **SSH pairing** — for a host you already reach with your own key: add it manually, confirm its
   host key fingerprint, then *Enable notifications* runs `openmosh-hook pair-ssh` over SSH.
-- **Terminal** — full xterm emulation in the chosen color scheme. A grid of six big keys
-  (Esc, Tab, Ctrl, *more keys*, Chat, Keyboard) sits under the thumb; *more keys* opens rows with
-  Alt, arrows, `|`, `/`, `~`, `-`, text size −/+ and the tmux or Herdr prefix keys. Chat mode
-  composes a whole message with image/file attachments before sending it. Automatic reconnect
+- **Open Herdr / Shell** — the host screen has *Open Herdr*, which attaches the Herdr session
+  through `openmosh-hook attach herdr` so the computer follows the tab and workspace picked on
+  the phone (mirroring), and *Shell* for a plain login shell.
+- **Terminal** — full xterm emulation in the chosen color scheme. The system keyboard opens on
+  demand. The keys bar is one compact row on a phone (Esc, Tab, Ctrl, *more keys*, Chat,
+  Keyboard; the arrow cross opens with *more keys*) and a 2x3 grid with the arrow cross beside it
+  on a tablet; the cross has Enter in its middle. *More keys* adds Alt, `|`, `/`, `~`, `-`, text size −/+,
+  Paste, the tmux or Herdr prefix keys and your **saved shortcuts** (Ctrl + key, a letter, or a
+  text with optional Enter; long press removes one). Pinch to zoom, copy and paste, full screen. Every
+  paste is stripped of escape and control characters. When a connection drops, the terminal says
+  why.
+- **Chat** — composes a whole message with image and file attachments before sending it; the
+  files are uploaded and the message lists them as `Attached image: <path>` / `Attached file:
+  <path>` lines, so every agent gets them, not only those that read pasted images. Automatic reconnect
   with backoff on network change or app resume, re-attaching the Herdr/tmux session; sessions
   stay connected in the background unless disabled in Settings (up to 4 kept, 3000 lines of
   scrollback each). In the background a dropped session waits for the app or the network to come
   back instead of retrying; after 10 minutes in the background every shell and SSH connection
   closes, and an open terminal reconnects when the app returns. Notifications do not use SSH.
 - **Sessions** — lists Herdr/tmux sessions and agents through the hook and attaches to one.
+- **Agent usage** — per host, the tokens the agents recorded on that computer (today and the
+  period, projects, models) and plan limits with their reset time, from `openmosh-hook usage`.
+  Only Codex records usage locally; other agents show why there is no data.
 - **Paired devices** — the host screen lists every device paired with that host
   (`openmosh-hook devices list`): name, paired date, a stale push endpoint and which one is
   *this phone*. *Revoke* asks for confirmation, then for your fingerprint, face or screen lock,
   and runs `openmosh-hook devices revoke`. Revoking this phone warns first that OpenMosh loses
   access to that host.
 - **App lock** — optional, off by default (*Settings → Lock OpenMosh*). When on, OpenMosh asks
-  for user verification when it opens and after more than 60 s in the background; until then
+  for user verification when it opens and after more than 60 s in the background (timed on the
+  boot clock, so deep sleep and clock changes count correctly); until then
   the screen shows only the mole and nothing keeps the keyboard focus. Turning the lock on or off
   asks for that verification too (turning it on fails, and the lock stays off, when the phone
   has no fingerprint, face or screen lock).
 - **Inbox** — encrypted pushes are decrypted on the phone; approve, deny or reply from the inbox
   or from a notification (which opens a confirm screen; nothing is sent from the lock screen).
+  Approval requests show the command or file being approved.
+- **Notification hours** — an app-wide window (it may cross midnight) and one per host with
+  notifications on. Outside it events still reach the inbox, without sound or a notification.
 - **Uploads** — pick an image or file, upload it over SFTP to `~/.openmosh/uploads/` and paste
   the path at the cursor.
 - **Home** — greets you, says which computer is waiting for an answer and puts the newest
   request in a big card you can open with one thumb; below are your computers with *Terminal*
   and *Sessions* buttons. Tabs (Hosts, Inbox, Keys, Settings) are a dock of big tiles.
+- **Language** — English or Spanish (or the system's), switched at the top of Settings next to
+  the light/dark/system theme.
+- **Masking** — host addresses, public keys and fingerprints are masked until you tap the eye.
 
 ## Look and feel
 
@@ -55,7 +78,8 @@ color. The mascot, **Topo** the mole with accent goggles, is the launcher icon (
 an Android 13 themed variant), the splash screen and the empty, loading and pairing-success
 states.
 
-**Settings → Colors** chooses:
+The app theme and the language are switched at the top of **Settings**; **Settings → Colors**
+keeps the accent and terminal scheme:
 
 | Setting | Options | Default |
 |---|---|---|
@@ -79,7 +103,7 @@ downloaded at runtime.
 | Push E2EE | X25519 + HKDF-SHA256 + XChaCha20-Poly1305, decrypted in pure Dart. Bodies with a wrong `kid`, version or tag are discarded. Verified against the hook's shared test vectors. |
 | Push replay | A decrypted push is dropped when its `ts` is more than 24 h old or more than 5 min in the future, or when the inbox already holds that event id with the same or a later `seq` (pushes can arrive out of order, so there is no per-host high-water mark). Resolved pushes reuse the event id with a new `seq`. The inbox sync over SSH reads from its own cursor (the hook's `last_seq`), so it still brings in anything dropped or lost. |
 | Device revocation | Paired devices are listed and revoked in the app (SEC-11); the hook removes the `authorized_keys` line and the push key together. Revoking needs a confirmation and a user verification. |
-| App lock | Optional: user verification on a cold start and after more than 60 s in the background, measured with a monotonic clock (changing the phone's clock cannot skip it). While locked the app content is offstage (not painted, not in accessibility) and `FLAG_SECURE` still blocks screenshots. |
+| App lock | Optional: user verification on a cold start and after more than 60 s in the background, measured on the boot clock (`elapsedRealtime`: it counts deep sleep, and changing the phone's clock cannot skip it). While locked the app content is offstage (not painted, not in accessibility) and `FLAG_SECURE` still blocks screenshots. |
 | Live terminals | A terminal that is already connected (kept by "Keep sessions connected" or reusing an open connection) is shown only after user verification, unless the user was verified in the last 5 minutes; a refusal goes back. Pastes (chat, paths, the Paste shortcut, text shortcuts) drop ESC, C0 except tab/LF/CR, and C1 before bracketed paste, so pasted text cannot end the paste early. |
 | On screen | Host addresses, public keys and fingerprints are masked (`100.••.••.67`, `SHA256:ab••••••yz`) until an eye button reveals them; the reveal resets when the screen is left. Host-provided text (event titles and summaries, agent titles, paths, project and device names) is stripped of bidi, zero-width and control characters, and cut text ends in `…`. Event and device ids must be b64u. |
 | Lock screen | Previews off by default: notifications say only `<host>: <agent> needs you`. Every notification is `VISIBILITY_PRIVATE`, so a secure lock screen shows Android's redacted version, never the host alias. |
@@ -134,14 +158,15 @@ If the files are missing the vector tests are skipped with `vectors pending`.
 
 1. Install Tailscale on the host and the phone, signed in with the **same Tailscale account**.
 2. Install a UnifiedPush distributor on the phone, for example **ntfy** (F-Droid or GitHub
-   releases), and open it once.
+   releases), and open it once. Optional: without one the phone pairs with notifications off.
 3. Install `openmosh-hook` on the host (see the hook's README) and run:
    ```sh
    openmosh-hook pair
    ```
 4. In the app: **Hosts → Pair with QR** (or *Scan pairing code* on the empty home), scan the QR, check the host address, choose
-   a name for the phone and tap **Pair**. The code is single-use and expires after 5 minutes.
-5. Open the host and tap **Shell** or **Load sessions**. The first connection asks for your
+   a name for the phone and tap **Pair**, then answer `y` on the host within 60 s. The code is
+   single-use and expires after 5 minutes.
+5. Open the host and tap **Open Herdr**, **Shell** or **Load sessions**. The first connection asks for your
    fingerprint/PIN.
 
 Already using SSH keys? Import your key under **Keys**, add the host manually, compare the shown
