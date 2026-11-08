@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/di.dart';
 import '../../../../shared/domain/failure.dart';
-import '../../../../shared/platform/secure_window.dart';
 import '../../../../shared/ui/organisms/failure_panel.dart';
 import '../../domain/entities/ssh_key_info.dart';
 import '../views/keys_view.dart';
@@ -90,41 +89,39 @@ class KeysContainer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final keys = ref.watch(keysProvider);
-    return SecureScreen(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Keys'),
-          actions: [
-            IconButton(
-              tooltip: 'Generate key',
-              icon: const Icon(Icons.add),
-              onPressed: () => _guard(
-                context,
-                () => ref
-                    .read(keyVaultProvider)
-                    .generate('Key ${DateTime.now().toIso8601String().substring(0, 10)}'),
-              ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Keys'),
+        actions: [
+          IconButton(
+            tooltip: 'Generate key',
+            icon: const Icon(Icons.add),
+            onPressed: () => _guard(
+              context,
+              () => ref
+                  .read(keyVaultProvider)
+                  .generate('Key ${DateTime.now().toIso8601String().substring(0, 10)}'),
             ),
-            IconButton(
-              tooltip: 'Import key',
-              icon: const Icon(Icons.file_download_outlined),
-              onPressed: () => _import(context, ref),
-            ),
-          ],
-        ),
-        body: keys.when(
-          data: (list) => KeysView(
-            keys: list,
-            onCopyPublic: (k) async {
-              final m = ScaffoldMessenger.of(context);
-              await Clipboard.setData(ClipboardData(text: k.publicKey));
-              m.showSnackBar(const SnackBar(content: Text('Public key copied')));
-            },
-            onDelete: (k) => _delete(context, ref, k),
           ),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => FailurePanel(failure: e),
+          IconButton(
+            tooltip: 'Import key',
+            icon: const Icon(Icons.file_download_outlined),
+            onPressed: () => _import(context, ref),
+          ),
+        ],
+      ),
+      body: keys.when(
+        data: (list) => KeysView(
+          keys: list,
+          onCopyPublic: (k) async {
+            final m = ScaffoldMessenger.of(context);
+            await Clipboard.setData(ClipboardData(text: k.publicKey));
+            m.showSnackBar(const SnackBar(content: Text('Public key copied')));
+          },
+          onDelete: (k) => _delete(context, ref, k),
         ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => FailurePanel(failure: e),
       ),
     );
   }

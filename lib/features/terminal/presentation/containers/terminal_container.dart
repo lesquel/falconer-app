@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/di.dart';
 import '../../../../shared/domain/failure.dart';
-import '../../../../shared/platform/secure_window.dart';
 import '../../../../shared/ui/organisms/failure_panel.dart';
 import '../../../keyboard/domain/entities/key_presets.dart';
 import '../../../keyboard/domain/entities/modifier_state.dart';
@@ -97,44 +96,42 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
       herdrPrefix: settings.herdrPrefixSequence,
     );
     final failure = _phase == TerminalPhase.failed ? _runner.failure : null;
-    return SecureScreen(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.session ?? host?.alias ?? 'Terminal'),
-          actions: [
-            IconButton(
-              tooltip: 'Upload image',
-              icon: const Icon(Icons.image_outlined),
-              onPressed: _uploading ? null : () => _upload(true),
-            ),
-            IconButton(
-              tooltip: 'Upload file',
-              icon: const Icon(Icons.attach_file),
-              onPressed: _uploading ? null : () => _upload(false),
-            ),
-          ],
-        ),
-        body: TerminalScreenView(
-          terminal: _emu.terminal,
-          phase: _phase,
-          fontSize: settings.fontSize,
-          overlay: failure == null
-              ? null
-              : FailurePanel(
-                  failure: failure,
-                  onBack: () => context.pop(),
-                  onRetry: failure is HostKeyMismatchFailure
-                      ? null
-                      : () => _runner.wake(restart: true),
-                ),
-          keysBar: ExtraKeysBar(
-            base: KeyPresets.base,
-            preset: preset,
-            modifiers: _mods,
-            onKey: (seq) => _runner.send(seq),
-            onModifier: (m) => setState(() => _mods = _mods.toggle(m)),
-            onModifierLock: (m) => setState(() => _mods = _mods.lock(m)),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.session ?? host?.alias ?? 'Terminal'),
+        actions: [
+          IconButton(
+            tooltip: 'Upload image',
+            icon: const Icon(Icons.image_outlined),
+            onPressed: _uploading ? null : () => _upload(true),
           ),
+          IconButton(
+            tooltip: 'Upload file',
+            icon: const Icon(Icons.attach_file),
+            onPressed: _uploading ? null : () => _upload(false),
+          ),
+        ],
+      ),
+      body: TerminalScreenView(
+        terminal: _emu.terminal,
+        phase: _phase,
+        fontSize: settings.fontSize,
+        overlay: failure == null
+            ? null
+            : FailurePanel(
+                failure: failure,
+                onBack: () => context.pop(),
+                onRetry: failure is HostKeyMismatchFailure
+                    ? null
+                    : () => _runner.wake(restart: true),
+              ),
+        keysBar: ExtraKeysBar(
+          base: KeyPresets.base,
+          preset: preset,
+          modifiers: _mods,
+          onKey: (seq) => _runner.send(seq),
+          onModifier: (m) => setState(() => _mods = _mods.toggle(m)),
+          onModifierLock: (m) => setState(() => _mods = _mods.lock(m)),
         ),
       ),
     );

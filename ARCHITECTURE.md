@@ -22,7 +22,6 @@ lib/
 │   ├── ssh/data/datasources/     # ssh_bridge.dart: the only user of the Rust SSH API
 │   ├── data/                     # drift database (hosts, key metadata, inbox, settings)
 │   ├── logging/                  # redacting logger (the only logging entry point)
-│   ├── platform/                 # FLAG_SECURE control
 │   ├── ui/{atoms,molecules,organisms}/
 │   └── bridge/                   # generated flutter_rust_bridge bindings (do not edit)
 └── features/<feature>/

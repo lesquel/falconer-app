@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../shared/platform/secure_window.dart';
 import '../controllers/pairing_controller.dart';
 import '../views/pair_review_view.dart';
 import '../views/pair_scan_view.dart';
@@ -41,11 +40,9 @@ class PairingContainer extends ConsumerWidget {
         ),
       ),
     };
-    return SecureScreen(
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Pair a host')),
-        body: body,
-      ),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Pair a host')),
+      body: body,
     );
   }
 }

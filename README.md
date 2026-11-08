@@ -35,7 +35,7 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
 | Keys | Ed25519 generated on the device; stored with `flutter_secure_storage` (AES-GCM key wrapped by Android Keystore); unlock with biometrics/device credential before each new connection. The private key is never displayed or copied. |
 | Push E2EE | X25519 + HKDF-SHA256 + XChaCha20-Poly1305, decrypted in pure Dart. Bodies with a wrong `kid`, version or tag are discarded. Verified against the hook's shared test vectors. |
 | Lock screen | Previews off by default: notifications say only `<host>: <agent> needs you`. With previews on, notifications are `VISIBILITY_PRIVATE`. |
-| Screens | `FLAG_SECURE` on terminal, keys and pairing screens (no screenshots, no recents thumbnail). |
+| Screens | `FLAG_SECURE` on the whole app, always: `MainActivity.onCreate` sets it before the first frame and no screen clears it (no screenshots, screen recording or recents thumbnail of the terminal, keys, pairing, inbox or answer screens). |
 | Backups | `allowBackup="false"`, backup and data-extraction rules exclude everything. |
 | Network | No HTTP calls from the app. `network_security_config` refuses cleartext except `*.ts.net` (domain configs cannot express the 100.64.0.0/10 range; SSH and pairing use raw TCP inside the tailnet anyway). Pairing refuses codes whose address is outside 100.64.0.0/10. |
 | Pairing input | QR codes and host replies are untrusted: `exp` must be a positive integer at most one day ahead, IPv4 octets must be plain decimal, host-sent aliases are limited to 64 characters and stripped of control, bidi, zero-width and separator characters. The pairing TCP exchange has one 15 s deadline and a 16 KiB reply cap. |
