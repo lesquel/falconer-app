@@ -61,7 +61,12 @@ void main() {
         GoRoute(
           path: '/',
           builder: (c, _) => TextButton(onPressed: () => c.push('/t'), child: const Text('home')),
-          routes: [GoRoute(path: 't', builder: (_, _) => const TerminalContainer(hostId: 'h1'))],
+          routes: [
+            GoRoute(
+              path: 't',
+              builder: (_, _) => const TerminalContainer(hostId: 'h1'),
+            ),
+          ],
         ),
       ],
     );
