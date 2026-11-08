@@ -10,8 +10,12 @@ import 'package:xterm/xterm.dart';
 import '../../../../shared/domain/paste_text.dart';
 import '../../domain/repositories/terminal_emulator.dart';
 
+/// Scrollback kept per terminal. Each line holds a cell buffer; with up to
+/// four pooled terminals alive, 10 000 lines cost tens of MB.
+const scrollbackLines = 3000;
+
 class XtermEmulator implements TerminalEmulator {
-  XtermEmulator() : terminal = _SafeTerminal(maxLines: 10000) {
+  XtermEmulator() : terminal = _SafeTerminal(maxLines: scrollbackLines) {
     _sink = const Utf8Decoder(allowMalformed: true)
         .startChunkedConversion(_StringSink(terminal.write));
     terminal.onOutput = _input.add;

@@ -82,6 +82,8 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
         kind: widget.kind,
       ),
     );
+    // On screen: the pool never evicts it while this screen is open.
+    _pool.attach(_key);
     _phase = _runner.phase;
     _session.modifiers.addListener(_onMods);
     _selection.addListener(_onMods);
@@ -162,6 +164,7 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     if (_fullScreen) {
       unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
     }
+    _pool.detach(_key);
     if (!_keepConnected) unawaited(_pool.release(_key));
     super.dispose();
   }
