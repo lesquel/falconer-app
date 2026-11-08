@@ -28,6 +28,30 @@ void main() {
     expect(list[1].windows, 3);
   });
 
+  test('parses the hook sessions report shape', () async {
+    final list = await catalog({
+      'sessions': [
+        {'name': 'main', 'runtime': 'herdr', 'running': true, 'default': true, 'attached': null},
+        {'name': 'dev', 'runtime': 'tmux', 'running': true, 'default': false, 'attached': true},
+      ],
+      'unavailable': ['tmux'],
+    }).sessions('h1');
+    expect(list.map((s) => (s.name, s.kind, s.attached)),
+        [('main', SessionKind.herdr, false), ('dev', SessionKind.tmux, true)]);
+  });
+
+  test('parses the hook agents report shape', () async {
+    final list = await catalog({
+      'agents': [
+        {'pane_id': 'w7:pA', 'agent': 'claude', 'status': 'blocked', 'state_change_seq': 3,
+         'cwd': '/src', 'title': 'Allow Bash?', 'workspace_id': null, 'runtime': 'herdr'},
+      ],
+      'unavailable': [],
+    }).agents('h1');
+    expect(list.single.state, AgentState.blocked);
+    expect(list.single.title, 'Allow Bash?');
+  });
+
   test('parses Herdr agents', () async {
     final list = await catalog({
       'agents': [

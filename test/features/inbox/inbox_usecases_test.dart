@@ -161,6 +161,38 @@ void main() {
     expect((await inbox.byId('h1', 'ev9'))!.status, InboxStatus.pending);
   });
 
+  test('sync reads the hook inbox page shape', () async {
+    final conn = FakeConnection((_, _) => ok({
+          'events': [
+            {'id': '-AbC', 'seq': 12, 'source': 'herdr', 'agent': 'claude', 'kind': 'question',
+             'status': 'pending', 'title': 'Which DB?', 'summary': 'pick one', 'pane': null,
+             'runtime': 'herdr', 'created_at': 1762500000, 'resolved_at': null, 'resolution': null},
+          ],
+          'last_seq': 12,
+        }));
+    final sync = SyncInbox(
+      inbox: inbox,
+      connections: HostConnections(hosts: hosts, vault: FakeVault(), connector: FakeConnector(() => conn)),
+    );
+    expect(await sync('h1'), 1);
+    final e = (await inbox.byId('h1', '-AbC'))!;
+    expect(e.kind, EventKind.question);
+    expect(e.at, DateTime.fromMillisecondsSinceEpoch(1762500000 * 1000, isUtc: true));
+    expect(e.pane, '');
+  });
+
+  test('ids starting with a hyphen are answered (hook ids are b64u)', () async {
+    opener.next = wire(id: '-x1');
+    await handle(body('kid1'));
+    final conn = FakeConnection((_, _) => ok(null));
+    await RespondToEvent(
+      inbox: inbox,
+      connections: HostConnections(hosts: hosts, vault: FakeVault(), connector: FakeConnector(() => conn)),
+      notifier: notifier,
+    )('h1', '-x1', ResponseKind.allow);
+    expect(conn.commands.single, "'/h' 'respond' '-x1' '--action' 'allow' '--json'");
+  });
+
   test('endpoint rule: https anywhere, http only inside the tailnet', () {
     expect(isAllowedPushEndpoint('https://ntfy.sh/up1'), isTrue);
     expect(isAllowedPushEndpoint('http://ntfy.tail1.ts.net/up1'), isTrue);

@@ -18,7 +18,7 @@ InboxEvent? eventFromWire(Map<String, Object?> m, {required String hostId}) {
   }
 
   final seq = m['seq'];
-  final ts = m['ts'];
+  final ts = m['ts'] ?? m['created_at'];
   final e = InboxEvent.received(
     id: id,
     hostId: hostId,

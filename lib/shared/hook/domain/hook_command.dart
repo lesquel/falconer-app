@@ -48,13 +48,15 @@ final class HookCommand {
 
   factory HookCommand.setEndpoint(String deviceId, String url) {
     _checkId(deviceId);
-    return HookCommand._(['devices', 'set-endpoint', deviceId, url]);
+    return HookCommand._(['devices', 'set-endpoint', deviceId, url, '--json']);
   }
 
   String toShell(String hookPath) => shJoin([hookPath, ...argv]);
 
   static void _checkId(String id) {
-    if (id.isEmpty || id.startsWith('-') || id.length > 128) {
+    // Hook ids are b64u and may start with '-'; the hook declares these
+    // positionals with allow_hyphen_values, and quoting keeps them one word.
+    if (id.isEmpty || id.length > 128 || id.contains(RegExp(r'[\x00-\x1f\x7f]'))) {
       throw const ValidationFailure('Invalid identifier.');
     }
   }

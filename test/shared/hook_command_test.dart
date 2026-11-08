@@ -43,9 +43,15 @@ void main() {
           throwsA(isA<ValidationFailure>()));
     });
 
-    test('event ids that look like options are rejected', () {
-      expect(() => HookCommand.respond('--action', RespondAction.allow),
-          throwsA(isA<ValidationFailure>()));
+    test('empty or oversized ids are rejected; hyphen-leading ids are allowed', () {
+      expect(() => HookCommand.respond('', RespondAction.allow), throwsA(isA<ValidationFailure>()));
+      expect(() => HookCommand.respond('a' * 129, RespondAction.allow), throwsA(isA<ValidationFailure>()));
+      expect(HookCommand.respond('-AbC', RespondAction.allow).argv[1], '-AbC');
+    });
+
+    test('set-endpoint uses the JSON envelope', () {
+      expect(HookCommand.setEndpoint('-d1', 'https://ntfy.sh/up').argv,
+          ['devices', 'set-endpoint', '-d1', 'https://ntfy.sh/up', '--json']);
     });
 
     test('hook path resolution probe is a fixed command', () {

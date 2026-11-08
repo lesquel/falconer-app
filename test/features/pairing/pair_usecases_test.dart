@@ -120,7 +120,7 @@ void main() {
     await sync((await hosts.byId('h1'))!, run);
     await sync((await hosts.byId('h1'))!, run);
     expect(sent, [
-      ['devices', 'set-endpoint', 'd1', 'https://ntfy.sh/upXYZ']
+      ['devices', 'set-endpoint', 'd1', 'https://ntfy.sh/upXYZ', '--json']
     ]);
   });
 }

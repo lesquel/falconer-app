@@ -56,7 +56,7 @@ final class AgentInfo {
     final pane = raw['pane_id'] ?? raw['pane'];
     final agent = raw['agent'];
     if (pane is! String || agent is! String) return null;
-    final status = raw['agent_status'] ?? raw['state'];
+    final status = raw['status'] ?? raw['agent_status'] ?? raw['state'];
     final state = AgentState.values.where((s) => s.name == status).firstOrNull ?? AgentState.unknown;
     String? s(String k) => raw[k] is String ? raw[k]! as String : null;
     return AgentInfo(
