@@ -21,52 +21,20 @@ class KeysContainer extends ConsumerWidget {
   }
 
   Future<void> _import(BuildContext context, WidgetRef ref) async {
-    final label = TextEditingController(text: 'Imported key');
-    final pem = TextEditingController();
-    final ok = await showDialog<bool>(
+    final result = await showDialog<({String label, String pem})>(
       context: context,
-      builder: (c) => AlertDialog(
-        title: const Text('Import ssh-ed25519 key'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: label,
-              decoration: const InputDecoration(labelText: 'Label'),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: pem,
-              minLines: 4,
-              maxLines: 8,
-              autocorrect: false,
-              enableSuggestions: false,
-              keyboardType: TextInputType.visiblePassword,
-              style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
-              decoration: const InputDecoration(labelText: 'Paste the OpenSSH private key'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(c, true), child: const Text('Import')),
-        ],
-      ),
+      builder: (_) => const _ImportKeyDialog(),
     );
-    final text = pem.text;
-    pem.clear();
-    pem.dispose();
-    if (ok == true && context.mounted) {
-      await _guard(
-        context,
-        () => ref
-            .read(keyVaultProvider)
-            .import(label.text.trim().isEmpty ? 'Imported key' : label.text.trim(), text),
-      );
-      // The private key may have been pasted from the clipboard: clear it.
-      await Clipboard.setData(const ClipboardData(text: ''));
-    }
-    label.dispose();
+    // The private key may have been pasted from the clipboard: clear it
+    // whether the dialog was confirmed or cancelled.
+    await Clipboard.setData(const ClipboardData(text: ''));
+    if (result == null || !context.mounted) return;
+    await _guard(
+      context,
+      () => ref
+          .read(keyVaultProvider)
+          .import(result.label.isEmpty ? 'Imported key' : result.label, result.pem),
+    );
   }
 
   Future<void> _delete(BuildContext context, WidgetRef ref, SshKeyInfo k) async {
@@ -125,4 +93,58 @@ class KeysContainer extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Owns its controllers so they are disposed only after the dialog route is
+/// gone; the pasted key is cleared from the field on dispose.
+class _ImportKeyDialog extends StatefulWidget {
+  const _ImportKeyDialog();
+
+  @override
+  State<_ImportKeyDialog> createState() => _ImportKeyDialogState();
+}
+
+class _ImportKeyDialogState extends State<_ImportKeyDialog> {
+  final _label = TextEditingController(text: 'Imported key');
+  final _pem = TextEditingController();
+
+  @override
+  void dispose() {
+    _pem.clear();
+    _pem.dispose();
+    _label.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('Import ssh-ed25519 key'),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TextField(
+          controller: _label,
+          decoration: const InputDecoration(labelText: 'Label'),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _pem,
+          minLines: 4,
+          maxLines: 8,
+          autocorrect: false,
+          enableSuggestions: false,
+          keyboardType: TextInputType.visiblePassword,
+          style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
+          decoration: const InputDecoration(labelText: 'Paste the OpenSSH private key'),
+        ),
+      ],
+    ),
+    actions: [
+      TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+      FilledButton(
+        onPressed: () => Navigator.pop(context, (label: _label.text.trim(), pem: _pem.text)),
+        child: const Text('Import'),
+      ),
+    ],
+  );
 }
