@@ -219,4 +219,26 @@ void main() {
       ['devices', 'set-endpoint', 'd1', 'https://ntfy.sh/upXYZ', '--json'],
     ]);
   });
+
+  test('a host paired without notifications gets them once the distributor registers', () async {
+    await hosts.save(
+      testHost(deviceId: 'd1', hpk: b64uEncode(List.filled(32, 1))).copyWith(endpointSent: ''),
+    );
+    expect((await hosts.byId('h1'))!.pushEnabled, isFalse);
+    final sent = <List<String>>[];
+    await SyncPushEndpoint(hosts: hosts, endpoints: endpoints)((await hosts.byId('h1'))!, (
+      c,
+    ) async {
+      sent.add(c.argv);
+      return null;
+    });
+    expect(sent.single, ['devices', 'set-endpoint', 'd1', 'https://ntfy.sh/upXYZ', '--json']);
+    expect((await hosts.byId('h1'))!.pushEnabled, isTrue);
+  });
+
+  test('hosts saved before endpoints were tracked still count as push enabled', () {
+    final legacy = testHost(deviceId: 'd1', hpk: b64uEncode(List.filled(32, 1)));
+    expect(legacy.endpointSent, isNull);
+    expect(legacy.pushEnabled, isTrue);
+  });
 }
