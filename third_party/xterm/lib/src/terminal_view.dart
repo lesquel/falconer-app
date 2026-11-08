@@ -44,6 +44,7 @@ class TerminalView extends StatefulWidget {
     this.cursorType = TerminalCursorType.block,
     this.alwaysShowCursor = false,
     this.deleteDetection = false,
+    this.showKeyboardOnTap = true,
     this.shortcuts,
     this.onKeyEvent,
     this.readOnly = false,
@@ -114,6 +115,10 @@ class TerminalView extends StatefulWidget {
   /// Whether to always show the cursor. This is useful for debugging.
   /// [false] by default.
   final bool alwaysShowCursor;
+
+  /// OpenMosh patch: when false a tap no longer opens the soft keyboard;
+  /// callers open it with [TerminalViewState.requestKeyboard].
+  final bool showKeyboardOnTap;
 
   /// Workaround to detect delete key for platforms and IMEs that does not
   /// emit hardware delete event. Prefered on mobile platforms. [false] by
@@ -348,6 +353,8 @@ class TerminalViewState extends State<TerminalView> {
   void _onTapDown(_) {
     if (_controller.selection != null) {
       _controller.clearSelection();
+    } else if (!widget.showKeyboardOnTap) {
+      return;
     } else {
       if (!widget.hardwareKeyboardOnly) {
         _customTextEditKey.currentState?.requestKeyboard();

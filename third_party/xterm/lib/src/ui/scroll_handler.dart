@@ -99,8 +99,19 @@ class _TerminalScrollGestureHandlerState
     }
   }
 
+  /// OpenMosh patch: line height used for [lastLineOffset]. When the font
+  /// size changes, the same pixel offset maps to a different line, which
+  /// upstream turned into a burst of scroll events.
+  double lastLineHeight = 0;
+
   void _onScroll(double offset) {
-    final currentLineOffset = offset ~/ widget.getLineHeight();
+    final lineHeight = widget.getLineHeight();
+    if (lineHeight != lastLineHeight) {
+      lastLineHeight = lineHeight;
+      lastLineOffset = offset ~/ lineHeight;
+      return;
+    }
+    final currentLineOffset = offset ~/ lineHeight;
 
     final delta = currentLineOffset - lastLineOffset;
 
@@ -126,6 +137,7 @@ class _TerminalScrollGestureHandlerState
       },
       onPointerDown: (event) {
         lastPointerPosition = event.localPosition;
+        if (lastLineHeight == 0) lastLineHeight = widget.getLineHeight();
       },
       child: InfiniteScrollView(
         onScroll: _onScroll,

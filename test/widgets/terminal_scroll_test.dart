@@ -61,4 +61,55 @@ void main() {
     );
     expect(out.last, '\x1b[M ${String.fromCharCode(32 + 5)}${String.fromCharCode(32 + 3)}');
   });
+
+  testWidgets('changing the font size does not turn the next scroll into a burst', (t) async {
+    final terminal = Terminal();
+    final out = <String>[];
+    terminal.onOutput = out.add;
+    Widget app(double size) => MaterialApp(
+      home: Scaffold(
+        body: TerminalView(
+          terminal,
+          textStyle: TerminalStyle(fontSize: size, fontFamily: 'monospace'),
+        ),
+      ),
+    );
+    await t.pumpWidget(app(10));
+    terminal.write('\x1b[?1049h\x1b[?1000h\x1b[?1006h');
+    await t.pump();
+    final view = t.getTopLeft(find.byType(TerminalView));
+    await t.dragFrom(view + const Offset(5, 5), const Offset(0, -120));
+    await t.pump();
+
+    await t.pumpWidget(app(24));
+    await t.pump();
+    out.clear();
+    final g = await t.startGesture(view + const Offset(5, 100));
+    for (var i = 0; i < 8; i++) {
+      await g.moveBy(const Offset(0, -10));
+      await t.pump();
+    }
+    await g.up();
+    await t.pump();
+
+    final wheel = out.where((s) => RegExp(r'^\x1b\[<6\d;').hasMatch(s)).toList();
+    expect(wheel, isNotEmpty);
+    expect(wheel.map((s) => s.substring(0, 6)).toSet(), hasLength(1), reason: 'one direction only');
+    expect(wheel.length, lessThanOrEqualTo(4));
+  });
+
+  testWidgets('a tap does not open the keyboard when showKeyboardOnTap is false', (t) async {
+    final terminal = Terminal();
+    final focus = FocusNode();
+    addTearDown(focus.dispose);
+    await t.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: TerminalView(terminal, focusNode: focus, showKeyboardOnTap: false)),
+      ),
+    );
+    await t.tap(find.byType(TerminalView));
+    await t.pump(const Duration(milliseconds: 500));
+    expect(focus.hasFocus, isFalse);
+    expect(t.testTextInput.isVisible, isFalse);
+  });
 }
