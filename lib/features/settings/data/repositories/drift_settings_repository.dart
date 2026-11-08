@@ -1,20 +1,37 @@
 import '../../../../shared/data/app_database.dart';
 import '../../../keyboard/domain/entities/key_presets.dart';
 import '../../domain/entities/app_settings.dart';
+import '../../domain/entities/appearance.dart';
 import '../../domain/repositories/settings_repository.dart';
 
+/// Settings are key/value rows. Unknown or missing values fall back to defaults.
 class DriftSettingsRepository implements SettingsRepository {
   DriftSettingsRepository(this._db);
   final AppDatabase _db;
+
+  static T? _byName<T extends Enum>(List<T> values, String? name) =>
+      values.where((v) => v.name == name).firstOrNull;
+
+  /// `theme` replaced the boolean `dark` key; rows written by older versions
+  /// keep their choice.
+  static ThemePreference _theme(Map<String, String> m) =>
+      _byName(ThemePreference.values, m['theme']) ??
+      switch (m['dark']) {
+        'true' => ThemePreference.dark,
+        'false' => ThemePreference.light,
+        _ => const AppSettings().themePreference,
+      };
 
   AppSettings _parse(List<SettingRow> rows) {
     final m = {for (final r in rows) r.key: r.value};
     const d = AppSettings();
     return AppSettings(
       notificationPreviews: m['previews'] == 'true',
-      darkTheme: m['dark'] != 'false',
+      themePreference: _theme(m),
+      accent: _byName(AccentColor.values, m['accent']) ?? d.accent,
+      terminalScheme: _byName(TerminalScheme.values, m['terminal_scheme']) ?? d.terminalScheme,
       fontSize: double.tryParse(m['font'] ?? '') ?? d.fontSize,
-      keyPreset: PresetName.values.where((p) => p.name == m['preset']).firstOrNull ?? d.keyPreset,
+      keyPreset: _byName(PresetName.values, m['preset']) ?? d.keyPreset,
       herdrPrefix: m['herdr_prefix'] ?? d.herdrPrefix,
       keepConnected: m['keep_connected'] != 'false',
     );
@@ -30,7 +47,14 @@ class DriftSettingsRepository implements SettingsRepository {
   Future<void> save(AppSettings s) => _db.batch(
     (b) => b.insertAllOnConflictUpdate(_db.settingRows, [
       SettingRowsCompanion.insert(key: 'previews', value: '${s.notificationPreviews}'),
-      SettingRowsCompanion.insert(key: 'dark', value: '${s.darkTheme}'),
+      SettingRowsCompanion.insert(key: 'theme', value: s.themePreference.name),
+      // Kept so an older build installed over this one still reads a theme.
+      SettingRowsCompanion.insert(
+        key: 'dark',
+        value: '${s.themePreference != ThemePreference.light}',
+      ),
+      SettingRowsCompanion.insert(key: 'accent', value: s.accent.name),
+      SettingRowsCompanion.insert(key: 'terminal_scheme', value: s.terminalScheme.name),
       SettingRowsCompanion.insert(key: 'font', value: '${s.fontSize}'),
       SettingRowsCompanion.insert(key: 'preset', value: s.keyPreset.name),
       SettingRowsCompanion.insert(key: 'herdr_prefix', value: s.herdrPrefix),

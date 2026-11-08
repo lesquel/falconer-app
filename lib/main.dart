@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -17,6 +19,11 @@ Future<void> main(List<String> args) async {
   // Started by UnifiedPush to handle a message while the UI is closed.
   if (args.contains('--unifiedpush-bg')) return;
 
+  // The bundled Manrope font ships under the SIL Open Font License.
+  LicenseRegistry.addLicense(() async* {
+    final text = await rootBundle.loadString('assets/fonts/Manrope-OFL.txt');
+    yield LicenseEntryWithLineBreaks(const ['Manrope'], text);
+  });
   await RustLib.init();
   final launch = await push.notifier.launchPayload();
   final router = _router = buildRouter(initialLocation: launch ?? '/');

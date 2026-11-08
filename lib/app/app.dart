@@ -12,13 +12,13 @@ class OpenMoshApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dark = (ref.watch(settingsProvider).value ?? const AppSettings()).darkTheme;
+    final s = ref.watch(settingsProvider).value ?? const AppSettings();
     return MaterialApp.router(
       title: 'OpenMosh',
       debugShowCheckedModeBanner: false,
-      theme: buildTheme(Brightness.light),
-      darkTheme: buildTheme(Brightness.dark),
-      themeMode: dark ? ThemeMode.dark : ThemeMode.light,
+      theme: buildTheme(Brightness.light, accent: s.accent),
+      darkTheme: buildTheme(Brightness.dark, accent: s.accent),
+      themeMode: themeModeFor(s.themePreference),
       routerConfig: router,
     );
   }

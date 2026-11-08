@@ -8,6 +8,7 @@ import '../features/inbox/presentation/containers/event_confirm_container.dart';
 import '../features/inbox/presentation/containers/inbox_container.dart';
 import '../features/keys/presentation/containers/keys_container.dart';
 import '../features/pairing/presentation/containers/pairing_container.dart';
+import '../features/settings/presentation/containers/colors_container.dart';
 import '../features/settings/presentation/containers/settings_container.dart';
 import '../features/terminal/presentation/containers/terminal_container.dart';
 import 'home_shell.dart';
@@ -60,7 +61,13 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
           routes: [GoRoute(path: '/keys', builder: (_, _) => const KeysContainer())],
         ),
         StatefulShellBranch(
-          routes: [GoRoute(path: '/settings', builder: (_, _) => const SettingsContainer())],
+          routes: [
+            GoRoute(
+              path: '/settings',
+              builder: (_, _) => const SettingsContainer(),
+              routes: [GoRoute(path: 'colors', builder: (_, _) => const ColorsContainer())],
+            ),
+          ],
         ),
       ],
     ),
