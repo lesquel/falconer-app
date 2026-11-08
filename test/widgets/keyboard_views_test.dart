@@ -31,7 +31,7 @@ void main() {
     expect(mods, [Modifier.ctrl]);
   });
 
-  testWidgets('pinned controls sit in the key grid next to Esc', (t) async {
+  testWidgets('pinned controls sit in the second row of the key grid, under Esc', (t) async {
     var taps = 0;
     await t.pumpWidget(
       app(
@@ -50,13 +50,14 @@ void main() {
     );
     final pinned = t.getCenter(find.byIcon(Icons.keyboard));
     final esc = t.getCenter(find.text('Esc'));
-    expect(pinned.dy, closeTo(esc.dy, 1));
+    // 2x3 grid: Esc, Tab, Ctrl on top; more keys, Chat, Keyboard below.
+    expect(pinned.dy, closeTo(esc.dy + 60, 1));
     expect(pinned.dx, greaterThan(esc.dx));
     await t.tap(find.byIcon(Icons.keyboard));
     expect(taps, 1);
   });
 
-  testWidgets('more keys toggle shows the arrows and the preset row', (t) async {
+  testWidgets('more keys toggle shows Alt, symbols and the preset row', (t) async {
     var toggles = 0;
     Widget bar(bool expanded) => app(
       ExtraKeysBar(
