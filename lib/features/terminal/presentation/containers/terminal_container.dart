@@ -88,8 +88,6 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     // On screen: the pool never evicts it while this screen is open.
     _pool.attach(_key);
     _phase = _runner.phase;
-    _session.modifiers.addListener(_onMods);
-    _selection.addListener(_onMods);
     _phaseSub = _runner.phases.listen((p) => setState(() => _phase = p));
     _net = networkRegained().listen((_) => _runner.wake());
     final reused = !fresh || _connections.isConnected(widget.hostId);
@@ -122,8 +120,6 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
   /// Retries now; a runner suspended in the background reconnects (only
   /// once the user is verified, so call this after the check).
   void _resumeRunner() => _runner.wake(restart: _runner.suspended);
-
-  void _onMods() => setState(() {});
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -169,8 +165,6 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     WidgetsBinding.instance.removeObserver(this);
     unawaited(_net?.cancel());
     unawaited(_phaseSub?.cancel());
-    _session.modifiers.removeListener(_onMods);
-    _selection.removeListener(_onMods);
     _selection.dispose();
     _focus.dispose();
     if (_fullScreen) {
@@ -354,7 +348,6 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
       KeyPresets.forSession(widget.kind, settings.keyPreset),
       herdrPrefix: settings.herdrPrefixSequence,
     );
-    final mods = _session.modifiers.value;
     final failure = _phase == TerminalPhase.failed ? _runner.failure : null;
     final Widget? overlay = failure != null
         ? FailurePanel(
@@ -451,9 +444,13 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
         onTwoFingerDoubleTap: () {
           if (!_keyboardOpen) _toggleKeyboard();
         },
-        selectionBar: _selection.selection == null
-            ? null
-            : _SelectionBar(onCopy: _copySelection, onClear: _selection.clearSelection),
+        // Selection and modifier changes rebuild only their bar.
+        selectionBar: ListenableBuilder(
+          listenable: _selection,
+          builder: (_, _) => _selection.selection == null
+              ? const SizedBox.shrink()
+              : _SelectionBar(onCopy: _copySelection, onClear: _selection.clearSelection),
+        ),
         corner: _fullScreen
             ? IconButton.filledTonal(
                 tooltip: l.exitFullScreen,
@@ -478,46 +475,49 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
                 onClose: _toggleChat,
               )
             : null,
-        keysBar: ExtraKeysBar(
-          base: KeyPresets.base,
-          preset: preset,
-          modifiers: mods,
-          onKey: (seq) => _runner.send(seq),
-          onModifier: (m) => _session.modifiers.value = mods.toggle(m),
-          onModifierLock: (m) => _session.modifiers.value = mods.lock(m),
-          expanded: _session.moreKeys,
-          onToggleExpanded: () => setState(() => _session.moreKeys = !_session.moreKeys),
-          shortcuts: settings.customKeys,
-          onShortcutLongPress: (i) => unawaited(_removeShortcut(settings, i)),
-          shortcutExtras: [
-            IconButton(
-              tooltip: l.addShortcut,
-              icon: const Icon(Icons.add),
-              onPressed: () => unawaited(_addShortcut(settings)),
-            ),
-          ],
-          pinned: [
-            KeyGridButton(
-              tooltip: _session.chatOpen ? l.typeInTerminal : l.terminalChat,
-              selected: _session.chatOpen,
-              icon: Icons.chat_bubble_outline,
-              selectedIcon: Icons.chat_bubble,
-              onPressed: _toggleChat,
-            ),
-            KeyGridButton(tooltip: l.keyboard, icon: Icons.keyboard, onPressed: _toggleKeyboard),
-          ],
-          trailing: [
-            IconButton(
-              tooltip: l.smallerText,
-              icon: const Icon(Icons.text_decrease),
-              onPressed: settings.fontSize <= 8 ? null : () => _zoom(settings, -1),
-            ),
-            IconButton(
-              tooltip: l.largerText,
-              icon: const Icon(Icons.text_increase),
-              onPressed: settings.fontSize >= 32 ? null : () => _zoom(settings, 1),
-            ),
-          ],
+        keysBar: ValueListenableBuilder(
+          valueListenable: _session.modifiers,
+          builder: (_, mods, _) => ExtraKeysBar(
+            base: KeyPresets.base,
+            preset: preset,
+            modifiers: mods,
+            onKey: (seq) => _runner.send(seq),
+            onModifier: (m) => _session.modifiers.value = mods.toggle(m),
+            onModifierLock: (m) => _session.modifiers.value = mods.lock(m),
+            expanded: _session.moreKeys,
+            onToggleExpanded: () => setState(() => _session.moreKeys = !_session.moreKeys),
+            shortcuts: settings.customKeys,
+            onShortcutLongPress: (i) => unawaited(_removeShortcut(settings, i)),
+            shortcutExtras: [
+              IconButton(
+                tooltip: l.addShortcut,
+                icon: const Icon(Icons.add),
+                onPressed: () => unawaited(_addShortcut(settings)),
+              ),
+            ],
+            pinned: [
+              KeyGridButton(
+                tooltip: _session.chatOpen ? l.typeInTerminal : l.terminalChat,
+                selected: _session.chatOpen,
+                icon: Icons.chat_bubble_outline,
+                selectedIcon: Icons.chat_bubble,
+                onPressed: _toggleChat,
+              ),
+              KeyGridButton(tooltip: l.keyboard, icon: Icons.keyboard, onPressed: _toggleKeyboard),
+            ],
+            trailing: [
+              IconButton(
+                tooltip: l.smallerText,
+                icon: const Icon(Icons.text_decrease),
+                onPressed: settings.fontSize <= 8 ? null : () => _zoom(settings, -1),
+              ),
+              IconButton(
+                tooltip: l.largerText,
+                icon: const Icon(Icons.text_increase),
+                onPressed: settings.fontSize >= 32 ? null : () => _zoom(settings, 1),
+              ),
+            ],
+          ),
         ),
       ),
     );

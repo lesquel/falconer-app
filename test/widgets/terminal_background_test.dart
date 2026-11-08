@@ -6,11 +6,14 @@ import 'package:go_router/go_router.dart';
 import 'package:openmosh/app/di.dart';
 import 'package:openmosh/features/hosts/domain/usecases/host_connections.dart';
 import 'package:openmosh/features/lock/domain/user_presence.dart';
+import 'package:openmosh/features/keyboard/domain/entities/extra_key.dart';
+import 'package:openmosh/features/keyboard/presentation/views/extra_keys_bar.dart';
 import 'package:openmosh/features/settings/domain/entities/app_settings.dart';
 import 'package:openmosh/features/terminal/domain/usecases/terminal_runner.dart';
 import 'package:openmosh/features/terminal/presentation/containers/terminal_container.dart';
 import 'package:openmosh/features/terminal/presentation/controllers/terminal_session.dart';
 import 'package:openmosh/features/terminal/presentation/controllers/terminal_session_pool.dart';
+import 'package:openmosh/features/terminal/presentation/views/terminal_screen_view.dart';
 import 'package:openmosh/l10n/l10n.dart';
 import 'package:xterm/xterm.dart';
 
@@ -131,6 +134,40 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(pool.sessions, hasLength(1));
     expect(conns.single.isClosed, isFalse);
+    await tester.runAsync(pool.closeAll);
+  });
+
+  testWidgets('modifier and selection changes rebuild only their bars, not the screen', (
+    tester,
+  ) async {
+    await open(tester);
+    final screen = tester.widget<TerminalScreenView>(find.byType(TerminalScreenView));
+    final session = pool.sessions.single;
+
+    final keysBefore = tester.widget<ExtraKeysBar>(find.byType(ExtraKeysBar));
+    session.modifiers.value = session.modifiers.value.toggle(Modifier.ctrl);
+    await tester.pump();
+    final keysAfter = tester.widget<ExtraKeysBar>(find.byType(ExtraKeysBar));
+    expect(keysAfter.modifiers.ctrl, isTrue);
+    expect(identical(keysAfter, keysBefore), isFalse, reason: 'the keys bar rebuilt');
+    expect(
+      identical(tester.widget<TerminalScreenView>(find.byType(TerminalScreenView)), screen),
+      isTrue,
+      reason: 'the terminal screen did not rebuild',
+    );
+
+    final view = tester.widget<TerminalView>(find.byType(TerminalView));
+    final buffer = session.emulator.terminal.buffer;
+    view.controller!.setSelection(buffer.createAnchor(0, 0), buffer.createAnchor(3, 0));
+    await tester.pump();
+    expect(find.byIcon(Icons.copy), findsOneWidget, reason: 'the selection bar shows');
+    expect(
+      identical(tester.widget<TerminalScreenView>(find.byType(TerminalScreenView)), screen),
+      isTrue,
+    );
+    view.controller!.clearSelection();
+    await tester.pump();
+    expect(find.byIcon(Icons.copy), findsNothing);
     await tester.runAsync(pool.closeAll);
   });
 }
