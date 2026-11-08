@@ -1025,4 +1025,8 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get lockPromptTurnOff => 'Desactivar el bloqueo de OpenMosh';
+
+  @override
+  String get pairedWithoutPush =>
+      'Las notificaciones están desactivadas: la app de notificaciones (ntfy) no respondió. Abre ntfy y luego toca Activar notificaciones en este equipo.';
 }

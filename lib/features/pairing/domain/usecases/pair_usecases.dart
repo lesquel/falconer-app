@@ -44,10 +44,9 @@ final class PairWithQr {
     final code = inspect(raw);
     final key = await vault.ensureDeviceKey(comment: 'openmosh-device');
     final ppk = await pushKeys.publicKey();
-    final endpoint = await endpoints.currentEndpoint();
-    if (!isAllowedPushEndpoint(endpoint)) {
-      throw const PushFailure('The push endpoint must use https.');
-    }
+    // Notifications are optional: without an answer from the push
+    // distributor the phone still pairs, and turns them on later.
+    final endpoint = await _optionalEndpoint(endpoints);
     // Expiry and single use are enforced by the host, which rejects late codes.
     final reply = await gateway.exchange(
       code,
@@ -75,6 +74,38 @@ final class PairWithQr {
     );
     await hosts.save(host);
     return host;
+  }
+}
+
+Future<String> _optionalEndpoint(PushEndpointSource endpoints) async {
+  try {
+    final url = await endpoints.currentEndpoint();
+    return isAllowedPushEndpoint(url) ? url : '';
+  } on PushFailure {
+    return '';
+  }
+}
+
+/// Turns notifications on for a host paired without them: registers with
+/// the push distributor, then `devices set-endpoint` on the host.
+final class EnablePush {
+  const EnablePush({required this.connections, required this.hosts, required this.endpoints});
+
+  final HostConnections connections;
+  final HostRepository hosts;
+  final PushEndpointSource endpoints;
+
+  Future<Host> call(String hostId) async {
+    final host = await hosts.byId(hostId);
+    if (host == null || !host.paired) throw const ValidationFailure('Unknown host.');
+    final endpoint = await endpoints.currentEndpoint();
+    if (!isAllowedPushEndpoint(endpoint)) {
+      throw const PushFailure('The push endpoint must use https.');
+    }
+    await connections.runHook(hostId, HookCommand.setEndpoint(host.deviceId!, endpoint));
+    final updated = host.copyWith(endpointSent: endpoint);
+    await hosts.save(updated);
+    return updated;
   }
 }
 

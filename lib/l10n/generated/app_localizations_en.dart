@@ -1020,4 +1020,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lockPromptTurnOff => 'Turn off the OpenMosh lock';
+
+  @override
+  String get pairedWithoutPush =>
+      'Notifications are off: the push app (ntfy) did not answer. Open ntfy, then tap Enable notifications on this host.';
 }

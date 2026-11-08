@@ -156,6 +156,14 @@ final pairOverSshProvider = Provider<PairOverSsh>(
   ),
 );
 
+final enablePushProvider = Provider<EnablePush>(
+  (ref) => EnablePush(
+    connections: ref.watch(hostConnectionsProvider),
+    hosts: ref.watch(hostRepositoryProvider),
+    endpoints: ref.watch(pushEndpointsProvider),
+  ),
+);
+
 final respondProvider = Provider<RespondToEvent>(
   (ref) => RespondToEvent(
     inbox: ref.watch(inboxRepositoryProvider),

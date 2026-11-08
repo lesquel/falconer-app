@@ -21,6 +21,7 @@ class PairingContainer extends ConsumerWidget {
     final body = switch (state.step) {
       PairStep.done when paired != null => PairSuccessView(
         alias: paired.alias,
+        pushEnabled: paired.pushEnabled,
         onOpen: () => context.go('/hosts/${paired.id}'),
       ),
       PairStep.review || PairStep.pairing => PairReviewView(

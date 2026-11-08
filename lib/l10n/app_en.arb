@@ -770,5 +770,9 @@
   "lockPromptTurnOff": "Turn off the OpenMosh lock",
   "@lockPromptTurnOff": {
     "description": "System biometric prompt reason."
+  },
+  "pairedWithoutPush": "Notifications are off: the push app (ntfy) did not answer. Open ntfy, then tap Enable notifications on this host.",
+  "@pairedWithoutPush": {
+    "description": "Pairing success when the phone paired without a push endpoint."
   }
 }

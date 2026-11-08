@@ -45,7 +45,12 @@ final class Host {
   /// Command that re-attaches the last Herdr/tmux session.
   final String? lastAttach;
 
-  bool get pushEnabled => deviceId != null && hostPushKey != null;
+  /// Registered as a device on the host (QR or SSH pairing).
+  bool get paired => deviceId != null && hostPushKey != null;
+
+  /// Paired with a push endpoint. An empty [endpointSent] means the phone
+  /// paired without one (no push distributor answered).
+  bool get pushEnabled => paired && endpointSent != '';
 
   Host copyWith({
     String? alias,

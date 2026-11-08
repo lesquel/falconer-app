@@ -295,5 +295,6 @@
   "unlock": "Desbloquear",
   "lockPromptUnlock": "Desbloquear OpenMosh",
   "lockPromptTurnOn": "Activar el bloqueo de OpenMosh",
-  "lockPromptTurnOff": "Desactivar el bloqueo de OpenMosh"
+  "lockPromptTurnOff": "Desactivar el bloqueo de OpenMosh",
+  "pairedWithoutPush": "Las notificaciones están desactivadas: la app de notificaciones (ntfy) no respondió. Abre ntfy y luego toca Activar notificaciones en este equipo."
 }

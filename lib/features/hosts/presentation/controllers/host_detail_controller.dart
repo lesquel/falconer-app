@@ -39,7 +39,13 @@ class HostDetailController extends Notifier<HostDetailState> {
   Future<void> enablePush(String deviceName) async {
     state = HostDetailState(sessions: state.sessions, agents: state.agents, loading: true);
     try {
-      await ref.read(pairOverSshProvider)(hostId, deviceName: deviceName);
+      final host = await ref.read(hostRepositoryProvider).byId(hostId);
+      if (host != null && host.paired) {
+        // Paired by QR without notifications: only the endpoint is missing.
+        await ref.read(enablePushProvider)(hostId);
+      } else {
+        await ref.read(pairOverSshProvider)(hostId, deviceName: deviceName);
+      }
       state = HostDetailState(sessions: state.sessions, agents: state.agents);
     } catch (e) {
       state = HostDetailState(sessions: state.sessions, agents: state.agents, error: e);

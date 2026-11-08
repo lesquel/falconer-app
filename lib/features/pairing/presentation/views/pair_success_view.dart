@@ -5,15 +5,23 @@ import '../../../../shared/ui/molecules/themed_mole.dart';
 
 /// Shown once pairing finished: the mole celebrates, then open the host.
 class PairSuccessView extends StatelessWidget {
-  const PairSuccessView({super.key, required this.alias, required this.onOpen});
+  const PairSuccessView({
+    super.key,
+    required this.alias,
+    required this.onOpen,
+    this.pushEnabled = true,
+  });
 
   final String alias;
   final VoidCallback onOpen;
 
+  /// False when the phone paired without notifications.
+  final bool pushEnabled;
+
   @override
   Widget build(BuildContext context) => MoleMessage(
     title: context.l10n.pairedWith(alias),
-    message: context.l10n.pairedBody,
+    message: pushEnabled ? context.l10n.pairedBody : context.l10n.pairedWithoutPush,
     size: 180,
     actions: [
       FilledButton.icon(

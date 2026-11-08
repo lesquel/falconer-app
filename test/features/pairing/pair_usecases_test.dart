@@ -34,8 +34,17 @@ class FakeGateway implements PairingGateway {
 class FakeEndpoints implements PushEndpointSource {
   FakeEndpoints(this.url);
   String url;
+
+  /// The distributor does not answer (ntfy asleep or missing).
+  bool silent = false;
   @override
-  Future<String> currentEndpoint() async => url;
+  Future<String> currentEndpoint() async {
+    if (silent) {
+      throw const PushFailure('The push distributor did not answer. Open ntfy and retry.');
+    }
+    return url;
+  }
+
   @override
   Future<String?> knownEndpoint() async => url;
 }
@@ -96,10 +105,51 @@ void main() {
     expect(hosts.rows, isEmpty);
   });
 
-  test('plain http push endpoints outside the tailnet are refused', () async {
+  test('a plain http push endpoint outside the tailnet is never sent', () async {
     endpoints.url = 'http://ntfy.example.com/up';
-    await expectLater(pair(code(), deviceName: 'Phone'), throwsA(isA<PushFailure>()));
-    expect(gateway.sent, isNull);
+    final host = await pair(code(), deviceName: 'Phone');
+    expect(gateway.sent!.endpoint, '');
+    expect(host.pushEnabled, isFalse);
+  });
+
+  test(
+    'without an answer from the push distributor the phone pairs without notifications',
+    () async {
+      endpoints.silent = true;
+      final host = await pair(code(), deviceName: 'Phone');
+      expect(gateway.sent!.endpoint, '');
+      expect(host.paired, isTrue);
+      expect(host.pushEnabled, isFalse);
+      expect(hosts.rows.values.single.endpointSent, '');
+    },
+  );
+
+  test('notifications are turned on later with devices set-endpoint', () async {
+    await hosts.save(
+      testHost(
+        deviceId: 'd1',
+        hpk: b64uEncode(List.filled(32, 1)),
+        hookPath: '/h/openmosh-hook',
+      ).copyWith(endpointSent: ''),
+    );
+    final conn = FakeConnection((cmd, _) => ok({'id': 'd1'}));
+    final enable = EnablePush(
+      connections: HostConnections(
+        hosts: hosts,
+        vault: FakeVault(),
+        connector: FakeConnector(() => conn),
+      ),
+      hosts: hosts,
+      endpoints: endpoints,
+    );
+    endpoints.silent = true;
+    await expectLater(enable('h1'), throwsA(isA<PushFailure>()));
+    expect((await hosts.byId('h1'))!.pushEnabled, isFalse);
+    endpoints.silent = false;
+    final host = await enable('h1');
+    expect(conn.scripts.single, contains("'devices' 'set-endpoint' 'd1' 'https://ntfy.sh/upXYZ'"));
+    expect(host.pushEnabled, isTrue);
+    expect((await hosts.byId('h1'))!.endpointSent, 'https://ntfy.sh/upXYZ');
   });
 
   test('SSH pairing reply alias is cleaned; an oversized one is refused', () async {

@@ -1868,6 +1868,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Turn off the OpenMosh lock'**
   String get lockPromptTurnOff;
+
+  /// Pairing success when the phone paired without a push endpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are off: the push app (ntfy) did not answer. Open ntfy, then tap Enable notifications on this host.'**
+  String get pairedWithoutPush;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
