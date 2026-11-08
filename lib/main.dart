@@ -16,17 +16,21 @@ GoRouter? _router;
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
-  final push = await PushRuntime.start(onTap: (payload) => _router?.go(payload));
-
-  // Started by UnifiedPush to handle a message while the UI is closed.
-  if (args.contains('--unifiedpush-bg')) return;
+  // Started by UnifiedPush to handle a message while the UI is closed:
+  // no Rust needed. Otherwise the Rust core loads while the database and
+  // notifications start.
+  final background = args.contains('--unifiedpush-bg');
+  final (push, _) = await (
+    PushRuntime.start(onTap: (payload) => _router?.go(payload)),
+    background ? Future<void>.value() : RustLib.init(),
+  ).wait;
+  if (background) return;
 
   // The bundled Manrope font ships under the SIL Open Font License.
   LicenseRegistry.addLicense(() async* {
     final text = await rootBundle.loadString('assets/fonts/Manrope-OFL.txt');
     yield LicenseEntryWithLineBreaks(const ['Manrope'], text);
   });
-  await RustLib.init();
   final launch = await push.notifier.launchPayload();
   final router = _router = buildRouter(initialLocation: launch ?? '/');
 
