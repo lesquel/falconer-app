@@ -17,15 +17,15 @@ final class UserPresence implements UserAuthenticator {
   final UserAuthenticator inner;
   final Elapsed elapsed;
   final Duration window;
-  Duration? _last;
+  Future<Duration>? _last;
 
   void markVerified() => _last = elapsed();
 
   /// True when the last verification is at most [window] old.
-  bool get recent {
+  Future<bool> recent() async {
     final last = _last;
     if (last == null) return false;
-    final age = elapsed() - last;
+    final age = await elapsed() - await last;
     return !age.isNegative && age <= window;
   }
 
@@ -38,5 +38,5 @@ final class UserPresence implements UserAuthenticator {
 
   /// Asks for verification unless the last one is recent. False when the
   /// user refuses.
-  Future<bool> ensureRecent(String reason) async => recent || await authenticate(reason);
+  Future<bool> ensureRecent(String reason) async => await recent() || await authenticate(reason);
 }

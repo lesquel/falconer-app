@@ -28,6 +28,16 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        // Boot clock for the app lock and re-verification windows: counts
+        // deep sleep and ignores wall-clock changes.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "dev.openmosh/clock")
+            .setMethodCallHandler { call, result ->
+                if (call.method == "elapsedRealtime") {
+                    result.success(android.os.SystemClock.elapsedRealtime())
+                } else {
+                    result.notImplemented()
+                }
+            }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "dev.openmosh/clipboard")
             .setMethodCallHandler { call, result ->
                 val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

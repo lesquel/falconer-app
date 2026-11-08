@@ -118,7 +118,32 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _runner.wake();
+    if (state != AppLifecycleState.resumed) return;
+    _runner.wake();
+    // Coming back to an open terminal is the same as opening a live one:
+    // hide it until the user is verified (unless verified recently).
+    if (_verified && !_reverifying) unawaited(_reverifyOnResume());
+  }
+
+  bool _reverifying = false;
+
+  Future<void> _reverifyOnResume() async {
+    _reverifying = true;
+    try {
+      final presence = ref.read(userPresenceProvider);
+      if (await presence.recent()) return;
+      if (!mounted) return;
+      setState(() => _verified = false);
+      final ok = await presence.ensureRecent(context.l10n.verifyToShowTerminal);
+      if (!mounted) return;
+      if (ok) {
+        setState(() => _verified = true);
+      } else {
+        _leave();
+      }
+    } finally {
+      _reverifying = false;
+    }
   }
 
   @override

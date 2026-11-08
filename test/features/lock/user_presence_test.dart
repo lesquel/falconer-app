@@ -11,7 +11,7 @@ void main() {
   setUp(() {
     auth = ScriptedAuth();
     t = Duration.zero;
-    presence = UserPresence(inner: auth, elapsed: () => t);
+    presence = UserPresence(inner: auth, elapsed: () async => t);
   });
 
   test('never verified: asks', () async {
@@ -36,13 +36,13 @@ void main() {
   test('a refusal shows nothing and is not remembered', () async {
     auth.allow = false;
     expect(await presence.ensureRecent('show terminal'), isFalse);
-    expect(presence.recent, isFalse);
+    expect(await presence.recent(), isFalse);
   });
 
   test('a clock that goes back does not count as recent', () async {
     t = const Duration(minutes: 10);
     presence.markVerified();
     t = const Duration(minutes: 1);
-    expect(presence.recent, isFalse);
+    expect(await presence.recent(), isFalse);
   });
 }

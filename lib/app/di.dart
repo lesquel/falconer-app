@@ -96,7 +96,7 @@ final secureClipboardProvider = Provider<SecureClipboard>((ref) => const SecureC
 final keyFilePickerProvider = Provider<KeyFilePicker>((ref) => const KeyFilePicker());
 
 /// Monotonic time for security windows.
-final monotonicClockProvider = Provider<Elapsed>((ref) => monotonicClock());
+final monotonicClockProvider = Provider<Elapsed>((ref) => bootClock());
 
 /// Remembers the last successful verification (re-verify pooled terminals).
 final userPresenceProvider = Provider<UserPresence>(

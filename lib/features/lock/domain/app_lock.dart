@@ -27,14 +27,15 @@ final class AppLock {
 
   final UserAuthenticator auth;
 
-  /// Monotonic, so changing the phone's clock cannot skip the timeout.
+  /// Boot clock: counts sleep, and changing the phone's clock cannot skip
+  /// the timeout.
   final Elapsed elapsed;
 
   /// Set by the lock gate from the current locale.
   LockPrompts prompts = const LockPrompts();
 
   bool _locked = false;
-  Duration? _backgroundSince;
+  Future<Duration>? _backgroundSince;
 
   bool get locked => _locked;
 
@@ -43,11 +44,11 @@ final class AppLock {
   /// Keeps the first timestamp when several background events arrive.
   void backgrounded() => _backgroundSince ??= elapsed();
 
-  void resumed({required bool enabled}) {
+  Future<void> resumed({required bool enabled}) async {
     final since = _backgroundSince;
     _backgroundSince = null;
     if (!enabled || since == null) return;
-    final away = elapsed() - since;
+    final away = await elapsed() - await since;
     // A clock that went back cannot be trusted: lock.
     if (away.isNegative || away > lockAfterBackground) _locked = true;
   }

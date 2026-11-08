@@ -26,6 +26,9 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
   bool _started = false;
   bool _unlocking = false;
 
+  /// Between a resume and the lock decision the content stays hidden.
+  bool _checking = false;
+
   @override
   void initState() {
     super.initState();
@@ -80,17 +83,27 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
       case AppLifecycleState.hidden || AppLifecycleState.paused:
         widget.lock.backgrounded();
       case AppLifecycleState.resumed:
-        // The verification prompt itself can send the app to the background.
-        final enabled = !_unlocking && (widget.enabled ?? false);
-        final was = widget.lock.locked;
-        widget.lock.resumed(enabled: enabled);
-        if (!was && widget.lock.locked) {
-          _dropFocus();
-          setState(() {});
-          _promptAfterFrame();
-        }
+        unawaited(_onResumed());
       case AppLifecycleState.inactive || AppLifecycleState.detached:
         break;
+    }
+  }
+
+  Future<void> _onResumed() async {
+    // The verification prompt itself can send the app to the background.
+    final enabled = !_unlocking && (widget.enabled ?? false);
+    final was = widget.lock.locked;
+    if (enabled && !was) setState(() => _checking = true);
+    try {
+      await widget.lock.resumed(enabled: enabled);
+    } finally {
+      if (mounted) {
+        setState(() => _checking = false);
+        if (!was && widget.lock.locked) {
+          _dropFocus();
+          _promptAfterFrame();
+        }
+      }
     }
   }
 
@@ -113,7 +126,7 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final loading = widget.enabled == null;
-    final hidden = loading || widget.lock.locked;
+    final hidden = loading || _checking || widget.lock.locked;
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -121,7 +134,7 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
           enabled: !hidden,
           child: Offstage(offstage: hidden, child: widget.child),
         ),
-        if (loading) ColoredBox(color: MoshColors.of(context).background),
+        if (loading || _checking) ColoredBox(color: MoshColors.of(context).background),
         if (!loading && widget.lock.locked) LockView(onUnlock: _unlock, busy: _unlocking),
       ],
     );

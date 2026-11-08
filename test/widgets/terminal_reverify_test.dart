@@ -27,7 +27,7 @@ void main() {
   setUp(() async {
     auth = ScriptedAuth();
     t = const Duration(hours: 1);
-    presence = UserPresence(inner: auth, elapsed: () => t);
+    presence = UserPresence(inner: auth, elapsed: () async => t);
     final repo = FakeHostRepository();
     await repo.save(testHost());
     connections = HostConnections(
@@ -102,5 +102,26 @@ void main() {
     await tester.pump();
     expect(auth.reasons, isEmpty);
     expect(find.byType(TerminalView), findsOneWidget);
+  });
+
+  testWidgets('returning to an open terminal after 5 minutes asks again', (tester) async {
+    await open(tester);
+    await tester.pump();
+    expect(auth.reasons, hasLength(1));
+    // Back from the background soon: no prompt.
+    t += const Duration(minutes: 1);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    expect(auth.reasons, hasLength(1));
+    // Back after a long while, and the user refuses: the terminal closes.
+    t += const Duration(minutes: 10);
+    auth.allow = false;
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(auth.reasons, hasLength(2));
+    expect(find.byType(TerminalView), findsNothing);
+    expect(find.text('home'), findsOneWidget);
   });
 }

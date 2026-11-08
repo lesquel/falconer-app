@@ -15,7 +15,7 @@ void main() {
   setUp(() {
     auth = ScriptedAuth()..allow = false;
     now = const Duration(hours: 3);
-    lock = AppLock(auth: auth, elapsed: () => now);
+    lock = AppLock(auth: auth, elapsed: () async => now);
   });
 
   Widget gate(bool? enabled) => MaterialApp(

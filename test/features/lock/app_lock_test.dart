@@ -11,10 +11,10 @@ void main() {
   setUp(() {
     auth = ScriptedAuth();
     now = const Duration(hours: 3);
-    lock = AppLock(auth: auth, elapsed: () => now);
+    lock = AppLock(auth: auth, elapsed: () async => now);
   });
 
-  test('off by default: a cold start does not lock', () {
+  test('off by default: a cold start does not lock', () async {
     lock.coldStart(enabled: false);
     expect(lock.locked, isFalse);
   });
@@ -31,33 +31,33 @@ void main() {
     expect(auth.reasons, ['Unlock OpenMosh', 'Unlock OpenMosh']);
   });
 
-  test('resuming after more than 60 s in the background locks', () {
+  test('resuming after more than 60 s in the background locks', () async {
     lock.coldStart(enabled: false); // Turned on later in Settings.
     lock.backgrounded();
     now += const Duration(seconds: 60);
-    lock.resumed(enabled: true);
+    await lock.resumed(enabled: true);
     expect(lock.locked, isFalse, reason: 'exactly 60 s stays unlocked');
     lock.backgrounded();
     now += const Duration(seconds: 61);
-    lock.resumed(enabled: true);
+    await lock.resumed(enabled: true);
     expect(lock.locked, isTrue);
   });
 
-  test('resuming after a long background stays unlocked when the lock is off', () {
+  test('resuming after a long background stays unlocked when the lock is off', () async {
     lock.coldStart(enabled: false);
     lock.backgrounded();
     now += const Duration(hours: 1);
-    lock.resumed(enabled: false);
+    await lock.resumed(enabled: false);
     expect(lock.locked, isFalse);
   });
 
-  test('repeated background events keep the first timestamp', () {
+  test('repeated background events keep the first timestamp', () async {
     lock.coldStart(enabled: false); // Turned on later in Settings.
     lock.backgrounded();
     now += const Duration(seconds: 50);
     lock.backgrounded();
     now += const Duration(seconds: 20);
-    lock.resumed(enabled: true);
+    await lock.resumed(enabled: true);
     expect(lock.locked, isTrue);
   });
 
@@ -78,11 +78,11 @@ void main() {
     expect(auth.reasons, ['Turn on the OpenMosh lock', 'Turn on the OpenMosh lock']);
   });
 
-  test('a clock that goes back locks instead of skipping the timeout', () {
+  test('a clock that goes back locks instead of skipping the timeout', () async {
     lock.coldStart(enabled: false);
     lock.backgrounded();
     now -= const Duration(hours: 1);
-    lock.resumed(enabled: true);
+    await lock.resumed(enabled: true);
     expect(lock.locked, isTrue);
   });
 }
