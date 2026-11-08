@@ -13,6 +13,7 @@ import '../../../../shared/domain/failure.dart';
 import '../../../../shared/ui/atoms/circle_icon_button.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
 import '../../../../shared/ui/organisms/failure_panel.dart';
+import '../../../hosts/domain/usecases/host_connections.dart';
 import '../../../keyboard/domain/entities/key_presets.dart';
 import '../../../keyboard/presentation/views/extra_keys_bar.dart';
 import '../../../settings/domain/entities/app_settings.dart';
@@ -44,6 +45,7 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
   late final String _key;
   late final TerminalSession _session;
   late final TerminalSessionPool<TerminalSession> _pool;
+  late final HostConnections _connections;
   final _focus = FocusNode();
   final _termKey = GlobalKey<TerminalViewState>();
   final _selection = TerminalController();
@@ -72,12 +74,13 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     WidgetsBinding.instance.addObserver(this);
     _key = terminalSessionKey(widget.hostId, widget.kind, widget.session);
     _pool = ref.read(terminalSessionPoolProvider);
+    _connections = ref.read(hostConnectionsProvider);
     final fresh = !_pool.contains(_key);
     _session = _pool.obtain(
       _key,
       () => TerminalSession.create(
         hostId: widget.hostId,
-        connections: ref.read(hostConnectionsProvider),
+        connections: _connections,
         session: widget.session,
         kind: widget.kind,
       ),
@@ -89,7 +92,7 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     _selection.addListener(_onMods);
     _phaseSub = _runner.phases.listen((p) => setState(() => _phase = p));
     _net = networkRegained().listen((_) => _runner.wake());
-    final reused = !fresh || ref.read(hostConnectionsProvider).isConnected(widget.hostId);
+    final reused = !fresh || _connections.isConnected(widget.hostId);
     if (reused) {
       _verified = false;
       WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_verifyThenShow(fresh)));
@@ -112,16 +115,21 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     if (fresh) {
       unawaited(_runner.start());
     } else {
-      _runner.wake();
+      _resumeRunner();
     }
   }
+
+  /// Retries now; a runner suspended in the background reconnects (only
+  /// once the user is verified, so call this after the check).
+  void _resumeRunner() => _runner.wake(restart: _runner.suspended);
 
   void _onMods() => setState(() {});
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) return;
-    _runner.wake();
+    // A suspended runner reconnects after the re-verification below.
+    if (!_runner.suspended) _runner.wake();
     // Coming back to an open terminal is the same as opening a live one:
     // hide it until the user is verified (unless verified recently).
     if (_verified && !_reverifying) unawaited(_reverifyOnResume());
@@ -136,7 +144,10 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     try {
       final presence = ref.read(userPresenceProvider);
       if (await presence.recent()) {
-        if (mounted) setState(() => _verified = true);
+        if (mounted) {
+          setState(() => _verified = true);
+          _resumeRunner();
+        }
         return;
       }
       if (!mounted) return;
@@ -144,6 +155,7 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
       if (!mounted) return;
       if (ok) {
         setState(() => _verified = true);
+        _resumeRunner();
       } else {
         _leave();
       }
@@ -165,8 +177,15 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
       unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
     }
     _pool.detach(_key);
-    if (!_keepConnected) unawaited(_pool.release(_key));
+    if (!_keepConnected) unawaited(_releaseAndCloseHost());
     super.dispose();
+  }
+
+  /// Without "Keep sessions connected", the last terminal of a host also
+  /// closes its SSH connection.
+  Future<void> _releaseAndCloseHost() async {
+    await _pool.release(_key);
+    if (!_pool.hasHost(widget.hostId)) await _connections.disconnect(widget.hostId);
   }
 
   bool get _keyboardOpen => _focus.hasFocus && MediaQuery.viewInsetsOf(context).bottom > 0;

@@ -44,8 +44,9 @@ class FakeShell implements ShellChannel {
   Future<void> write(List<int> data) async => written.add(utf8.decode(data));
   @override
   Future<void> resize(int c, int r) async => sizes.add((c, r));
+  /// Like the Rust shell, closing does not wait for the reader to drain.
   @override
-  Future<void> close() async => out.close();
+  Future<void> close() async => unawaited(out.close());
 }
 
 class ShellConnection extends FakeConnection {
@@ -126,7 +127,8 @@ void main() {
     emu.inputCtrl.add('ls\r');
     emu.resizeCtrl.add((100, 30));
     await pump();
-    expect(shells.single.written.last, 'ls\r');
+    await Future<void>.delayed(resizeDebounce * 2);
+    expect(shells.single.written, contains('ls\r'));
     expect(shells.single.sizes.single, (100, 30));
   });
 
@@ -181,5 +183,75 @@ void main() {
     }
     expect(sleeps.take(3).map((d) => d.inMilliseconds), [500, 1000, 2000]);
     expect(runner.phase, TerminalPhase.connected);
+  });
+
+  test('resizes are debounced: 30 in 100 ms send one resize with the last size', () async {
+    unawaited(runner.start());
+    await pump();
+    for (var i = 0; i < 30; i++) {
+      emu.resizeCtrl.add((80 + i, 24));
+      await Future<void>.delayed(const Duration(microseconds: 3333));
+    }
+    expect(shells.single.sizes, isEmpty, reason: 'the size is still changing');
+    await Future<void>.delayed(resizeDebounce * 2);
+    expect(shells.single.sizes, [(109, 24)]);
+  });
+
+  test('while paused, a failed connection waits for resume instead of retrying', () async {
+    connector.fail = const ConnectionFailure();
+    runner.paused = true;
+    unawaited(runner.start());
+    for (var i = 0; i < 10; i++) {
+      await pump();
+    }
+    expect(connector.endpoints, hasLength(1), reason: 'no retry while paused');
+    expect(sleeps, isEmpty);
+    expect(runner.phase, TerminalPhase.reconnecting);
+
+    connector.fail = null;
+    runner.paused = false;
+    await pump();
+    await pump();
+    expect(connector.endpoints, hasLength(2), reason: 'resume retries at once');
+    expect(runner.phase, TerminalPhase.connected);
+  });
+
+  test('network regained retries a paused runner once', () async {
+    connector.fail = const ConnectionFailure();
+    runner.paused = true;
+    unawaited(runner.start());
+    await pump();
+    runner.wake();
+    for (var i = 0; i < 10; i++) {
+      await pump();
+    }
+    expect(connector.endpoints, hasLength(2));
+    expect(sleeps, isEmpty);
+  });
+
+  test('suspend closes the shell and stops; a restart reconnects on a clean screen', () async {
+    unawaited(runner.start());
+    await pump();
+    expect(runner.phase, TerminalPhase.connected);
+    await runner.suspend();
+    conns.single.closed = true;
+    await pump();
+    await pump();
+    expect(runner.suspended, isTrue);
+    expect(runner.phase, TerminalPhase.idle);
+    expect(shells, hasLength(1), reason: 'no reconnect while suspended');
+    expect(sleeps, isEmpty);
+
+    runner.wake();
+    await pump();
+    expect(shells, hasLength(1), reason: 'a plain wake (network) does not restart it');
+
+    runner.wake(restart: true);
+    await pump();
+    await pump();
+    expect(shells, hasLength(2));
+    expect(runner.suspended, isFalse);
+    expect(runner.phase, TerminalPhase.connected);
+    expect(emu.resets, 1, reason: 'the suspended screen is cleared before re-attaching');
   });
 }

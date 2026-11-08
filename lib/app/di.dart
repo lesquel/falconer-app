@@ -47,6 +47,7 @@ import '../shared/hook/domain/hook_client.dart';
 import '../shared/ssh/data/datasources/ssh_bridge.dart';
 import '../shared/ssh/domain/ssh_ports.dart';
 import '../features/terminal/presentation/controllers/terminal_session.dart';
+import '../features/terminal/presentation/controllers/terminal_lifecycle.dart';
 import '../features/terminal/presentation/controllers/terminal_session_pool.dart';
 
 String newId() {
@@ -244,6 +245,14 @@ final terminalSessionPoolProvider = Provider<TerminalSessionPool<TerminalSession
   ref.onDispose(() => unawaited(pool.closeAll()));
   return pool;
 });
+
+/// Background policy for terminals: no retries, close after 10 minutes.
+final terminalLifecycleProvider = Provider<TerminalLifecycle>(
+  (ref) => TerminalLifecycle(
+    pool: ref.watch(terminalSessionPoolProvider),
+    disconnectAll: ref.watch(hostConnectionsProvider).disconnectAll,
+  ),
+);
 
 /// One lock for the app's lifetime.
 final appLockProvider = Provider<AppLock>(

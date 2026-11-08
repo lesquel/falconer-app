@@ -18,6 +18,11 @@ enum TerminalPhase { idle, connecting, connected, reconnecting, closed, failed }
 
 typedef Sleep = Future<void> Function(Duration);
 
+/// Quiet time before a terminal size reaches the SSH channel. A pinch or
+/// a keyboard animation resizes every frame; the server (and the TUI
+/// redrawing on SIGWINCH) only needs the final size.
+const resizeDebounce = Duration(milliseconds: 150);
+
 final class TerminalRunner {
   TerminalRunner({
     required this.hostId,
@@ -42,6 +47,8 @@ final class TerminalRunner {
   final BackoffPolicy _backoff;
   final Sleep _sleep;
 
+  Timer? _resizeTimer;
+  (int, int)? _pendingSize;
   final _phases = StreamController<TerminalPhase>.broadcast();
   final _subs = <StreamSubscription<Object?>>[];
   TerminalPhase _phase = TerminalPhase.idle;
@@ -51,9 +58,27 @@ final class TerminalRunner {
   Completer<void>? _wake;
   bool _disposed = false;
   bool _running = false;
+  bool _paused = false;
+  bool _suspended = false;
+
+  /// The next connection starts from a clean screen.
+  bool _resetOnConnect = false;
 
   TerminalPhase get phase => _phase;
   Stream<TerminalPhase> get phases => _phases.stream;
+
+  /// App in the background: a dropped or failed connection waits for
+  /// [wake] (network regained) or for the app to resume instead of retrying
+  /// on a timer. Resuming retries at once.
+  bool get paused => _paused;
+  set paused(bool value) {
+    if (_paused == value) return;
+    _paused = value;
+    if (!value) _completeWake();
+  }
+
+  /// Stopped by [suspend]; only `wake(restart: true)` starts it again.
+  bool get suspended => _suspended;
 
   void _set(TerminalPhase p) {
     _phase = p;
@@ -63,20 +88,24 @@ final class TerminalRunner {
   Future<void> start() async {
     if (_running || _disposed) return;
     _running = true;
+    _suspended = false;
     if (_subs.isEmpty) {
       _subs.add(emulator.input.listen((s) => send(s)));
-      _subs.add(
-        emulator.resizes.listen((r) => _shell?.resize(r.$1, r.$2).catchError((Object _) {})),
-      );
+      _subs.add(emulator.resizes.listen(_queueResize));
     }
     var attempt = 0;
-    var reconnect = false;
+    var reconnect = _resetOnConnect;
+    _resetOnConnect = false;
     failure = null;
-    while (!_disposed) {
+    while (!_disposed && !_suspended) {
       _set(attempt == 0 ? TerminalPhase.connecting : TerminalPhase.reconnecting);
       try {
         final conn = await connections.connection(hostId);
         final shell = await conn.openShell(cols: emulator.cols, rows: emulator.rows);
+        if (_disposed || _suspended) {
+          await shell.close();
+          break;
+        }
         _conn = conn;
         _shell = shell;
         attempt = 0;
@@ -105,7 +134,7 @@ final class TerminalRunner {
           fallback?.cancel();
         }
         _shell = null;
-        if (_disposed) break;
+        if (_disposed || _suspended) break;
         if (!conn.isClosed) {
           emulator.notice('[session ended]');
           _set(TerminalPhase.closed);
@@ -131,14 +160,47 @@ final class TerminalRunner {
         failure = e;
         emulator.notice('[${e.message} Retrying…]');
       }
-      if (_disposed) break;
+      if (_disposed || _suspended) break;
       _set(TerminalPhase.reconnecting);
-      _wake = Completer<void>();
-      await Future.any([_sleep(_backoff.delay(attempt)), _wake!.future]);
+      final wake = _wake = Completer<void>();
+      if (!_paused) await Future.any([_sleep(_backoff.delay(attempt)), wake.future]);
+      // Paused (now or while sleeping): no retry until resume or network.
+      if (_paused && !wake.isCompleted) await wake.future;
       _wake = null;
       attempt++;
     }
     _running = false;
+    if (_suspended && !_disposed) _set(TerminalPhase.idle);
+  }
+
+  void _queueResize((int, int) size) {
+    _pendingSize = size;
+    _resizeTimer?.cancel();
+    _resizeTimer = Timer(resizeDebounce, () {
+      final s = _pendingSize;
+      _pendingSize = null;
+      // Without a shell the next one opens at the emulator's current size.
+      if (s != null) _shell?.resize(s.$1, s.$2).catchError((Object _) {});
+    });
+  }
+
+  void _completeWake() {
+    final w = _wake;
+    if (w != null && !w.isCompleted) w.complete();
+  }
+
+  /// Closes the shell and stops without retrying (the app stayed long in
+  /// the background). The screen is kept until `wake(restart: true)`
+  /// reconnects, which clears it before re-attaching.
+  Future<void> suspend() async {
+    if (_disposed) return;
+    _suspended = true;
+    _resetOnConnect = true;
+    _completeWake();
+    final shell = _shell;
+    _shell = null;
+    await shell?.close();
+    if (!_running) _set(TerminalPhase.idle);
   }
 
   void _fail(AppFailure e) {
@@ -148,10 +210,10 @@ final class TerminalRunner {
   }
 
   /// Network came back or the app resumed: retry now instead of waiting,
-  /// or restart after a clean end/failure if [restart] is set.
+  /// or restart after a clean end/failure or a [suspend] if [restart] is set.
   void wake({bool restart = false}) {
-    final w = _wake;
-    if (w != null && !w.isCompleted) w.complete();
+    _completeWake();
+    if (_suspended && !restart) return;
     if (_conn?.isClosed ?? false) _shell?.close();
     if (restart && !_running) unawaited(start());
   }
@@ -168,7 +230,8 @@ final class TerminalRunner {
 
   Future<void> dispose() async {
     _disposed = true;
-    wake();
+    _resizeTimer?.cancel();
+    _completeWake();
     for (final s in _subs) {
       await s.cancel();
     }

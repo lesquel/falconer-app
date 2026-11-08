@@ -41,6 +41,11 @@ Future<void> main(List<String> args) async {
   // A v0.1 key still outside the auth-bound namespace moves at the next
   // successful user verification.
   unawaited(container.read(legacyKeyMigrationProvider).checkOnStartup());
+  // Registered before any screen, so a resume unpauses terminals before a
+  // terminal screen handles it.
+  final terminals = container.read(terminalLifecycleProvider);
+  // The listener registers with the binding and lives as long as the app.
+  AppLifecycleListener(onPause: terminals.paused, onResume: terminals.resumed);
 
   runApp(
     UncontrolledProviderScope(
