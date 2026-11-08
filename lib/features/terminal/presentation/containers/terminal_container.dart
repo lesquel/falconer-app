@@ -163,12 +163,6 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     }
   }
 
-  Future<void> _pasteClipboard() async {
-    final data = await Clipboard.getData(Clipboard.kTextPlain);
-    final text = data?.text;
-    if (text != null && text.isNotEmpty) _session.emulator.terminal.paste(text);
-  }
-
   Future<void> _addShortcut(AppSettings s) async {
     final key = await showShortcutDialog(context);
     if (key == null) return;
@@ -398,11 +392,6 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
           shortcuts: settings.customKeys,
           onShortcutLongPress: (i) => unawaited(_removeShortcut(settings, i)),
           shortcutExtras: [
-            IconButton(
-              tooltip: l.paste,
-              icon: const Icon(Icons.content_paste),
-              onPressed: () => unawaited(_pasteClipboard()),
-            ),
             IconButton(
               tooltip: l.addShortcut,
               icon: const Icon(Icons.add),

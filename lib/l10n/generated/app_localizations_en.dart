@@ -1024,4 +1024,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pairedWithoutPush =>
       'Notifications are off: the push app (ntfy) did not answer. Open ntfy, then tap Enable notifications on this host.';
+
+  @override
+  String get arrowUp => 'Up';
+
+  @override
+  String get arrowDown => 'Down';
+
+  @override
+  String get arrowLeft => 'Left';
+
+  @override
+  String get arrowRight => 'Right';
 }

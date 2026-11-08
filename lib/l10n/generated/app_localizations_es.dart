@@ -1029,4 +1029,16 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get pairedWithoutPush =>
       'Las notificaciones están desactivadas: la app de notificaciones (ntfy) no respondió. Abre ntfy y luego toca Activar notificaciones en este equipo.';
+
+  @override
+  String get arrowUp => 'Arriba';
+
+  @override
+  String get arrowDown => 'Abajo';
+
+  @override
+  String get arrowLeft => 'Izquierda';
+
+  @override
+  String get arrowRight => 'Derecha';
 }

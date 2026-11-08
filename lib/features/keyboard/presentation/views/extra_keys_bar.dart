@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/l10n.dart';
@@ -9,6 +11,8 @@ import '../../domain/entities/modifier_state.dart';
 /// UI-G keys bar: a grid of big keys (the first [gridKeys] base keys, a
 /// "more keys" toggle and the [pinned] controls). When expanded, two
 /// scrollable rows add the rest of the base keys, [trailing] and the preset.
+const _arrows = {'\x1b[A', '\x1b[B', '\x1b[C', '\x1b[D'};
+
 class ExtraKeysBar extends StatelessWidget {
   const ExtraKeysBar({
     super.key,
@@ -87,7 +91,8 @@ class ExtraKeysBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = MoshColors.of(context);
     final head = base.take(gridKeys).toList();
-    final rest = base.skip(gridKeys).toList();
+    // Arrows live on the always-visible cross, not in the scrolling rows.
+    final rest = base.skip(gridKeys).where((k) => !_arrows.contains(k.sequence)).toList();
     final cells = <Widget>[
       for (final k in head) _cap(k, grid: true),
       if (onToggleExpanded != null)
@@ -136,11 +141,27 @@ class ExtraKeysBar extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    for (var i = 0; i < cells.length; i++) ...[
-                      if (i > 0) const SizedBox(width: 8),
-                      Expanded(child: SizedBox(height: 52, child: cells[i])),
-                    ],
+                    Expanded(
+                      child: Column(
+                        children: [
+                          for (var r = 0; r * 3 < cells.length; r++) ...[
+                            if (r > 0) const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                for (var i = r * 3; i < cells.length && i < r * 3 + 3; i++) ...[
+                                  if (i > r * 3) const SizedBox(width: 8),
+                                  Expanded(child: SizedBox(height: 52, child: cells[i])),
+                                ],
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    ArrowCross(onKey: onKey),
                   ],
                 ),
               ),
@@ -185,6 +206,107 @@ class KeyGridButton extends StatelessWidget {
         disabledForegroundColor: c.muted,
         minimumSize: const Size(44, 52),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(MoshRadii.key - 4)),
+      ),
+    );
+  }
+}
+
+/// Always-visible arrow keys in a cross. Holding an arrow repeats it.
+class ArrowCross extends StatelessWidget {
+  const ArrowCross({super.key, required this.onKey, this.size = 36});
+  final ValueChanged<String> onKey;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    Widget key(String seq, IconData icon, String label) => SizedBox.square(
+      dimension: size,
+      child: _RepeatKey(sequence: seq, icon: icon, label: label, onKey: onKey),
+    );
+    final gap = SizedBox.square(dimension: size);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [gap, key('\x1b[A', Icons.keyboard_arrow_up, l.arrowUp), gap],
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            key('\x1b[D', Icons.keyboard_arrow_left, l.arrowLeft),
+            gap,
+            key('\x1b[C', Icons.keyboard_arrow_right, l.arrowRight),
+          ],
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [gap, key('\x1b[B', Icons.keyboard_arrow_down, l.arrowDown), gap],
+        ),
+      ],
+    );
+  }
+}
+
+class _RepeatKey extends StatefulWidget {
+  const _RepeatKey({
+    required this.sequence,
+    required this.icon,
+    required this.label,
+    required this.onKey,
+  });
+  final String sequence;
+  final IconData icon;
+  final String label;
+  final ValueChanged<String> onKey;
+
+  @override
+  State<_RepeatKey> createState() => _RepeatKeyState();
+}
+
+class _RepeatKeyState extends State<_RepeatKey> {
+  Timer? _repeat;
+
+  void _start() {
+    _stop();
+    _repeat = Timer.periodic(
+      const Duration(milliseconds: 80),
+      (_) => widget.onKey(widget.sequence),
+    );
+  }
+
+  void _stop() {
+    _repeat?.cancel();
+    _repeat = null;
+  }
+
+  @override
+  void dispose() {
+    _stop();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = MoshColors.of(context);
+    return Semantics(
+      label: widget.label,
+      button: true,
+      excludeSemantics: true,
+      child: GestureDetector(
+        onLongPressStart: (_) => _start(),
+        onLongPressEnd: (_) => _stop(),
+        onLongPressCancel: _stop,
+        child: Material(
+          color: c.surface,
+          borderRadius: BorderRadius.circular(10),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () => widget.onKey(widget.sequence),
+            child: Center(child: Icon(widget.icon, size: 22, color: c.foreground)),
+          ),
+        ),
       ),
     );
   }

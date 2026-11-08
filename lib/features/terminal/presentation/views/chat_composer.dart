@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
@@ -39,6 +40,21 @@ class _ChatComposerState extends State<ChatComposer> {
   void dispose() {
     _text.dispose();
     super.dispose();
+  }
+
+  /// Inserts the phone clipboard at the cursor of the message.
+  Future<void> _paste() async {
+    final clip = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
+    if (clip == null || clip.isEmpty || !mounted) return;
+    final v = _text.value;
+    final start = v.selection.isValid ? v.selection.start : v.text.length;
+    final end = v.selection.isValid ? v.selection.end : v.text.length;
+    final text = v.text.replaceRange(start, end, clip);
+    _text.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: start + clip.length),
+    );
+    widget.onChanged(text);
   }
 
   void _send() {
@@ -98,6 +114,12 @@ class _ChatComposerState extends State<ChatComposer> {
                       onChanged: widget.onChanged,
                       decoration: InputDecoration(hintText: l.chatHint, isDense: true),
                     ),
+                  ),
+                  IconButton(
+                    key: const Key('chat-paste'),
+                    tooltip: l.paste,
+                    icon: const Icon(Icons.content_paste),
+                    onPressed: _paste,
                   ),
                   IconButton(
                     tooltip: l.chatClose,

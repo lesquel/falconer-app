@@ -1575,7 +1575,7 @@ abstract class AppLocalizations {
   /// **'Larger text'**
   String get largerText;
 
-  /// Pastes the clipboard into the terminal.
+  /// Pastes the phone clipboard into the chat message.
   ///
   /// In en, this message translates to:
   /// **'Paste'**
@@ -1874,6 +1874,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notifications are off: the push app (ntfy) did not answer. Open ntfy, then tap Enable notifications on this host.'**
   String get pairedWithoutPush;
+
+  /// Accessibility label of an arrow key on the arrow cross.
+  ///
+  /// In en, this message translates to:
+  /// **'Up'**
+  String get arrowUp;
+
+  /// Accessibility label of an arrow key on the arrow cross.
+  ///
+  /// In en, this message translates to:
+  /// **'Down'**
+  String get arrowDown;
+
+  /// Accessibility label of an arrow key on the arrow cross.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get arrowLeft;
+
+  /// Accessibility label of an arrow key on the arrow cross.
+  ///
+  /// In en, this message translates to:
+  /// **'Right'**
+  String get arrowRight;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

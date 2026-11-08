@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openmosh/features/keyboard/domain/entities/extra_key.dart';
 import 'package:openmosh/features/keyboard/domain/entities/key_presets.dart';
 import 'package:openmosh/features/keyboard/domain/entities/modifier_state.dart';
 import 'package:openmosh/features/keyboard/presentation/views/extra_keys_bar.dart';
 import 'package:openmosh/features/terminal/domain/usecases/terminal_runner.dart';
+import 'package:openmosh/features/terminal/presentation/views/chat_composer.dart';
 import 'package:openmosh/features/terminal/presentation/views/shortcut_dialog.dart';
 import 'package:openmosh/features/terminal/presentation/views/terminal_screen_view.dart';
 import 'package:xterm/xterm.dart';
@@ -111,5 +113,71 @@ void main() {
     expect(find.text('Agregar atajo'), findsOneWidget);
     expect(find.text('Ctrl + tecla'), findsOneWidget);
     expect(find.text('Cancelar'), findsOneWidget);
+  });
+
+  testWidgets('the arrow cross is always visible, sends arrows and repeats while held', (t) async {
+    final sent = <String>[];
+    await t.pumpWidget(
+      _app(
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: ExtraKeysBar(
+            base: KeyPresets.base,
+            preset: const [],
+            modifiers: const ModifierState(),
+            onKey: sent.add,
+            onModifier: (_) {},
+            onModifierLock: (_) {},
+            expanded: true,
+            onToggleExpanded: () {},
+          ),
+        ),
+      ),
+    );
+    expect(find.text('←'), findsNothing, reason: 'arrows left the scrolling rows');
+    await t.tap(find.bySemanticsLabel('Up'));
+    await t.tap(find.bySemanticsLabel('Left'));
+    expect(sent, ['\x1b[A', '\x1b[D']);
+    sent.clear();
+    final g = await t.startGesture(t.getCenter(find.bySemanticsLabel('Down')));
+    await t.pump(const Duration(milliseconds: 600));
+    await t.pump(const Duration(milliseconds: 400));
+    await g.up();
+    await t.pump(const Duration(milliseconds: 300));
+    expect(sent.length, greaterThan(2));
+    expect(sent.toSet(), {'\x1b[B'});
+  });
+
+  testWidgets('chat Paste inserts the phone clipboard into the message', (t) async {
+    t.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
+      call,
+    ) async {
+      if (call.method == 'Clipboard.getData') return {'text': 'npm test'};
+      return null;
+    });
+    addTearDown(
+      () =>
+          t.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null),
+    );
+    final changes = <String>[];
+    await t.pumpWidget(
+      _app(
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: ChatComposer(
+            initialText: 'run ',
+            attachments: const [],
+            onSend: (_) {},
+            onChanged: changes.add,
+            onAttach: () {},
+            onRemoveAttachment: (_) {},
+            onClose: () {},
+          ),
+        ),
+      ),
+    );
+    await t.tap(find.byKey(const Key('chat-paste')));
+    await t.pump();
+    expect(changes.last, 'run npm test');
   });
 }

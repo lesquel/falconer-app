@@ -601,7 +601,7 @@
   },
   "paste": "Paste",
   "@paste": {
-    "description": "Pastes the clipboard into the terminal."
+    "description": "Pastes the phone clipboard into the chat message."
   },
   "addShortcut": "Add shortcut",
   "@addShortcut": {
@@ -774,5 +774,21 @@
   "pairedWithoutPush": "Notifications are off: the push app (ntfy) did not answer. Open ntfy, then tap Enable notifications on this host.",
   "@pairedWithoutPush": {
     "description": "Pairing success when the phone paired without a push endpoint."
+  },
+  "arrowUp": "Up",
+  "@arrowUp": {
+    "description": "Accessibility label of an arrow key on the arrow cross."
+  },
+  "arrowDown": "Down",
+  "@arrowDown": {
+    "description": "Accessibility label of an arrow key on the arrow cross."
+  },
+  "arrowLeft": "Left",
+  "@arrowLeft": {
+    "description": "Accessibility label of an arrow key on the arrow cross."
+  },
+  "arrowRight": "Right",
+  "@arrowRight": {
+    "description": "Accessibility label of an arrow key on the arrow cross."
   }
 }
