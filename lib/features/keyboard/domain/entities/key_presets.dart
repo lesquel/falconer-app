@@ -33,7 +33,6 @@ abstract final class KeyPresets {
           'prev': 'p',
           'split│': '%',
           'split─': '"',
-          'zoom': 'z',
           'copy': '[',
           'detach': 'd',
         }),
@@ -42,7 +41,6 @@ abstract final class KeyPresets {
           'pane←': 'h',
           'pane↓': 'j',
           'pane↑': 'k',
-          'zoom': 'z',
           'detach': 'd',
         }),
       };

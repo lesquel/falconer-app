@@ -35,7 +35,7 @@ class ExtraKeysBar extends StatelessWidget {
   final ValueChanged<Modifier> onModifier;
   final ValueChanged<Modifier> onModifierLock;
 
-  /// Extra controls at the end of the expanded base row (zoom).
+  /// Extra controls at the end of the expanded base row (text size).
   final List<Widget> trailing;
 
   /// Controls that never go away (chat, keyboard), in the grid.
