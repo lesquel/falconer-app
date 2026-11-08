@@ -34,6 +34,7 @@ class DriftSettingsRepository implements SettingsRepository {
       keyPreset: _byName(PresetName.values, m['preset']) ?? d.keyPreset,
       herdrPrefix: m['herdr_prefix'] ?? d.herdrPrefix,
       keepConnected: m['keep_connected'] != 'false',
+      appLock: m['app_lock'] == 'true',
     );
   }
 
@@ -59,6 +60,7 @@ class DriftSettingsRepository implements SettingsRepository {
       SettingRowsCompanion.insert(key: 'preset', value: s.keyPreset.name),
       SettingRowsCompanion.insert(key: 'herdr_prefix', value: s.herdrPrefix),
       SettingRowsCompanion.insert(key: 'keep_connected', value: '${s.keepConnected}'),
+      SettingRowsCompanion.insert(key: 'app_lock', value: '${s.appLock}'),
     ]),
   );
 }

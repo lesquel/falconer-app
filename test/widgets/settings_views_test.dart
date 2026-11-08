@@ -28,6 +28,19 @@ void main() {
     expect(changed!.keepConnected, isFalse);
   });
 
+  testWidgets('settings: the app lock is off by default and can be turned on', (t) async {
+    AppSettings? changed;
+    await t.pumpWidget(
+      app(SettingsView(settings: const AppSettings(), onChanged: (s) => changed = s)),
+    );
+    final sw = find.byKey(const Key('app_lock'));
+    await t.scrollUntilVisible(sw, 200);
+    expect(t.widget<SwitchListTile>(sw).value, isFalse);
+    expect(find.text('Lock OpenMosh'), findsOneWidget);
+    await t.tap(sw);
+    expect(changed!.appLock, isTrue);
+  });
+
   test('font size is clamped to 8..32', () {
     expect(const AppSettings().copyWith(fontSize: 40).fontSize, 32);
     expect(const AppSettings().copyWith(fontSize: 2).fontSize, 8);

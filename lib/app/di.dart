@@ -24,6 +24,7 @@ import '../features/keys/data/datasources/secure_key_storage.dart';
 import '../features/keys/data/repositories/secure_key_vault.dart';
 import '../features/keys/domain/entities/ssh_key_info.dart';
 import '../features/keys/domain/repositories/key_vault.dart';
+import '../features/lock/domain/app_lock.dart';
 import '../features/pairing/data/repositories/tcp_pairing_gateway.dart';
 import '../features/pairing/domain/repositories/pairing_gateway.dart';
 import '../features/pairing/domain/usecases/pair_usecases.dart';
@@ -192,6 +193,11 @@ final terminalSessionPoolProvider = Provider<TerminalSessionPool<TerminalSession
   ref.onDispose(() => unawaited(pool.closeAll()));
   return pool;
 });
+
+/// One lock for the app's lifetime.
+final appLockProvider = Provider<AppLock>(
+  (ref) => AppLock(auth: ref.watch(authenticatorProvider), now: DateTime.now),
+);
 
 final settingsProvider = StreamProvider<AppSettings>(
   (ref) => ref.watch(settingsRepositoryProvider).watch(),

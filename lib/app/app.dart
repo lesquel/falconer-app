@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/lock/presentation/app_lock_gate.dart';
 import '../features/settings/domain/entities/app_settings.dart';
 import 'di.dart';
 import 'theme.dart';
@@ -12,7 +13,10 @@ class OpenMoshApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final s = ref.watch(settingsProvider).value ?? const AppSettings();
+    final settings = ref.watch(settingsProvider);
+    final s = settings.value ?? const AppSettings();
+    // Until settings load, the gate shows nothing; a failed load locks.
+    final lockEnabled = settings.hasValue ? s.appLock : (settings.hasError ? true : null);
     return MaterialApp.router(
       title: 'OpenMosh',
       debugShowCheckedModeBanner: false,
@@ -20,6 +24,11 @@ class OpenMoshApp extends ConsumerWidget {
       darkTheme: buildTheme(Brightness.dark, accent: s.accent),
       themeMode: themeModeFor(s.themePreference),
       routerConfig: router,
+      builder: (context, child) => AppLockGate(
+        lock: ref.watch(appLockProvider),
+        enabled: lockEnabled,
+        child: child ?? const SizedBox.shrink(),
+      ),
     );
   }
 }

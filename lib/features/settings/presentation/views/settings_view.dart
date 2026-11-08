@@ -96,6 +96,16 @@ class SettingsView extends StatelessWidget {
             value: s.keepConnected,
             onChanged: (v) => onChanged(s.copyWith(keepConnected: v)),
           ),
+          SwitchListTile(
+            key: const Key('app_lock'),
+            title: const Text('Lock OpenMosh'),
+            subtitle: const Text(
+              'Ask for your fingerprint, face or screen lock when OpenMosh opens and after '
+              'a minute in the background.',
+            ),
+            value: s.appLock,
+            onChanged: (v) => onChanged(s.copyWith(appLock: v)),
+          ),
         ]),
         card([
           ListTile(

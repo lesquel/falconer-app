@@ -72,6 +72,12 @@ void main() {
     expect(rows['dark'], 'false');
   });
 
+  test('the app lock is off by default and round-trips', () async {
+    expect((await repo.load()).appLock, isFalse);
+    await repo.save(const AppSettings().copyWith(appLock: true));
+    expect((await repo.load()).appLock, isTrue);
+  });
+
   test('existing settings still round-trip', () async {
     await repo.save(const AppSettings().copyWith(notificationPreviews: true, fontSize: 18));
     final s = await repo.load();
