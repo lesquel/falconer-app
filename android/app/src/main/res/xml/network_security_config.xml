@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Cleartext HTTP is refused everywhere except Tailscale MagicDNS names.
+  Limits: domain-config matches host names, not CIDR ranges, so raw
+  100.64.0.0/10 addresses cannot be listed here. The app itself makes no
+  HTTP requests (SSH and pairing use raw TCP inside the tailnet; push
+  arrives through the UnifiedPush distributor app), so this policy is a
+  backstop for any HTTP stack a dependency might use.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">ts.net</domain>
+    </domain-config>
+</network-security-config>
