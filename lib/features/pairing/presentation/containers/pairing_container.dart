@@ -31,6 +31,12 @@ class PairingContainer extends ConsumerWidget {
         onSubmit: ctrl.scanned,
         scanner: ReaderWidget(
           codeFormat: Format.qrCode,
+          // The code is usually on a monitor: decode almost the whole frame (default 50%),
+          // accept light-on-dark terminals and downscale high-resolution frames.
+          cropPercent: 0.9,
+          tryHarder: true,
+          tryInverted: true,
+          tryDownscale: true,
           showGallery: false,
           showToggleCamera: false,
           onScan: (code) {
