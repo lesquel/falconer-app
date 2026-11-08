@@ -9,7 +9,7 @@ final class AppSettings {
     this.herdrPrefix = 'b',
   });
 
-  /// Off by default (SEC-2): the lock screen shows only "<alias>: <agent> needs you".
+  /// Off by default (SEC-2): the lock screen shows only `<alias>: <agent> needs you`.
   final bool notificationPreviews;
   final bool darkTheme;
   final double fontSize;
