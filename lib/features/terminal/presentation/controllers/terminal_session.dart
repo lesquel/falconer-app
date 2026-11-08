@@ -43,11 +43,27 @@ Future<void> sendComposed({
   if (files.isNotEmpty && submit) {
     await wait(attachSettle + attachSettleEach * (files.length - 1));
   }
-  if (text.isNotEmpty) {
-    await paste(text);
+  // Agents that do not turn a pasted path into an attachment (Pi, Cursor,
+  // Gemini, OpenCode...) still learn where the file is and can open it with
+  // their own read tool. For Claude Code and Codex the pasted path above is
+  // already an attachment; the line is harmless.
+  final body = submit && files.isNotEmpty ? withAttachmentLines(text, files) : text;
+  if (body.isNotEmpty) {
+    await paste(body);
     if (submit) await wait(submitPause);
   }
   if (submit) await send('\r');
+}
+
+const _imageExtensions = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'heic'};
+
+/// [text] followed by one line per uploaded file, so every agent can find it.
+String withAttachmentLines(String text, List<String> files) {
+  final lines = [
+    for (final f in files)
+      '${_imageExtensions.contains(f.split('.').last.toLowerCase()) ? 'Attached image' : 'Attached file'}: $f',
+  ];
+  return [if (text.trim().isNotEmpty) text, ...lines].join('\n');
 }
 
 final class TerminalSession {

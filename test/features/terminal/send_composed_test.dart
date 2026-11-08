@@ -17,7 +17,7 @@ void main() {
       'send \x1b[200~/u/b.jpg\x1b[201~',
       'send  ',
       'wait 950',
-      'send \x1b[200~look at these\x1b[201~',
+      'send \x1b[200~look at these\nAttached image: /u/a.jpg\nAttached image: /u/b.jpg\x1b[201~',
       'wait 80',
       'send enter',
     ]);
@@ -45,5 +45,13 @@ void main() {
       wait: (_) async {},
     );
     expect(log.first, '\x1b[200~a[201~b\x1b[201~');
+  });
+
+  test('attachment lines name images and files; an empty message still lists them', () {
+    expect(
+      withAttachmentLines('', ['/u/x.PNG', '/u/log.txt']),
+      'Attached image: /u/x.PNG\nAttached file: /u/log.txt',
+    );
+    expect(withAttachmentLines('hi', ['/u/a.jpg']), 'hi\nAttached image: /u/a.jpg');
   });
 }
