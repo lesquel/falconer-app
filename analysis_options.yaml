@@ -7,6 +7,7 @@ analyzer:
     - rust_builder/**
     - build/**
     - android/**
+    - third_party/**
   language:
     strict-casts: true
     strict-raw-types: true

@@ -111,14 +111,18 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     final messenger = ScaffoldMessenger.of(context);
     setState(() => _uploading = true);
     try {
-      final file = await source.pick(imagesOnly: images);
-      if (file == null) return;
+      final files = images ? await source.pickImages() : [?(await source.pick(imagesOnly: false))];
+      final pasted = <String>[];
       try {
-        final text = await ref.read(uploadFileProvider)(widget.hostId, file);
-        await _runner.send(text);
+        for (final file in files) {
+          pasted.add(await ref.read(uploadFileProvider)(widget.hostId, file));
+        }
       } finally {
-        await source.discard(file);
+        for (final file in files) {
+          await source.discard(file);
+        }
       }
+      if (pasted.isNotEmpty) await _runner.send(pasted.join(' '));
     } on AppFailure catch (e) {
       messenger.showSnackBar(SnackBar(content: Text(e.message)));
     } finally {

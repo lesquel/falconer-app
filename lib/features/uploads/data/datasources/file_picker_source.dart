@@ -1,6 +1,10 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart' show ImagePicker;
+import 'package:image_picker_android/image_picker_android.dart';
+import 'package:image_picker_platform_interface/image_picker_platform_interface.dart'
+    show ImagePickerPlatform;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -12,15 +16,30 @@ typedef PickFiles = Future<List<PlatformFile>> Function(FileType type);
 
 Future<List<PlatformFile>> _systemPicker(FileType type) => FilePicker.pickFiles(type: type);
 
+typedef PickImagePaths = Future<List<String>> Function();
+
+/// Android photo picker (the system bottom sheet), never the gallery app.
+Future<List<String>> _photoPicker() async {
+  final impl = ImagePickerPlatform.instance;
+  if (impl is ImagePickerAndroid) impl.useAndroidPhotoPicker = true;
+  final files = await ImagePicker().pickMultiImage(requestFullMetadata: false, limit: 10);
+  return [for (final f in files) f.path];
+}
+
 /// System picker. Content URIs are copied into the app cache (capped at the
 /// upload limit) so the Rust core can stream them. Any picked file that lives
 /// in the app cache (our copies and the copies file_picker itself makes under
 /// `cache/file_picker/`) is [PickedFile.temporary] and is deleted by
 /// [discard] after the upload, whether it succeeded or failed.
 class FilePickerSource implements FileSource {
-  const FilePickerSource({this.pickFiles = _systemPicker, this.cacheDir = getTemporaryDirectory});
+  const FilePickerSource({
+    this.pickFiles = _systemPicker,
+    this.pickImagePaths = _photoPicker,
+    this.cacheDir = getTemporaryDirectory,
+  });
 
   final PickFiles pickFiles;
+  final PickImagePaths pickImagePaths;
 
   /// The app cache (Android `Context.getCacheDir()`).
   final Future<Directory> Function() cacheDir;
@@ -67,6 +86,34 @@ class FilePickerSource implements FileSource {
     }
     await sink.close();
     return PickedFile(path: tmp.path, name: f.name, size: copied, temporary: true);
+  }
+
+  @override
+  Future<List<PickedFile>> pickImages() async {
+    final cache = (await cacheDir()).path;
+    final picked = <PickedFile>[];
+    for (final path in await pickImagePaths()) {
+      final f = File(path);
+      picked.add(
+        PickedFile(
+          path: path,
+          name: p.basename(path),
+          size: await f.length(),
+          temporary: _inside(cache, path),
+        ),
+      );
+    }
+    try {
+      for (final f in picked) {
+        checkUploadSize(f.size);
+      }
+    } catch (_) {
+      for (final f in picked) {
+        await discard(f);
+      }
+      rethrow;
+    }
+    return picked;
   }
 
   @override

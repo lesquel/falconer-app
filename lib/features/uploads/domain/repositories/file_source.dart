@@ -16,5 +16,9 @@ final class PickedFile {
 /// System picker for images or any file.
 abstract interface class FileSource {
   Future<PickedFile?> pick({required bool imagesOnly});
+
+  /// Android's photo picker (system bottom sheet, no storage permission);
+  /// several images at once. Empty when cancelled.
+  Future<List<PickedFile>> pickImages();
   Future<void> discard(PickedFile file);
 }

@@ -29,13 +29,19 @@ void main() {
   late Directory root;
   late Directory cache;
   late List<PlatformFile> next;
+  late List<String> images;
   late FilePickerSource source;
 
   setUp(() {
     root = Directory.systemTemp.createTempSync('openmosh_picker_');
     cache = Directory('${root.path}/cache')..createSync();
     next = [];
-    source = FilePickerSource(pickFiles: (_) async => next, cacheDir: () async => cache);
+    images = [];
+    source = FilePickerSource(
+      pickFiles: (_) async => next,
+      pickImagePaths: () async => images,
+      cacheDir: () async => cache,
+    );
   });
   tearDown(() => root.deleteSync(recursive: true));
 
@@ -77,5 +83,34 @@ void main() {
     next = [LocalFile(f)];
     await expectLater(source.pick(imagesOnly: false), throwsA(isA<ValidationFailure>()));
     expect(f.existsSync(), isFalse);
+  });
+
+  test('photo picker returns every selected image; cache copies are temporary', () async {
+    final a = File('${cache.path}/scaled_a.jpg')..writeAsBytesSync([1, 2]);
+    final b = File('${cache.path}/scaled_b.png')..writeAsBytesSync([3]);
+    images = [a.path, b.path];
+    final picked = await source.pickImages();
+    expect([for (final f in picked) f.name], ['scaled_a.jpg', 'scaled_b.png']);
+    expect([for (final f in picked) f.size], [2, 1]);
+    expect(picked.every((f) => f.temporary), isTrue);
+    await source.discard(picked.first);
+    expect(a.existsSync(), isFalse);
+  });
+
+  test('cancelled photo picker returns nothing', () async {
+    expect(await source.pickImages(), isEmpty);
+  });
+
+  test('an oversized image fails the whole pick and its cache copies are removed', () async {
+    final small = File('${cache.path}/ok.jpg')..writeAsBytesSync([1]);
+    final big = File('${cache.path}/big.jpg');
+    final raf = big.openSync(mode: FileMode.write)..setPositionSync(50 * 1024 * 1024 + 1);
+    raf
+      ..writeByteSync(0)
+      ..closeSync();
+    images = [small.path, big.path];
+    await expectLater(source.pickImages(), throwsA(isA<ValidationFailure>()));
+    expect(small.existsSync(), isFalse);
+    expect(big.existsSync(), isFalse);
   });
 }

@@ -53,6 +53,9 @@ dependencies:
     path: rust_builder
   unifiedpush_android: ^3.5.0
   unifiedpush_platform_interface: ^4.0.0
+  image_picker: ^1.2.4
+  image_picker_android: ^0.8.13+25
+  image_picker_platform_interface: ^2.11.2
 
 dev_dependencies:
   flutter_test:
@@ -108,3 +111,8 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+dependency_overrides:
+  # Vendored with a scroll fix; see third_party/xterm/OPENMOSH_PATCHES.md.
+  xterm:
+    path: third_party/xterm
