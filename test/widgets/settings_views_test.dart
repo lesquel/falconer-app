@@ -113,4 +113,21 @@ void main() {
     expect(const AppSettings().copyWith(fontSize: 40).fontSize, 32);
     expect(const AppSettings().copyWith(fontSize: 2).fontSize, 8);
   });
+
+  testWidgets('settings: the light / dark switch is on the main screen', (t) async {
+    AppSettings? changed;
+    await t.pumpWidget(
+      app(
+        SettingsView(
+          settings: const AppSettings(),
+          onChanged: (s) => changed = s,
+          onAppLockChanged: (_) {},
+        ),
+      ),
+    );
+    expect(find.byKey(const Key('theme_switch')), findsOneWidget);
+    await t.tap(find.byIcon(Icons.light_mode_outlined));
+    await t.pump();
+    expect(changed?.themePreference, ThemePreference.light);
+  });
 }
