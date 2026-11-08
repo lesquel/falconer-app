@@ -9,6 +9,11 @@ enum AgentState { idle, working, blocked, done, unknown }
 
 final _name = RegExp(r'^[A-Za-z0-9._:@%+=-]{1,128}$');
 
+const _herdrAttachScript =
+    r'h=$(command -v openmosh-hook || echo "$HOME/.local/bin/openmosh-hook"); '
+    r'if [ -x "$h" ]; then exec "$h" attach herdr --session "$1"; fi; '
+    r'exec herdr session attach "$1"';
+
 final class RemoteSession {
   const RemoteSession({
     required this.name,
@@ -23,8 +28,13 @@ final class RemoteSession {
   final int? windows;
 
   /// Shell command typed into the PTY to (re)attach this session.
+  ///
+  /// Herdr goes through `openmosh-hook attach herdr`, which mirrors navigation
+  /// so the computer follows the phone; without the hook it runs Herdr directly.
+  /// The logic runs in `sh -c` (name passed as `$1`) so it works under any login
+  /// shell, including fish.
   String get attachCommand => switch (kind) {
-    SessionKind.herdr => shJoin(['herdr', 'session', 'attach', name]),
+    SessionKind.herdr => shJoin(['sh', '-c', _herdrAttachScript, 'sh', name]),
     SessionKind.tmux => shJoin(['tmux', 'new-session', '-A', '-s', name]),
   };
 

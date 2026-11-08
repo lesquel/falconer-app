@@ -28,7 +28,12 @@ void main() {
       {'name': 'x', 'kind': 'screen'},
     ]).sessions('h1');
     expect(list.map((s) => s.name), ['main', 'work']);
-    expect(list[0].attachCommand, "'herdr' 'session' 'attach' 'main'");
+    expect(
+      list[0].attachCommand,
+      "'sh' '-c' 'h=\$(command -v openmosh-hook || echo \"\$HOME/.local/bin/openmosh-hook\"); "
+      'if [ -x "\$h" ]; then exec "\$h" attach herdr --session "\$1"; fi; '
+      "exec herdr session attach \"\$1\"' 'sh' 'main'",
+    );
     expect(list[1].attachCommand, "'tmux' 'new-session' '-A' '-s' 'work'");
     expect(list[1].windows, 3);
   });
