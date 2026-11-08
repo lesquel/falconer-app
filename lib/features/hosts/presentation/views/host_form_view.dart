@@ -47,12 +47,18 @@ class _HostFormViewState extends State<HostFormView> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        TextField(controller: _alias, decoration: const InputDecoration(labelText: 'Name')),
+        TextField(
+          controller: _alias,
+          decoration: const InputDecoration(labelText: 'Name'),
+        ),
         const SizedBox(height: 12),
         TextField(
           controller: _address,
           enabled: !widget.lockAddress,
-          decoration: const InputDecoration(labelText: 'Hostname or Tailscale IP', hintText: 'box.tailnet.ts.net'),
+          decoration: const InputDecoration(
+            labelText: 'Hostname or Tailscale IP',
+            hintText: 'box.tailnet.ts.net',
+          ),
           keyboardType: TextInputType.url,
           autocorrect: false,
         ),
@@ -64,7 +70,11 @@ class _HostFormViewState extends State<HostFormView> {
           keyboardType: TextInputType.number,
         ),
         const SizedBox(height: 12),
-        TextField(controller: _user, decoration: const InputDecoration(labelText: 'User'), autocorrect: false),
+        TextField(
+          controller: _user,
+          decoration: const InputDecoration(labelText: 'User'),
+          autocorrect: false,
+        ),
         const SizedBox(height: 12),
         DropdownButtonFormField<String?>(
           initialValue: _keyId,
@@ -85,15 +95,17 @@ class _HostFormViewState extends State<HostFormView> {
           onPressed: widget.busy
               ? null
               : () => widget.onSubmit(
-                    HostDraft(
-                      alias: _alias.text,
-                      address: _address.text,
-                      port: int.tryParse(_port.text) ?? 0,
-                      user: _user.text,
-                    ),
-                    _keyId,
+                  HostDraft(
+                    alias: _alias.text,
+                    address: _address.text,
+                    port: int.tryParse(_port.text) ?? 0,
+                    user: _user.text,
                   ),
-          child: Text(widget.busy ? 'Checking host key…' : (widget.lockAddress ? 'Save' : 'Continue')),
+                  _keyId,
+                ),
+          child: Text(
+            widget.busy ? 'Checking host key…' : (widget.lockAddress ? 'Save' : 'Continue'),
+          ),
         ),
       ],
     );

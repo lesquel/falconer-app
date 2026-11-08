@@ -11,12 +11,15 @@ class InboxView extends StatelessWidget {
   final ValueChanged<InboxEvent> onOpen;
 
   static (String, BadgeTone) badge(InboxEvent e) => switch (e.status) {
-        InboxStatus.pending => (e.kind == EventKind.question ? 'question' : 'needs approval', BadgeTone.attention),
-        InboxStatus.responding => ('sending…', BadgeTone.neutral),
-        InboxStatus.failed => ('failed', BadgeTone.danger),
-        InboxStatus.resolved => (e.response?.name ?? 'resolved', BadgeTone.success),
-        InboxStatus.info => ('done', BadgeTone.neutral),
-      };
+    InboxStatus.pending => (
+      e.kind == EventKind.question ? 'question' : 'needs approval',
+      BadgeTone.attention,
+    ),
+    InboxStatus.responding => ('sending…', BadgeTone.neutral),
+    InboxStatus.failed => ('failed', BadgeTone.danger),
+    InboxStatus.resolved => (e.response?.name ?? 'resolved', BadgeTone.success),
+    InboxStatus.info => ('done', BadgeTone.neutral),
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +33,11 @@ class InboxView extends StatelessWidget {
         final e = events[i];
         final (label, tone) = badge(e);
         return ListTile(
-          title: Text(e.title.isEmpty ? '${e.agent} on ${hostAlias(e.hostId)}' : e.title,
-              maxLines: 1, overflow: TextOverflow.ellipsis),
+          title: Text(
+            e.title.isEmpty ? '${e.agent} on ${hostAlias(e.hostId)}' : e.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
           subtitle: Text('${hostAlias(e.hostId)} · ${e.agent}', maxLines: 1),
           trailing: StatusBadge(label: label, tone: tone),
           onTap: () => onOpen(e),

@@ -11,14 +11,18 @@ void main() {
   testWidgets('extra keys send sequences and toggle modifiers', (t) async {
     final sent = <String>[];
     final mods = <Modifier>[];
-    await t.pumpWidget(app(ExtraKeysBar(
-      base: KeyPresets.base,
-      preset: KeyPresets.forName(PresetName.tmux),
-      modifiers: const ModifierState(ctrl: true),
-      onKey: sent.add,
-      onModifier: mods.add,
-      onModifierLock: (_) {},
-    )));
+    await t.pumpWidget(
+      app(
+        ExtraKeysBar(
+          base: KeyPresets.base,
+          preset: KeyPresets.forName(PresetName.tmux),
+          modifiers: const ModifierState(ctrl: true),
+          onKey: sent.add,
+          onModifier: mods.add,
+          onModifierLock: (_) {},
+        ),
+      ),
+    );
     await t.tap(find.text('Esc'));
     await t.tap(find.text('Tab'));
     await t.tap(find.text('Ctrl'));

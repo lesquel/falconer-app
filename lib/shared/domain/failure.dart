@@ -14,7 +14,7 @@ abstract class AppFailure implements Exception {
 /// hard stop: no UI may offer "continue anyway".
 final class HostKeyMismatchFailure extends AppFailure {
   const HostKeyMismatchFailure({required this.expected, required this.actual})
-      : super('Host key changed. The connection was blocked.');
+    : super('Host key changed. The connection was blocked.');
   final String expected;
   final String actual;
 

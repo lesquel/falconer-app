@@ -21,14 +21,16 @@ Future<void> main(List<String> args) async {
   final launch = await push.notifier.launchPayload();
   final router = _router = buildRouter(initialLocation: launch ?? '/');
 
-  runApp(ProviderScope(
-    overrides: [
-      databaseProvider.overrideWithValue(push.db),
-      secureStorageProvider.overrideWithValue(push.storage),
-      pushEndpointsProvider.overrideWithValue(push.endpoints),
-      notifierProvider.overrideWithValue(push.notifier),
-    ],
-    child: OpenMoshApp(router: router),
-  ));
+  runApp(
+    ProviderScope(
+      overrides: [
+        databaseProvider.overrideWithValue(push.db),
+        secureStorageProvider.overrideWithValue(push.storage),
+        pushEndpointsProvider.overrideWithValue(push.endpoints),
+        notifierProvider.overrideWithValue(push.notifier),
+      ],
+      child: OpenMoshApp(router: router),
+    ),
+  );
   await push.notifier.requestPermission();
 }

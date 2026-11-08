@@ -57,38 +57,49 @@ class _EventConfirmViewState extends State<EventConfirmView> {
         Text(e.title.isEmpty ? 'Agent needs you' : e.title, style: t.titleLarge),
         const SizedBox(height: 12),
         if (e.summary.isNotEmpty)
-          Card(child: Padding(padding: const EdgeInsets.all(12), child: MonoText(e.summary))),
+          Card(
+            child: Padding(padding: const EdgeInsets.all(12), child: MonoText(e.summary)),
+          ),
         if (!e.needsAction)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Text(e.status == InboxStatus.resolved ? 'Already answered.' : 'Nothing to answer.'),
+            child: Text(
+              e.status == InboxStatus.resolved ? 'Already answered.' : 'Nothing to answer.',
+            ),
           ),
         if (widget.error != null)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text(widget.error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            child: Text(
+              widget.error!,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
           ),
         if (widget.suggested != null && e.needsAction)
-          Text('You picked "${widget.suggested!.name}" in the notification. Confirm below.',
-              style: t.bodySmall),
+          Text(
+            'You picked "${widget.suggested!.name}" in the notification. Confirm below.',
+            style: t.bodySmall,
+          ),
         const SizedBox(height: 12),
-        Row(children: [
-          Expanded(
-            child: FilledButton(
-              key: const Key('approve'),
-              onPressed: canAnswer ? widget.onAllow : null,
-              child: const Text('Approve'),
+        Row(
+          children: [
+            Expanded(
+              child: FilledButton(
+                key: const Key('approve'),
+                onPressed: canAnswer ? widget.onAllow : null,
+                child: const Text('Approve'),
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: OutlinedButton(
-              key: const Key('deny'),
-              onPressed: canAnswer ? widget.onDeny : null,
-              child: const Text('Deny'),
+            const SizedBox(width: 12),
+            Expanded(
+              child: OutlinedButton(
+                key: const Key('deny'),
+                onPressed: canAnswer ? widget.onDeny : null,
+                child: const Text('Deny'),
+              ),
             ),
-          ),
-        ]),
+          ],
+        ),
         const SizedBox(height: 16),
         TextField(
           controller: _text,
@@ -106,7 +117,11 @@ class _EventConfirmViewState extends State<EventConfirmView> {
           ),
         ),
         const Divider(),
-        TextButton.icon(onPressed: widget.onOpenTerminal, icon: const Icon(Icons.terminal), label: const Text('Open terminal')),
+        TextButton.icon(
+          onPressed: widget.onOpenTerminal,
+          icon: const Icon(Icons.terminal),
+          label: const Text('Open terminal'),
+        ),
         if (widget.busy) const LinearProgressIndicator(),
       ],
     );

@@ -22,7 +22,11 @@ class FailurePanel extends StatelessWidget {
         children: [
           Icon(Icons.gpp_bad, size: 56, color: theme.colorScheme.error),
           const SizedBox(height: 16),
-          Text('Host key changed', style: theme.textTheme.headlineSmall, textAlign: TextAlign.center),
+          Text(
+            'Host key changed',
+            style: theme.textTheme.headlineSmall,
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 8),
           const Text(
             'The server presented a different key than the one pinned at pairing. '

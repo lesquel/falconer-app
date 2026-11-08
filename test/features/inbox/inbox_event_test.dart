@@ -2,16 +2,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openmosh/features/inbox/domain/entities/inbox_event.dart';
 
 InboxEvent event({EventKind kind = EventKind.approvalRequired}) => InboxEvent.received(
-      id: 'ev1',
-      hostId: 'h1',
-      seq: 3,
-      agent: 'claude',
-      kind: kind,
-      title: 'Run tests?',
-      summary: 'cargo test',
-      pane: 'p1',
-      at: DateTime.utc(2026),
-    );
+  id: 'ev1',
+  hostId: 'h1',
+  seq: 3,
+  agent: 'claude',
+  kind: kind,
+  title: 'Run tests?',
+  summary: 'cargo test',
+  pane: 'p1',
+  at: DateTime.utc(2026),
+);
 
 void main() {
   test('actionable kinds start pending, done starts informational', () {
@@ -39,8 +39,10 @@ void main() {
   test('illegal transitions throw', () {
     expect(() => event().responseSucceeded(), throwsA(isA<InvalidTransition>()));
     expect(() => event().responseFailed(), throwsA(isA<InvalidTransition>()));
-    expect(() => event(kind: EventKind.done).startResponding(ResponseKind.allow),
-        throwsA(isA<InvalidTransition>()));
+    expect(
+      () => event(kind: EventKind.done).startResponding(ResponseKind.allow),
+      throwsA(isA<InvalidTransition>()),
+    );
     final resolved = event().startResponding(ResponseKind.allow).responseSucceeded();
     expect(() => resolved.startResponding(ResponseKind.deny), throwsA(isA<InvalidTransition>()));
     final busy = event().startResponding(ResponseKind.allow);

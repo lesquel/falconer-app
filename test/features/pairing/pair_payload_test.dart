@@ -4,21 +4,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openmosh/features/pairing/domain/entities/pair_payload.dart';
 import 'package:openmosh/shared/domain/b64u.dart';
 
-String link(Map<String, Object?> json) => 'openmosh://pair?d=${b64uEncode(utf8.encode(jsonEncode(json)))}';
+String link(Map<String, Object?> json) =>
+    'openmosh://pair?d=${b64uEncode(utf8.encode(jsonEncode(json)))}';
 
 Map<String, Object?> valid() => {
-      'v': 1,
-      'alias': 'workstation',
-      'addr': 'workstation.tail1234.ts.net',
-      'ip': '100.101.102.103',
-      'ssh_port': 22,
-      'ssh_user': 'me',
-      'ssh_fp': 'SHA256:i2cBF5DBtTy5/U7Y27668/2F1HhY/qwC4eALG8QAiQM',
-      'hpk': b64uEncode(List<int>.filled(32, 7)),
-      'port': 40123,
-      'tok': b64uEncode(List<int>.filled(32, 9)),
-      'exp': 1000,
-    };
+  'v': 1,
+  'alias': 'workstation',
+  'addr': 'workstation.tail1234.ts.net',
+  'ip': '100.101.102.103',
+  'ssh_port': 22,
+  'ssh_user': 'me',
+  'ssh_fp': 'SHA256:i2cBF5DBtTy5/U7Y27668/2F1HhY/qwC4eALG8QAiQM',
+  'hpk': b64uEncode(List<int>.filled(32, 7)),
+  'port': 40123,
+  'tok': b64uEncode(List<int>.filled(32, 9)),
+  'exp': 1000,
+};
 
 final now = DateTime.fromMillisecondsSinceEpoch(900 * 1000, isUtc: true);
 
@@ -45,10 +46,14 @@ void main() {
   });
 
   test('expired code is rejected, including exactly at exp', () {
-    expect(errorOf(link(valid()), at: DateTime.fromMillisecondsSinceEpoch(1000 * 1000)),
-        PairCodeError.expired);
-    expect(errorOf(link(valid()), at: DateTime.fromMillisecondsSinceEpoch(5000 * 1000)),
-        PairCodeError.expired);
+    expect(
+      errorOf(link(valid()), at: DateTime.fromMillisecondsSinceEpoch(1000 * 1000)),
+      PairCodeError.expired,
+    );
+    expect(
+      errorOf(link(valid()), at: DateTime.fromMillisecondsSinceEpoch(5000 * 1000)),
+      PairCodeError.expired,
+    );
   });
 
   test('wrong version is rejected', () {

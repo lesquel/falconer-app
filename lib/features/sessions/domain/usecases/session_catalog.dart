@@ -7,17 +7,15 @@ final class SessionCatalog {
   const SessionCatalog(this.connections);
   final HostConnections connections;
 
-  Future<List<RemoteSession>> sessions(String hostId) async =>
-      _list(await connections.runHook(hostId, HookCommand.sessionsList()), 'sessions')
-          .map(RemoteSession.fromJson)
-          .nonNulls
-          .toList();
+  Future<List<RemoteSession>> sessions(String hostId) async => _list(
+    await connections.runHook(hostId, HookCommand.sessionsList()),
+    'sessions',
+  ).map(RemoteSession.fromJson).nonNulls.toList();
 
-  Future<List<AgentInfo>> agents(String hostId) async =>
-      _list(await connections.runHook(hostId, HookCommand.agentsList()), 'agents')
-          .map(AgentInfo.fromJson)
-          .nonNulls
-          .toList();
+  Future<List<AgentInfo>> agents(String hostId) async => _list(
+    await connections.runHook(hostId, HookCommand.agentsList()),
+    'agents',
+  ).map(AgentInfo.fromJson).nonNulls.toList();
 
   static List<Object?> _list(Object? data, String key) {
     if (data is List) return data;

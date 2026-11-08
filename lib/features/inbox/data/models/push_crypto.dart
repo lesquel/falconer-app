@@ -50,7 +50,10 @@ abstract final class PushCrypto {
     if (n is! String || ct is! String) throw _invalid;
     try {
       final key = await deriveKey(
-          devicePrivate: devicePrivate, hostPublicKey: hostPublicKey, deviceId: deviceId);
+        devicePrivate: devicePrivate,
+        hostPublicKey: hostPublicKey,
+        deviceId: deviceId,
+      );
       final pt = await c.open(key: key, nonce: b64uDecode(n), combined: b64uDecode(ct), aad: _aad);
       final out = jsonDecode(utf8.decode(pt));
       if (out is! Map<String, Object?>) throw _invalid;

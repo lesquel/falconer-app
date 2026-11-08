@@ -30,11 +30,11 @@ class HostDetailView extends StatelessWidget {
   final VoidCallback onEnablePush;
 
   BadgeTone _tone(AgentState s) => switch (s) {
-        AgentState.blocked => BadgeTone.attention,
-        AgentState.working => BadgeTone.success,
-        AgentState.done => BadgeTone.neutral,
-        _ => BadgeTone.neutral,
-      };
+    AgentState.blocked => BadgeTone.attention,
+    AgentState.working => BadgeTone.success,
+    AgentState.done => BadgeTone.neutral,
+    _ => BadgeTone.neutral,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -46,21 +46,33 @@ class HostDetailView extends StatelessWidget {
         const SizedBox(height: 8),
         FingerprintCard(label: 'Pinned host key', fingerprint: host.fingerprint),
         const SizedBox(height: 8),
-        Wrap(spacing: 8, runSpacing: 8, children: [
-          FilledButton.icon(onPressed: onShell, icon: const Icon(Icons.terminal), label: const Text('Shell')),
-          OutlinedButton.icon(
-            onPressed: loading ? null : onLoad,
-            icon: const Icon(Icons.refresh),
-            label: Text(sessions == null ? 'Load sessions' : 'Refresh'),
-          ),
-          if (!host.pushEnabled)
-            OutlinedButton.icon(
-              onPressed: onEnablePush,
-              icon: const Icon(Icons.notifications_active_outlined),
-              label: const Text('Enable notifications'),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            FilledButton.icon(
+              onPressed: onShell,
+              icon: const Icon(Icons.terminal),
+              label: const Text('Shell'),
             ),
-        ]),
-        if (loading) const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator())),
+            OutlinedButton.icon(
+              onPressed: loading ? null : onLoad,
+              icon: const Icon(Icons.refresh),
+              label: Text(sessions == null ? 'Load sessions' : 'Refresh'),
+            ),
+            if (!host.pushEnabled)
+              OutlinedButton.icon(
+                onPressed: onEnablePush,
+                icon: const Icon(Icons.notifications_active_outlined),
+                label: const Text('Enable notifications'),
+              ),
+          ],
+        ),
+        if (loading)
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: CircularProgressIndicator()),
+          ),
         ?error,
         if (sessions != null) ...[
           const SizedBox(height: 16),
@@ -68,7 +80,9 @@ class HostDetailView extends StatelessWidget {
           if (sessions!.isEmpty) const ListTile(title: Text('No Herdr or tmux sessions')),
           for (final s in sessions!)
             ListTile(
-              leading: Icon(s.kind == SessionKind.herdr ? Icons.dashboard_outlined : Icons.view_column_outlined),
+              leading: Icon(
+                s.kind == SessionKind.herdr ? Icons.dashboard_outlined : Icons.view_column_outlined,
+              ),
               title: Text(s.name),
               subtitle: Text(s.kind.name + (s.attached ? ' · attached' : '')),
               trailing: const Icon(Icons.chevron_right),

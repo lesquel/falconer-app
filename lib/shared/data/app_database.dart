@@ -83,11 +83,8 @@ class AppDatabase extends _$AppDatabase {
   /// Shared across isolates so the background push handler and the UI can
   /// use the same file safely.
   factory AppDatabase.open() => AppDatabase(
-        driftDatabase(
-          name: 'openmosh',
-          native: const DriftNativeOptions(shareAcrossIsolates: true),
-        ),
-      );
+    driftDatabase(name: 'openmosh', native: const DriftNativeOptions(shareAcrossIsolates: true)),
+  );
 
   @override
   int get schemaVersion => 1;

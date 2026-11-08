@@ -16,8 +16,10 @@ class HostDetailContainer extends ConsumerWidget {
       context: context,
       builder: (c) => AlertDialog(
         title: const Text('Delete host?'),
-        content: const Text('Removes the host, its pinned key and its inbox from this phone. '
-            'Revoke the device on the host with `openmosh-hook devices revoke`.'),
+        content: const Text(
+          'Removes the host, its pinned key and its inbox from this phone. '
+          'Revoke the device on the host with `openmosh-hook devices revoke`.',
+        ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel')),
           FilledButton(onPressed: () => Navigator.pop(c, true), child: const Text('Delete')),
@@ -40,8 +42,14 @@ class HostDetailContainer extends ConsumerWidget {
       appBar: AppBar(
         title: Text(host.alias),
         actions: [
-          IconButton(icon: const Icon(Icons.edit_outlined), onPressed: () => context.push('/hosts/$hostId/edit')),
-          IconButton(icon: const Icon(Icons.delete_outline), onPressed: () => _delete(context, ref)),
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            onPressed: () => context.push('/hosts/$hostId/edit'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () => _delete(context, ref),
+          ),
         ],
       ),
       body: HostDetailView(
@@ -51,11 +59,18 @@ class HostDetailContainer extends ConsumerWidget {
         loading: state.loading,
         error: state.error == null
             ? null
-            : SizedBox(height: 320, child: FailurePanel(failure: state.error!, onRetry: ctrl.load)),
+            : SizedBox(
+                height: 320,
+                child: FailurePanel(failure: state.error!, onRetry: ctrl.load),
+              ),
         onLoad: ctrl.load,
         onShell: () => context.push('/terminal/$hostId'),
         onAttach: (s) => context.push(
-            Uri(path: '/terminal/$hostId', queryParameters: {'session': s.name, 'kind': s.kind.name}).toString()),
+          Uri(
+            path: '/terminal/$hostId',
+            queryParameters: {'session': s.name, 'kind': s.kind.name},
+          ).toString(),
+        ),
         onEnablePush: () => ctrl.enablePush('Android phone'),
       ),
     );

@@ -6,7 +6,11 @@ library;
 import '../../domain/entities/inbox_event.dart';
 
 final class NotificationContent {
-  const NotificationContent({required this.title, required this.body, required this.lockScreenSafe});
+  const NotificationContent({
+    required this.title,
+    required this.body,
+    required this.lockScreenSafe,
+  });
   final String title;
   final String? body;
 
@@ -18,7 +22,11 @@ final class NotificationContent {
 String genericLine(String alias, String agent) =>
     '$alias: ${agent.isEmpty ? 'an agent' : agent} needs you';
 
-NotificationContent notificationContent(InboxEvent e, {required String hostAlias, required bool preview}) {
+NotificationContent notificationContent(
+  InboxEvent e, {
+  required String hostAlias,
+  required bool preview,
+}) {
   final generic = e.kind == EventKind.done
       ? '$hostAlias: ${e.agent.isEmpty ? 'an agent' : e.agent} finished'
       : genericLine(hostAlias, e.agent);
@@ -40,5 +48,7 @@ int notificationId(String hostId, String eventId) {
 }
 
 /// Payload routed back to the app; contains ids only.
-String notificationPayload(String hostId, String eventId, [String? action]) =>
-    Uri(path: '/inbox/$hostId/$eventId', queryParameters: action == null ? null : {'action': action}).toString();
+String notificationPayload(String hostId, String eventId, [String? action]) => Uri(
+  path: '/inbox/$hostId/$eventId',
+  queryParameters: action == null ? null : {'action': action},
+).toString();

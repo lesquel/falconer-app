@@ -4,7 +4,12 @@ library;
 import 'extra_key.dart';
 
 final class ModifierState {
-  const ModifierState({this.ctrl = false, this.alt = false, this.ctrlLocked = false, this.altLocked = false});
+  const ModifierState({
+    this.ctrl = false,
+    this.alt = false,
+    this.ctrlLocked = false,
+    this.altLocked = false,
+  });
 
   final bool ctrl;
   final bool alt;
@@ -14,14 +19,14 @@ final class ModifierState {
   bool get any => ctrl || alt;
 
   ModifierState toggle(Modifier m) => switch (m) {
-        Modifier.ctrl => ModifierState(ctrl: !ctrl, alt: alt, altLocked: altLocked),
-        Modifier.alt => ModifierState(ctrl: ctrl, alt: !alt, ctrlLocked: ctrlLocked),
-      };
+    Modifier.ctrl => ModifierState(ctrl: !ctrl, alt: alt, altLocked: altLocked),
+    Modifier.alt => ModifierState(ctrl: ctrl, alt: !alt, ctrlLocked: ctrlLocked),
+  };
 
   ModifierState lock(Modifier m) => switch (m) {
-        Modifier.ctrl => ModifierState(ctrl: true, ctrlLocked: true, alt: alt, altLocked: altLocked),
-        Modifier.alt => ModifierState(alt: true, altLocked: true, ctrl: ctrl, ctrlLocked: ctrlLocked),
-      };
+    Modifier.ctrl => ModifierState(ctrl: true, ctrlLocked: true, alt: alt, altLocked: altLocked),
+    Modifier.alt => ModifierState(alt: true, altLocked: true, ctrl: ctrl, ctrlLocked: ctrlLocked),
+  };
 
   /// Returns the bytes to send and the state for the following input.
   (String, ModifierState) apply(String input) {

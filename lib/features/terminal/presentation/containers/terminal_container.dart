@@ -92,7 +92,10 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider).value ?? const AppSettings();
     final host = ref.watch(hostProvider(widget.hostId)).value;
-    final preset = KeyPresets.forName(settings.keyPreset, herdrPrefix: settings.herdrPrefixSequence);
+    final preset = KeyPresets.forName(
+      settings.keyPreset,
+      herdrPrefix: settings.herdrPrefixSequence,
+    );
     final failure = _phase == TerminalPhase.failed ? _runner.failure : null;
     return SecureScreen(
       child: Scaffold(
@@ -120,7 +123,9 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
               : FailurePanel(
                   failure: failure,
                   onBack: () => context.pop(),
-                  onRetry: failure is HostKeyMismatchFailure ? null : () => _runner.wake(restart: true),
+                  onRetry: failure is HostKeyMismatchFailure
+                      ? null
+                      : () => _runner.wake(restart: true),
                 ),
           keysBar: ExtraKeysBar(
             base: KeyPresets.base,
@@ -144,11 +149,10 @@ class _ModifiedInput extends XtermProxy {
 
   @override
   Stream<String> get input => inner.input.map((s) {
-        final m = _mods();
-        if (!m.any) return s;
-        final (out, next) = m.apply(s);
-        _update(next);
-        return out;
-      });
+    final m = _mods();
+    if (!m.any) return s;
+    final (out, next) = m.apply(s);
+    _update(next);
+    return out;
+  });
 }
-

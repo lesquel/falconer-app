@@ -46,7 +46,9 @@ T _mustOverride<T>(String name) => throw UnimplementedError('$name must be overr
 
 // Platform-bound, overridden in main().
 final databaseProvider = Provider<AppDatabase>((ref) => _mustOverride('databaseProvider'));
-final pushEndpointsProvider = Provider<PushEndpointSource>((ref) => _mustOverride('pushEndpointsProvider'));
+final pushEndpointsProvider = Provider<PushEndpointSource>(
+  (ref) => _mustOverride('pushEndpointsProvider'),
+);
 final notifierProvider = Provider<EventNotifier>((ref) => _mustOverride('notifierProvider'));
 
 // Adapters.
@@ -56,23 +58,36 @@ final sshConnectorProvider = Provider<SshConnector>((ref) => const RustSshConnec
 final pairingGatewayProvider = Provider<PairingGateway>((ref) => const TcpPairingGateway());
 final fileSourceProvider = Provider<FileSource>((ref) => const FilePickerSource());
 
-final keyVaultProvider = Provider<KeyVault>((ref) => SecureKeyVault(
-      ref.watch(databaseProvider),
-      ref.watch(secureStorageProvider),
-      const KeysBridge(),
-      ref.watch(authenticatorProvider),
-      newId: newId,
-    ));
-final pushKeysProvider = Provider<PushKeyStore>((ref) => SecurePushKeyStore(ref.watch(secureStorageProvider)));
-final hostRepositoryProvider = Provider<HostRepository>((ref) => DriftHostRepository(ref.watch(databaseProvider)));
-final inboxRepositoryProvider = Provider<InboxRepository>((ref) => DriftInboxRepository(ref.watch(databaseProvider)));
-final settingsRepositoryProvider =
-    Provider<SettingsRepository>((ref) => DriftSettingsRepository(ref.watch(databaseProvider)));
+final keyVaultProvider = Provider<KeyVault>(
+  (ref) => SecureKeyVault(
+    ref.watch(databaseProvider),
+    ref.watch(secureStorageProvider),
+    const KeysBridge(),
+    ref.watch(authenticatorProvider),
+    newId: newId,
+  ),
+);
+final pushKeysProvider = Provider<PushKeyStore>(
+  (ref) => SecurePushKeyStore(ref.watch(secureStorageProvider)),
+);
+final hostRepositoryProvider = Provider<HostRepository>(
+  (ref) => DriftHostRepository(ref.watch(databaseProvider)),
+);
+final inboxRepositoryProvider = Provider<InboxRepository>(
+  (ref) => DriftInboxRepository(ref.watch(databaseProvider)),
+);
+final settingsRepositoryProvider = Provider<SettingsRepository>(
+  (ref) => DriftSettingsRepository(ref.watch(databaseProvider)),
+);
 
 // Use cases.
 final hostConnectionsProvider = Provider<HostConnections>((ref) {
   final hosts = ref.watch(hostRepositoryProvider);
-  final pool = HostConnections(hosts: hosts, vault: ref.watch(keyVaultProvider), connector: ref.watch(sshConnectorProvider));
+  final pool = HostConnections(
+    hosts: hosts,
+    vault: ref.watch(keyVaultProvider),
+    connector: ref.watch(sshConnectorProvider),
+  );
   final endpointSync = SyncPushEndpoint(hosts: hosts, endpoints: ref.watch(pushEndpointsProvider));
   const hook = HookClient();
   pool.addOnConnected((host, conn) async {
@@ -89,43 +104,75 @@ final hostConnectionsProvider = Provider<HostConnections>((ref) {
   return pool;
 });
 
-final manageHostsProvider = Provider<ManageHosts>((ref) =>
-    ManageHosts(ref.watch(hostRepositoryProvider), ref.watch(sshConnectorProvider), newId: newId, now: DateTime.now));
+final manageHostsProvider = Provider<ManageHosts>(
+  (ref) => ManageHosts(
+    ref.watch(hostRepositoryProvider),
+    ref.watch(sshConnectorProvider),
+    newId: newId,
+    now: DateTime.now,
+  ),
+);
 
-final pairWithQrProvider = Provider<PairWithQr>((ref) => PairWithQr(
-      gateway: ref.watch(pairingGatewayProvider),
-      vault: ref.watch(keyVaultProvider),
-      pushKeys: ref.watch(pushKeysProvider),
-      endpoints: ref.watch(pushEndpointsProvider),
-      hosts: ref.watch(hostRepositoryProvider),
-      newId: newId,
-      now: DateTime.now,
-    ));
+final pairWithQrProvider = Provider<PairWithQr>(
+  (ref) => PairWithQr(
+    gateway: ref.watch(pairingGatewayProvider),
+    vault: ref.watch(keyVaultProvider),
+    pushKeys: ref.watch(pushKeysProvider),
+    endpoints: ref.watch(pushEndpointsProvider),
+    hosts: ref.watch(hostRepositoryProvider),
+    newId: newId,
+    now: DateTime.now,
+  ),
+);
 
-final pairOverSshProvider = Provider<PairOverSsh>((ref) => PairOverSsh(
-      connections: ref.watch(hostConnectionsProvider),
-      hosts: ref.watch(hostRepositoryProvider),
-      pushKeys: ref.watch(pushKeysProvider),
-      endpoints: ref.watch(pushEndpointsProvider),
-    ));
+final pairOverSshProvider = Provider<PairOverSsh>(
+  (ref) => PairOverSsh(
+    connections: ref.watch(hostConnectionsProvider),
+    hosts: ref.watch(hostRepositoryProvider),
+    pushKeys: ref.watch(pushKeysProvider),
+    endpoints: ref.watch(pushEndpointsProvider),
+  ),
+);
 
-final respondProvider = Provider<RespondToEvent>((ref) => RespondToEvent(
-      inbox: ref.watch(inboxRepositoryProvider),
-      connections: ref.watch(hostConnectionsProvider),
-      notifier: ref.watch(notifierProvider),
-    ));
+final respondProvider = Provider<RespondToEvent>(
+  (ref) => RespondToEvent(
+    inbox: ref.watch(inboxRepositoryProvider),
+    connections: ref.watch(hostConnectionsProvider),
+    notifier: ref.watch(notifierProvider),
+  ),
+);
 
-final syncInboxProvider = Provider<SyncInbox>((ref) =>
-    SyncInbox(inbox: ref.watch(inboxRepositoryProvider), connections: ref.watch(hostConnectionsProvider)));
+final syncInboxProvider = Provider<SyncInbox>(
+  (ref) => SyncInbox(
+    inbox: ref.watch(inboxRepositoryProvider),
+    connections: ref.watch(hostConnectionsProvider),
+  ),
+);
 
-final sessionCatalogProvider = Provider<SessionCatalog>((ref) => SessionCatalog(ref.watch(hostConnectionsProvider)));
+final sessionCatalogProvider = Provider<SessionCatalog>(
+  (ref) => SessionCatalog(ref.watch(hostConnectionsProvider)),
+);
 
-final uploadFileProvider = Provider<UploadFile>((ref) => UploadFile(ref.watch(hostConnectionsProvider)));
+final uploadFileProvider = Provider<UploadFile>(
+  (ref) => UploadFile(ref.watch(hostConnectionsProvider)),
+);
 
 // Streams for the UI.
-final hostsProvider = StreamProvider<List<Host>>((ref) => ref.watch(hostRepositoryProvider).watchAll());
-final hostProvider = StreamProvider.family<Host?, String>((ref, id) =>
-    ref.watch(hostRepositoryProvider).watchAll().map((hs) => hs.where((h) => h.id == id).firstOrNull));
-final inboxProvider = StreamProvider<List<InboxEvent>>((ref) => ref.watch(inboxRepositoryProvider).watchAll());
-final keysProvider = StreamProvider<List<SshKeyInfo>>((ref) => ref.watch(keyVaultProvider).watchAll());
-final settingsProvider = StreamProvider<AppSettings>((ref) => ref.watch(settingsRepositoryProvider).watch());
+final hostsProvider = StreamProvider<List<Host>>(
+  (ref) => ref.watch(hostRepositoryProvider).watchAll(),
+);
+final hostProvider = StreamProvider.family<Host?, String>(
+  (ref, id) => ref
+      .watch(hostRepositoryProvider)
+      .watchAll()
+      .map((hs) => hs.where((h) => h.id == id).firstOrNull),
+);
+final inboxProvider = StreamProvider<List<InboxEvent>>(
+  (ref) => ref.watch(inboxRepositoryProvider).watchAll(),
+);
+final keysProvider = StreamProvider<List<SshKeyInfo>>(
+  (ref) => ref.watch(keyVaultProvider).watchAll(),
+);
+final settingsProvider = StreamProvider<AppSettings>(
+  (ref) => ref.watch(settingsRepositoryProvider).watch(),
+);

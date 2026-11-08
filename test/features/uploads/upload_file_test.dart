@@ -11,12 +11,20 @@ void main() {
     final hosts = FakeHostRepository();
     await hosts.save(testHost());
     final upload = UploadFile(
-      HostConnections(hosts: hosts, vault: FakeVault(), connector: FakeConnector(() => FakeConnection((_, _) => ok(null)))),
+      HostConnections(
+        hosts: hosts,
+        vault: FakeVault(),
+        connector: FakeConnector(() => FakeConnection((_, _) => ok(null))),
+      ),
       prefix: () => 'deadbeef',
     );
-    expect(await upload('h1', const PickedFile(path: '/cache/x', name: 'My shot.PNG', size: 10)),
-        "'/home/me/.openmosh/uploads/deadbeef-My_shot.png' ");
-    await expectLater(upload('h1', const PickedFile(path: '/c', name: 'big', size: 50 * 1024 * 1024 + 1)),
-        throwsA(isA<ValidationFailure>()));
+    expect(
+      await upload('h1', const PickedFile(path: '/cache/x', name: 'My shot.PNG', size: 10)),
+      "'/home/me/.openmosh/uploads/deadbeef-My_shot.png' ",
+    );
+    await expectLater(
+      upload('h1', const PickedFile(path: '/c', name: 'big', size: 50 * 1024 * 1024 + 1)),
+      throwsA(isA<ValidationFailure>()),
+    );
   });
 }

@@ -66,7 +66,8 @@ void main() {
   late List<Duration> sleeps;
   late TerminalRunner runner;
 
-  Future<void> pump() => Future<void>.delayed(Duration.zero).then((_) => Future<void>.delayed(Duration.zero));
+  Future<void> pump() =>
+      Future<void>.delayed(Duration.zero).then((_) => Future<void>.delayed(Duration.zero));
 
   setUp(() async {
     hosts = FakeHostRepository();

@@ -28,25 +28,26 @@ abstract final class KeyPresets {
       switch (name) {
         PresetName.none => const [],
         PresetName.tmux => _prefixed(tmuxPrefix, const {
-            'new': 'c',
-            'next': 'n',
-            'prev': 'p',
-            'split│': '%',
-            'split─': '"',
-            'zoom': 'z',
-            'copy': '[',
-            'detach': 'd',
-          }),
+          'new': 'c',
+          'next': 'n',
+          'prev': 'p',
+          'split│': '%',
+          'split─': '"',
+          'zoom': 'z',
+          'copy': '[',
+          'detach': 'd',
+        }),
         PresetName.herdr => _prefixed(herdrPrefix, const {
-            'pane→': 'l',
-            'pane←': 'h',
-            'pane↓': 'j',
-            'pane↑': 'k',
-            'zoom': 'z',
-            'detach': 'd',
-          }),
+          'pane→': 'l',
+          'pane←': 'h',
+          'pane↓': 'j',
+          'pane↑': 'k',
+          'zoom': 'z',
+          'detach': 'd',
+        }),
       };
 
-  static List<ExtraKey> _prefixed(String prefix, Map<String, String> keys) =>
-      [for (final e in keys.entries) ExtraKey.send(e.key, '$prefix${e.value}')];
+  static List<ExtraKey> _prefixed(String prefix, Map<String, String> keys) => [
+    for (final e in keys.entries) ExtraKey.send(e.key, '$prefix${e.value}'),
+  ];
 }

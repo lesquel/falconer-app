@@ -21,13 +21,13 @@ class SecureKeyVault implements KeyVault {
   final String Function() newId;
 
   SshKeyInfo _map(KeyRow r) => SshKeyInfo(
-        id: r.id,
-        label: r.label,
-        publicKey: r.publicKey,
-        fingerprint: r.fingerprint,
-        imported: r.imported,
-        createdAt: DateTime.fromMillisecondsSinceEpoch(r.createdAt),
-      );
+    id: r.id,
+    label: r.label,
+    publicKey: r.publicKey,
+    fingerprint: r.fingerprint,
+    imported: r.imported,
+    createdAt: DateTime.fromMillisecondsSinceEpoch(r.createdAt),
+  );
 
   @override
   Stream<List<SshKeyInfo>> watchAll() =>
@@ -39,7 +39,12 @@ class SecureKeyVault implements KeyVault {
     return r == null ? null : _map(r);
   }
 
-  Future<SshKeyInfo> _store(String id, String label, KeyMaterial m, {required bool imported}) async {
+  Future<SshKeyInfo> _store(
+    String id,
+    String label,
+    KeyMaterial m, {
+    required bool imported,
+  }) async {
     await _storage.writeSshPrivate(id, m.privateOpenssh);
     final row = KeyRowsCompanion.insert(
       id: id,
@@ -57,7 +62,12 @@ class SecureKeyVault implements KeyVault {
   Future<SshKeyInfo> ensureDeviceKey({required String comment}) async {
     final existing = await byId(SshKeyInfo.deviceKeyId);
     if (existing != null && await _storage.readSshPrivate(existing.id) != null) return existing;
-    return _store(SshKeyInfo.deviceKeyId, 'This device', _bridge.generate(comment), imported: false);
+    return _store(
+      SshKeyInfo.deviceKeyId,
+      'This device',
+      _bridge.generate(comment),
+      imported: false,
+    );
   }
 
   @override
@@ -108,4 +118,3 @@ class SecurePushKeyStore implements PushKeyStore {
     return pub;
   }
 }
-

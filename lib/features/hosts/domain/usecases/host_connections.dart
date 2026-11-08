@@ -48,9 +48,17 @@ final class HostConnections {
     final host = await hosts.byId(hostId);
     if (host == null) throw const ValidationFailure('Unknown host.');
     final keyId = host.keyId ?? SshKeyInfo.deviceKeyId;
-    final private = await vault.unlockPrivate(keyId, reason: 'Unlock key to connect to ${host.alias}');
+    final private = await vault.unlockPrivate(
+      keyId,
+      reason: 'Unlock key to connect to ${host.alias}',
+    );
     final conn = await connector.connect(
-      SshEndpoint(host: host.address, port: host.port, user: host.user, pinnedFingerprint: host.fingerprint),
+      SshEndpoint(
+        host: host.address,
+        port: host.port,
+        user: host.user,
+        pinnedFingerprint: host.fingerprint,
+      ),
       privateKeyOpenssh: private,
     );
     _open[hostId] = conn;

@@ -60,7 +60,10 @@ void main() {
       final hostPub = await c.x25519PublicBytes(host);
       final tok = c.randomBytes(32);
       final req = await PairCrypto.sealRequest(
-          hostPublicKey: hostPub, token: tok, plaintext: utf8.encode('{"a":1}'));
+        hostPublicKey: hostPub,
+        token: tok,
+        plaintext: utf8.encode('{"a":1}'),
+      );
       expect(req.line.endsWith('\n'), isFalse);
       final line = jsonDecode(req.line) as Map<String, Object?>;
       expect(line['v'], 1);
@@ -86,10 +89,14 @@ void main() {
         salt: [1],
         info: 'x',
       );
-      expect(PairCrypto.openResponse('{"v":1,"err":"pair_rejected"}', key),
-          throwsA(isA<PairingFailure>()));
-      expect(PairCrypto.openResponse('{"v":1,"n":"${b64uEncode(List.filled(24, 0))}","c":"AAAA"}', key),
-          throwsA(isA<PairingFailure>()));
+      expect(
+        PairCrypto.openResponse('{"v":1,"err":"pair_rejected"}', key),
+        throwsA(isA<PairingFailure>()),
+      );
+      expect(
+        PairCrypto.openResponse('{"v":1,"n":"${b64uEncode(List.filled(24, 0))}","c":"AAAA"}', key),
+        throwsA(isA<PairingFailure>()),
+      );
       expect(PairCrypto.openResponse('garbage', key), throwsA(isA<PairingFailure>()));
     });
   });

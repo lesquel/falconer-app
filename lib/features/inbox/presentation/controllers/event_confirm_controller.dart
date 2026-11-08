@@ -26,7 +26,9 @@ class EventConfirmController extends Notifier<ConfirmState> {
     state = const ConfirmState(busy: true);
     try {
       if (ref.read(hostConnectionsProvider).isConnected(key.hostId)) {
-        final ok = await ref.read(authenticatorProvider).authenticate('Confirm your answer to the agent');
+        final ok = await ref
+            .read(authenticatorProvider)
+            .authenticate('Confirm your answer to the agent');
         if (!ok) throw const UserCancelledFailure();
       }
       await ref.read(respondProvider)(key.hostId, key.eventId, kind, text: text);

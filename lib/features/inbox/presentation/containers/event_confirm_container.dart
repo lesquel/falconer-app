@@ -8,7 +8,12 @@ import '../controllers/event_confirm_controller.dart';
 import '../views/event_confirm_view.dart';
 
 class EventConfirmContainer extends ConsumerWidget {
-  const EventConfirmContainer({super.key, required this.hostId, required this.eventId, this.action});
+  const EventConfirmContainer({
+    super.key,
+    required this.hostId,
+    required this.eventId,
+    this.action,
+  });
   final String hostId;
   final String eventId;
   final String? action;

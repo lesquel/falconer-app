@@ -21,7 +21,11 @@ final class ManageHosts {
     return connector.probeFingerprint(d.address, d.port);
   }
 
-  Future<Host> addConfirmed(HostDraft draft, {required String confirmedFingerprint, String? keyId}) async {
+  Future<Host> addConfirmed(
+    HostDraft draft, {
+    required String confirmedFingerprint,
+    String? keyId,
+  }) async {
     final d = draft.validated();
     if (!_fp.hasMatch(confirmedFingerprint)) {
       throw const ValidationFailure('Invalid host key fingerprint.');
@@ -45,7 +49,9 @@ final class ManageHosts {
   Future<Host> edit(Host host, HostDraft draft, {String? keyId}) async {
     final d = draft.validated();
     if (d.address != host.address || d.port != host.port) {
-      throw const ValidationFailure('Changing address or port needs a new host key check. Add the host again.');
+      throw const ValidationFailure(
+        'Changing address or port needs a new host key check. Add the host again.',
+      );
     }
     final updated = host.copyWith(alias: d.alias, user: d.user, keyId: keyId);
     await repo.save(updated);

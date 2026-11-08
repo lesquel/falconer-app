@@ -47,9 +47,16 @@ class FakeNotifier implements EventNotifier {
 }
 
 Map<String, Object?> wire({String id = 'ev1', String kind = 'approval_required', int seq = 5}) => {
-      'id': id, 'seq': seq, 'host': 'work', 'agent': 'claude', 'kind': kind,
-      'title': 'Allow?', 'summary': 'rm build/', 'pane': 'p1', 'ts': 1700000000,
-    };
+  'id': id,
+  'seq': seq,
+  'host': 'work',
+  'agent': 'claude',
+  'kind': kind,
+  'title': 'Allow?',
+  'summary': 'rm build/',
+  'pane': 'p1',
+  'ts': 1700000000,
+};
 
 void main() {
   late FakeHostRepository hosts;
@@ -67,7 +74,10 @@ void main() {
     notifier = FakeNotifier();
     previews = false;
     handle = HandlePushMessage(
-      hosts: hosts, inbox: inbox, opener: opener, notifier: notifier,
+      hosts: hosts,
+      inbox: inbox,
+      opener: opener,
+      notifier: notifier,
       previews: () async => previews,
       kidOf: (b) => (jsonDecode(utf8.decode(b)) as Map)['kid'] as String?,
     );
@@ -122,7 +132,11 @@ void main() {
       conn = FakeConnection((c, s) => reply(c, s));
       respond = RespondToEvent(
         inbox: inbox,
-        connections: HostConnections(hosts: hosts, vault: FakeVault(), connector: FakeConnector(() => conn)),
+        connections: HostConnections(
+          hosts: hosts,
+          vault: FakeVault(),
+          connector: FakeConnector(() => conn),
+        ),
         notifier: notifier,
       );
     });
@@ -136,24 +150,31 @@ void main() {
     });
 
     test('host error leaves the event failed and retryable', () async {
-      reply = (_, _) => text('{"ok":false,"error":{"code":"pane_gone","message":"pane closed"}}', code: 1);
+      reply = (_, _) =>
+          text('{"ok":false,"error":{"code":"pane_gone","message":"pane closed"}}', code: 1);
       await expectLater(respond('h1', 'ev1', ResponseKind.deny), throwsA(isA<HookFailure>()));
       expect((await inbox.byId('h1', 'ev1'))!.status, InboxStatus.failed);
       reply = (_, _) => ok(null);
-      expect((await respond('h1', 'ev1', ResponseKind.text, text: 'yes')).status, InboxStatus.resolved);
+      expect(
+        (await respond('h1', 'ev1', ResponseKind.text, text: 'yes')).status,
+        InboxStatus.resolved,
+      );
     });
   });
 
   test('sync asks for events after the last seq and merges them', () async {
     opener.next = wire(seq: 5);
     await handle(body('kid1'));
-    final conn = FakeConnection((_, _) => ok([
-          wire(id: 'ev1', seq: 5)..['status'] = 'resolved',
-          wire(id: 'ev9', seq: 9),
-        ]));
+    final conn = FakeConnection(
+      (_, _) => ok([wire(id: 'ev1', seq: 5)..['status'] = 'resolved', wire(id: 'ev9', seq: 9)]),
+    );
     final sync = SyncInbox(
       inbox: inbox,
-      connections: HostConnections(hosts: hosts, vault: FakeVault(), connector: FakeConnector(() => conn)),
+      connections: HostConnections(
+        hosts: hosts,
+        vault: FakeVault(),
+        connector: FakeConnector(() => conn),
+      ),
     );
     expect(await sync('h1'), 2);
     expect(conn.commands.single, contains("'--since' '5'"));
@@ -162,17 +183,35 @@ void main() {
   });
 
   test('sync reads the hook inbox page shape', () async {
-    final conn = FakeConnection((_, _) => ok({
-          'events': [
-            {'id': '-AbC', 'seq': 12, 'source': 'herdr', 'agent': 'claude', 'kind': 'question',
-             'status': 'pending', 'title': 'Which DB?', 'summary': 'pick one', 'pane': null,
-             'runtime': 'herdr', 'created_at': 1762500000, 'resolved_at': null, 'resolution': null},
-          ],
-          'last_seq': 12,
-        }));
+    final conn = FakeConnection(
+      (_, _) => ok({
+        'events': [
+          {
+            'id': '-AbC',
+            'seq': 12,
+            'source': 'herdr',
+            'agent': 'claude',
+            'kind': 'question',
+            'status': 'pending',
+            'title': 'Which DB?',
+            'summary': 'pick one',
+            'pane': null,
+            'runtime': 'herdr',
+            'created_at': 1762500000,
+            'resolved_at': null,
+            'resolution': null,
+          },
+        ],
+        'last_seq': 12,
+      }),
+    );
     final sync = SyncInbox(
       inbox: inbox,
-      connections: HostConnections(hosts: hosts, vault: FakeVault(), connector: FakeConnector(() => conn)),
+      connections: HostConnections(
+        hosts: hosts,
+        vault: FakeVault(),
+        connector: FakeConnector(() => conn),
+      ),
     );
     expect(await sync('h1'), 1);
     final e = (await inbox.byId('h1', '-AbC'))!;
@@ -187,7 +226,11 @@ void main() {
     final conn = FakeConnection((_, _) => ok(null));
     await RespondToEvent(
       inbox: inbox,
-      connections: HostConnections(hosts: hosts, vault: FakeVault(), connector: FakeConnector(() => conn)),
+      connections: HostConnections(
+        hosts: hosts,
+        vault: FakeVault(),
+        connector: FakeConnector(() => conn),
+      ),
       notifier: notifier,
     )('h1', '-x1', ResponseKind.allow);
     expect(conn.commands.single, "'/h' 'respond' '-x1' '--action' 'allow' '--json'");
@@ -201,5 +244,4 @@ void main() {
     expect(isAllowedPushEndpoint('ftp://x/y'), isFalse);
     expect(isAllowedPushEndpoint('https://user:pw@ntfy.sh/up'), isFalse);
   });
-
 }

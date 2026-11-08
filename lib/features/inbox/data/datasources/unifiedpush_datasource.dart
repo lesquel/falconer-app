@@ -60,7 +60,8 @@ class UnifiedPushDatasource implements PushEndpointSource {
       final ds = await _up.getDistributors(const []);
       if (ds.isEmpty) {
         throw const PushFailure(
-            'No UnifiedPush distributor found. Install ntfy (F-Droid or GitHub) and try again.');
+          'No UnifiedPush distributor found. Install ntfy (F-Droid or GitHub) and try again.',
+        );
       }
       await _up.saveDistributor(ds.first);
     }

@@ -22,38 +22,52 @@ String? _guardIds(GoRouterState s) {
 }
 
 GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
-      initialLocation: initialLocation,
-      redirect: (_, s) => _guardIds(s),
-      errorBuilder: (_, _) => const Scaffold(body: Center(child: Text('Not found'))),
-      routes: [
-        StatefulShellRoute.indexedStack(
-          builder: (_, _, shell) => HomeShell(shell: shell),
-          branches: [
-            StatefulShellBranch(routes: [GoRoute(path: '/', builder: (_, _) => const HostsContainer())]),
-            StatefulShellBranch(routes: [GoRoute(path: '/inbox', builder: (_, _) => const InboxContainer())]),
-            StatefulShellBranch(routes: [GoRoute(path: '/keys', builder: (_, _) => const KeysContainer())]),
-            StatefulShellBranch(routes: [GoRoute(path: '/settings', builder: (_, _) => const SettingsContainer())]),
-          ],
+  initialLocation: initialLocation,
+  redirect: (_, s) => _guardIds(s),
+  errorBuilder: (_, _) => const Scaffold(body: Center(child: Text('Not found'))),
+  routes: [
+    StatefulShellRoute.indexedStack(
+      builder: (_, _, shell) => HomeShell(shell: shell),
+      branches: [
+        StatefulShellBranch(
+          routes: [GoRoute(path: '/', builder: (_, _) => const HostsContainer())],
         ),
-        GoRoute(path: '/pair', builder: (_, _) => const PairingContainer()),
-        GoRoute(path: '/hosts/new', builder: (_, _) => const HostFormContainer()),
-        GoRoute(path: '/hosts/:id', builder: (_, s) => HostDetailContainer(hostId: s.pathParameters['id']!)),
-        GoRoute(path: '/hosts/:id/edit', builder: (_, s) => HostFormContainer(hostId: s.pathParameters['id']!)),
-        GoRoute(
-          path: '/terminal/:id',
-          builder: (_, s) => TerminalContainer(
-            hostId: s.pathParameters['id']!,
-            session: s.uri.queryParameters['session'],
-            kind: s.uri.queryParameters['kind'],
-          ),
+        StatefulShellBranch(
+          routes: [GoRoute(path: '/inbox', builder: (_, _) => const InboxContainer())],
         ),
-        GoRoute(
-          path: '/inbox/:host/:event',
-          builder: (_, s) => EventConfirmContainer(
-            hostId: s.pathParameters['host']!,
-            eventId: s.pathParameters['event']!,
-            action: s.uri.queryParameters['action'],
-          ),
+        StatefulShellBranch(
+          routes: [GoRoute(path: '/keys', builder: (_, _) => const KeysContainer())],
+        ),
+        StatefulShellBranch(
+          routes: [GoRoute(path: '/settings', builder: (_, _) => const SettingsContainer())],
         ),
       ],
-    );
+    ),
+    GoRoute(path: '/pair', builder: (_, _) => const PairingContainer()),
+    GoRoute(path: '/hosts/new', builder: (_, _) => const HostFormContainer()),
+    GoRoute(
+      path: '/hosts/:id',
+      builder: (_, s) => HostDetailContainer(hostId: s.pathParameters['id']!),
+    ),
+    GoRoute(
+      path: '/hosts/:id/edit',
+      builder: (_, s) => HostFormContainer(hostId: s.pathParameters['id']!),
+    ),
+    GoRoute(
+      path: '/terminal/:id',
+      builder: (_, s) => TerminalContainer(
+        hostId: s.pathParameters['id']!,
+        session: s.uri.queryParameters['session'],
+        kind: s.uri.queryParameters['kind'],
+      ),
+    ),
+    GoRoute(
+      path: '/inbox/:host/:event',
+      builder: (_, s) => EventConfirmContainer(
+        hostId: s.pathParameters['host']!,
+        eventId: s.pathParameters['event']!,
+        action: s.uri.queryParameters['action'],
+      ),
+    ),
+  ],
+);

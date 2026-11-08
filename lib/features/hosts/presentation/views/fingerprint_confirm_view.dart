@@ -19,20 +19,20 @@ class FingerprintConfirmView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text('Verify the host key of $address', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          const Text(
-            'On the host run:\n  ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub\n'
-            'Trust it only if the fingerprint is identical. It will be pinned, and any later change '
-            'will block the connection.',
-          ),
-          const SizedBox(height: 12),
-          FingerprintCard(label: 'Presented host key', fingerprint: fingerprint),
-          const SizedBox(height: 16),
-          FilledButton(onPressed: onTrust, child: const Text('It matches — trust and save')),
-          TextButton(onPressed: onCancel, child: const Text('Cancel')),
-        ],
-      );
+    padding: const EdgeInsets.all(16),
+    children: [
+      Text('Verify the host key of $address', style: Theme.of(context).textTheme.titleMedium),
+      const SizedBox(height: 8),
+      const Text(
+        'On the host run:\n  ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub\n'
+        'Trust it only if the fingerprint is identical. It will be pinned, and any later change '
+        'will block the connection.',
+      ),
+      const SizedBox(height: 12),
+      FingerprintCard(label: 'Presented host key', fingerprint: fingerprint),
+      const SizedBox(height: 16),
+      FilledButton(onPressed: onTrust, child: const Text('It matches — trust and save')),
+      TextButton(onPressed: onCancel, child: const Text('Cancel')),
+    ],
+  );
 }

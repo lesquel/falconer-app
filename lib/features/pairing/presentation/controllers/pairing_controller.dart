@@ -36,7 +36,10 @@ class PairingController extends Notifier<PairingState> {
     state = PairingState(step: PairStep.pairing, raw: raw, code: state.code);
     try {
       final name = deviceName.trim().isEmpty ? 'Android phone' : deviceName.trim();
-      final host = await ref.read(pairWithQrProvider)(raw, deviceName: name.length > 64 ? name.substring(0, 64) : name);
+      final host = await ref.read(pairWithQrProvider)(
+        raw,
+        deviceName: name.length > 64 ? name.substring(0, 64) : name,
+      );
       state = PairingState(step: PairStep.done, host: host);
     } on AppFailure catch (e) {
       state = PairingState(step: PairStep.failed, error: e.message);
@@ -46,4 +49,6 @@ class PairingController extends Notifier<PairingState> {
   void reset() => state = const PairingState();
 }
 
-final pairingProvider = NotifierProvider.autoDispose<PairingController, PairingState>(PairingController.new);
+final pairingProvider = NotifierProvider.autoDispose<PairingController, PairingState>(
+  PairingController.new,
+);

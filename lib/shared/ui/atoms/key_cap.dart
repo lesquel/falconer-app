@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 
 /// One key on the extra-keys bar.
 class KeyCap extends StatelessWidget {
-  const KeyCap({super.key, required this.label, required this.onTap, this.active = false, this.onLongPress});
+  const KeyCap({
+    super.key,
+    required this.label,
+    required this.onTap,
+    this.active = false,
+    this.onLongPress,
+  });
 
   final String label;
   final VoidCallback onTap;

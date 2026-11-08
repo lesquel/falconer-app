@@ -20,34 +20,40 @@ class TerminalScreenView extends StatelessWidget {
   final Widget? overlay;
 
   String? get _banner => switch (phase) {
-        TerminalPhase.connecting => 'Connecting…',
-        TerminalPhase.reconnecting => 'Reconnecting…',
-        TerminalPhase.closed => 'Session ended',
-        _ => null,
-      };
+    TerminalPhase.connecting => 'Connecting…',
+    TerminalPhase.reconnecting => 'Reconnecting…',
+    TerminalPhase.closed => 'Session ended',
+    _ => null,
+  };
 
   @override
   Widget build(BuildContext context) {
     final banner = _banner;
-    return Column(children: [
-      if (banner != null)
-        Material(
-          color: Theme.of(context).colorScheme.secondaryContainer,
-          child: SizedBox(
-            width: double.infinity,
-            child: Padding(padding: const EdgeInsets.all(6), child: Text(banner, textAlign: TextAlign.center)),
-          ),
-        ),
-      Expanded(
-        child: overlay ??
-            TerminalView(
-              terminal,
-              autofocus: true,
-              textStyle: TerminalStyle(fontSize: fontSize, fontFamily: 'monospace'),
-              keyboardType: TextInputType.visiblePassword,
+    return Column(
+      children: [
+        if (banner != null)
+          Material(
+            color: Theme.of(context).colorScheme.secondaryContainer,
+            child: SizedBox(
+              width: double.infinity,
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: Text(banner, textAlign: TextAlign.center),
+              ),
             ),
-      ),
-      keysBar,
-    ]);
+          ),
+        Expanded(
+          child:
+              overlay ??
+              TerminalView(
+                terminal,
+                autofocus: true,
+                textStyle: TerminalStyle(fontSize: fontSize, fontFamily: 'monospace'),
+                keyboardType: TextInputType.visiblePassword,
+              ),
+        ),
+        keysBar,
+      ],
+    );
   }
 }

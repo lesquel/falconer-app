@@ -69,18 +69,18 @@ final class _RustConnection implements SshConnection {
 
   @override
   Future<ExecOutput> exec(String command, {List<int>? stdin}) => _guard(() async {
-        final r = await _client.exec(
-          command: command,
-          stdin: stdin == null ? null : Uint8List.fromList(stdin),
-        );
-        return ExecOutput(exitCode: r.exitCode, stdout: r.stdout, stderr: r.stderr);
-      });
+    final r = await _client.exec(
+      command: command,
+      stdin: stdin == null ? null : Uint8List.fromList(stdin),
+    );
+    return ExecOutput(exitCode: r.exitCode, stdout: r.stdout, stderr: r.stderr);
+  });
 
   @override
   Future<ShellChannel> openShell({required int cols, required int rows}) => _guard(() async {
-        final s = await _client.openShell(cols: cols, rows: rows);
-        return _RustShell(s, s.output());
-      });
+    final s = await _client.openShell(cols: cols, rows: rows);
+    return _RustShell(s, s.output());
+  });
 
   @override
   Future<String> upload(String localPath, String remoteName) =>

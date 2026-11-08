@@ -47,5 +47,5 @@ class HostDetailController extends Notifier<HostDetailState> {
   }
 }
 
-final hostDetailProvider =
-    NotifierProvider.autoDispose.family<HostDetailController, HostDetailState, String>(HostDetailController.new);
+final hostDetailProvider = NotifierProvider.autoDispose
+    .family<HostDetailController, HostDetailState, String>(HostDetailController.new);

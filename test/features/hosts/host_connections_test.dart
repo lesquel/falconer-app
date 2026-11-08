@@ -20,9 +20,10 @@ void main() {
     repo = FakeHostRepository();
     await repo.save(testHost());
     vault = FakeVault();
-    conn = FakeConnection((cmd, _) => cmd.startsWith('command -v')
-        ? text('/home/me/.local/bin/openmosh-hook\n')
-        : ok(const []));
+    conn = FakeConnection(
+      (cmd, _) =>
+          cmd.startsWith('command -v') ? text('/home/me/.local/bin/openmosh-hook\n') : ok(const []),
+    );
     connector = FakeConnector(() => conn);
     pool = HostConnections(hosts: repo, vault: vault, connector: connector);
   });
@@ -49,7 +50,9 @@ void main() {
   });
 
   test('host key mismatch from the core is surfaced as non-overridable', () async {
-    final failure = mapCoreError(AnyhowException('host_key_mismatch: expected SHA256:aaa got SHA256:bbb'));
+    final failure = mapCoreError(
+      AnyhowException('host_key_mismatch: expected SHA256:aaa got SHA256:bbb'),
+    );
     expect(failure, isA<HostKeyMismatchFailure>());
     final m = failure as HostKeyMismatchFailure;
     expect(m.overridable, isFalse);
@@ -71,19 +74,26 @@ void main() {
 
   test('a host without the hook binary reports hook_missing', () async {
     conn = FakeConnection((_, _) => text('', code: 1));
-    await expectLater(pool.runHook('h1', HookCommand.sessionsList()),
-        throwsA(isA<HookFailure>().having((e) => e.code, 'code', 'hook_missing')));
+    await expectLater(
+      pool.runHook('h1', HookCommand.sessionsList()),
+      throwsA(isA<HookFailure>().having((e) => e.code, 'code', 'hook_missing')),
+    );
   });
 
   group('ManageHosts', () {
     late ManageHosts manage;
-    setUp(() => manage = ManageHosts(repo, connector, newId: () => 'new', now: () => DateTime.utc(2026)));
+    setUp(
+      () =>
+          manage = ManageHosts(repo, connector, newId: () => 'new', now: () => DateTime.utc(2026)),
+    );
 
     const draft = HostDraft(alias: 'pi', address: 'pi.tail1.ts.net', port: 22, user: 'pi');
 
     test('adding requires a well-formed confirmed fingerprint', () async {
-      await expectLater(manage.addConfirmed(draft, confirmedFingerprint: 'yes'),
-          throwsA(isA<ValidationFailure>()));
+      await expectLater(
+        manage.addConfirmed(draft, confirmedFingerprint: 'yes'),
+        throwsA(isA<ValidationFailure>()),
+      );
       final h = await manage.addConfirmed(draft, confirmedFingerprint: await manage.probe(draft));
       expect(h.fingerprint, connector.probe);
     });
@@ -102,9 +112,13 @@ void main() {
     test('editing cannot move the pin to another address', () async {
       final h = await manage.addConfirmed(draft, confirmedFingerprint: connector.probe);
       await expectLater(
-          manage.edit(h, const HostDraft(alias: 'pi', address: 'evil.example', port: 22, user: 'pi')),
-          throwsA(isA<ValidationFailure>()));
-      final renamed = await manage.edit(h, const HostDraft(alias: 'pi4', address: 'pi.tail1.ts.net', port: 22, user: 'pi'));
+        manage.edit(h, const HostDraft(alias: 'pi', address: 'evil.example', port: 22, user: 'pi')),
+        throwsA(isA<ValidationFailure>()),
+      );
+      final renamed = await manage.edit(
+        h,
+        const HostDraft(alias: 'pi4', address: 'pi.tail1.ts.net', port: 22, user: 'pi'),
+      );
       expect(renamed.alias, 'pi4');
       expect(renamed.fingerprint, h.fingerprint);
     });

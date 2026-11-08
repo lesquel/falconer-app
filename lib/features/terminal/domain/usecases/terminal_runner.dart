@@ -25,8 +25,8 @@ final class TerminalRunner {
     this.attachCommand,
     BackoffPolicy? backoff,
     Sleep? sleep,
-  })  : _backoff = backoff ?? BackoffPolicy(),
-        _sleep = sleep ?? ((d) => Future<void>.delayed(d));
+  }) : _backoff = backoff ?? BackoffPolicy(),
+       _sleep = sleep ?? ((d) => Future<void>.delayed(d));
 
   final String hostId;
   final HostConnections connections;
@@ -58,7 +58,9 @@ final class TerminalRunner {
     _running = true;
     if (_subs.isEmpty) {
       _subs.add(emulator.input.listen((s) => send(s)));
-      _subs.add(emulator.resizes.listen((r) => _shell?.resize(r.$1, r.$2).catchError((Object _) {})));
+      _subs.add(
+        emulator.resizes.listen((r) => _shell?.resize(r.$1, r.$2).catchError((Object _) {})),
+      );
     }
     var attempt = 0;
     failure = null;

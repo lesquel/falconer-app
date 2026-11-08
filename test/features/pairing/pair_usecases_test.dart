@@ -36,9 +36,17 @@ class FakeEndpoints implements PushEndpointSource {
 
 String code({int exp = 2000, String ip = '100.101.102.103'}) {
   final json = {
-    'v': 1, 'alias': 'ws', 'addr': 'ws.tail.ts.net', 'ip': ip, 'ssh_port': 2222,
-    'ssh_user': 'me', 'ssh_fp': 'SHA256:i2cBF5DBtTy5/U7Y27668/2F1HhY/qwC4eALG8QAiQM',
-    'hpk': b64uEncode(List.filled(32, 7)), 'port': 41000, 'tok': b64uEncode(List.filled(32, 9)), 'exp': exp,
+    'v': 1,
+    'alias': 'ws',
+    'addr': 'ws.tail.ts.net',
+    'ip': ip,
+    'ssh_port': 2222,
+    'ssh_user': 'me',
+    'ssh_fp': 'SHA256:i2cBF5DBtTy5/U7Y27668/2F1HhY/qwC4eALG8QAiQM',
+    'hpk': b64uEncode(List.filled(32, 7)),
+    'port': 41000,
+    'tok': b64uEncode(List.filled(32, 9)),
+    'exp': exp,
   };
   return 'openmosh://pair?d=${b64uEncode(utf8.encode(jsonEncode(json)))}';
 }
@@ -96,14 +104,26 @@ void main() {
 
   test('SSH pairing sends name, push key and endpoint on stdin and stores the reply', () async {
     await hosts.save(testHost(hookPath: '/h/openmosh-hook'));
-    final conn = FakeConnection((cmd, _) => ok({'device_id': 'd9', 'alias': 'box', 'hpk': b64uEncode(List.filled(32, 1))}));
-    final connections = HostConnections(hosts: hosts, vault: FakeVault(), connector: FakeConnector(() => conn));
+    final conn = FakeConnection(
+      (cmd, _) => ok({'device_id': 'd9', 'alias': 'box', 'hpk': b64uEncode(List.filled(32, 1))}),
+    );
+    final connections = HostConnections(
+      hosts: hosts,
+      vault: FakeVault(),
+      connector: FakeConnector(() => conn),
+    );
     final updated = await PairOverSsh(
-      connections: connections, hosts: hosts, pushKeys: FakePushKeys(), endpoints: endpoints,
+      connections: connections,
+      hosts: hosts,
+      pushKeys: FakePushKeys(),
+      endpoints: endpoints,
     )('h1', deviceName: 'Phone');
     expect(conn.commands.single, "'/h/openmosh-hook' 'pair-ssh' '--json'");
-    expect(jsonDecode(utf8.decode(conn.stdins.single!)),
-        {'name': 'Phone', 'ppk': b64uEncode(List.filled(32, 3)), 'endpoint': 'https://ntfy.sh/upXYZ'});
+    expect(jsonDecode(utf8.decode(conn.stdins.single!)), {
+      'name': 'Phone',
+      'ppk': b64uEncode(List.filled(32, 3)),
+      'endpoint': 'https://ntfy.sh/upXYZ',
+    });
     expect(updated.deviceId, 'd9');
     expect(updated.pairedVia, PairedVia.ssh);
     expect(updated.fingerprint, testHost().fingerprint);
@@ -117,10 +137,11 @@ void main() {
       sent.add(c.argv);
       return null;
     }
+
     await sync((await hosts.byId('h1'))!, run);
     await sync((await hosts.byId('h1'))!, run);
     expect(sent, [
-      ['devices', 'set-endpoint', 'd1', 'https://ntfy.sh/upXYZ', '--json']
+      ['devices', 'set-endpoint', 'd1', 'https://ntfy.sh/upXYZ', '--json'],
     ]);
   });
 }

@@ -8,7 +8,12 @@ final _hostname = RegExp(r'^[A-Za-z0-9]([A-Za-z0-9.-]{0,251}[A-Za-z0-9])?$');
 final _ipv6 = RegExp(r'^[0-9A-Fa-f:]{2,39}$');
 
 final class HostDraft {
-  const HostDraft({required this.alias, required this.address, required this.port, required this.user});
+  const HostDraft({
+    required this.alias,
+    required this.address,
+    required this.port,
+    required this.user,
+  });
 
   final String alias;
   final String address;

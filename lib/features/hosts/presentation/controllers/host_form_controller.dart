@@ -7,7 +7,14 @@ import '../../domain/entities/host_draft.dart';
 
 /// Manual add: form -> probe host key -> explicit confirmation -> save.
 final class HostFormState {
-  const HostFormState({this.draft, this.keyId, this.probed, this.busy = false, this.error, this.saved});
+  const HostFormState({
+    this.draft,
+    this.keyId,
+    this.probed,
+    this.busy = false,
+    this.error,
+    this.saved,
+  });
   final HostDraft? draft;
   final String? keyId;
   final String? probed;
@@ -33,7 +40,9 @@ class HostFormController extends Notifier<HostFormState> {
   Future<void> trust() async {
     final s = state;
     if (s.draft == null || s.probed == null) return;
-    final host = await ref.read(manageHostsProvider).addConfirmed(s.draft!, confirmedFingerprint: s.probed!, keyId: s.keyId);
+    final host = await ref
+        .read(manageHostsProvider)
+        .addConfirmed(s.draft!, confirmedFingerprint: s.probed!, keyId: s.keyId);
     state = HostFormState(saved: host);
   }
 
@@ -49,4 +58,6 @@ class HostFormController extends Notifier<HostFormState> {
   }
 }
 
-final hostFormProvider = NotifierProvider.autoDispose<HostFormController, HostFormState>(HostFormController.new);
+final hostFormProvider = NotifierProvider.autoDispose<HostFormController, HostFormState>(
+  HostFormController.new,
+);

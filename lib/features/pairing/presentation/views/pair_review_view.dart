@@ -4,7 +4,13 @@ import '../../../../shared/ui/molecules/fingerprint_card.dart';
 import '../../domain/entities/pair_payload.dart';
 
 class PairReviewView extends StatefulWidget {
-  const PairReviewView({super.key, required this.code, required this.busy, required this.onPair, required this.onCancel});
+  const PairReviewView({
+    super.key,
+    required this.code,
+    required this.busy,
+    required this.onPair,
+    required this.onCancel,
+  });
 
   final PairPayload code;
   final bool busy;
@@ -36,10 +42,15 @@ class _PairReviewViewState extends State<PairReviewView> {
         const SizedBox(height: 12),
         FingerprintCard(label: 'SSH host key that will be pinned', fingerprint: c.sshFingerprint),
         const SizedBox(height: 12),
-        TextField(controller: _name, decoration: const InputDecoration(labelText: 'Name for this phone')),
+        TextField(
+          controller: _name,
+          decoration: const InputDecoration(labelText: 'Name for this phone'),
+        ),
         const SizedBox(height: 8),
-        const Text('This creates an SSH key on this phone, authorizes it on the host only from your '
-            'tailnet, and registers encrypted notifications.'),
+        const Text(
+          'This creates an SSH key on this phone, authorizes it on the host only from your '
+          'tailnet, and registers encrypted notifications.',
+        ),
         const SizedBox(height: 16),
         FilledButton(
           onPressed: widget.busy ? null : () => widget.onPair(_name.text),

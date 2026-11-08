@@ -99,11 +99,13 @@ final class PairOverSsh {
     if (!isAllowedPushEndpoint(endpoint)) {
       throw const PushFailure('The push endpoint must use https.');
     }
-    final stdin = utf8.encode(jsonEncode({
-      'name': deviceName,
-      'ppk': b64uEncode(await pushKeys.publicKey()),
-      'endpoint': endpoint,
-    }));
+    final stdin = utf8.encode(
+      jsonEncode({
+        'name': deviceName,
+        'ppk': b64uEncode(await pushKeys.publicKey()),
+        'endpoint': endpoint,
+      }),
+    );
     final data = await connections.runHook(hostId, HookCommand.pairSsh(), stdin: stdin);
     if (data is! Map<String, Object?>) throw const PairingFailure('Unexpected pairing reply.');
     final id = data['device_id'];

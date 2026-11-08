@@ -10,26 +10,42 @@ void main() {
 
   group('HookCommand.toShell', () {
     test('sessions list', () {
-      expect(HookCommand.sessionsList().toShell(hook),
-          "'$hook' 'sessions' 'list' '--json'");
+      expect(HookCommand.sessionsList().toShell(hook), "'$hook' 'sessions' 'list' '--json'");
     });
 
     test('inbox list with cursor', () {
-      expect(HookCommand.inboxList(since: 41, limit: 100).argv,
-          ['inbox', 'list', '--json', '--since', '41', '--limit', '100']);
+      expect(HookCommand.inboxList(since: 41, limit: 100).argv, [
+        'inbox',
+        'list',
+        '--json',
+        '--since',
+        '41',
+        '--limit',
+        '100',
+      ]);
     });
 
     test('respond text quotes hostile input as one argument', () {
-      final cmd = HookCommand.respond('ev1', RespondAction.text,
-          text: "it's \$(whoami) `id`\nnext");
-      expect(cmd.toShell(hook),
-          "'$hook' 'respond' 'ev1' '--action' 'text' '--text' "
-          "'it'\\''s \$(whoami) `id`\nnext' '--json'");
+      final cmd = HookCommand.respond(
+        'ev1',
+        RespondAction.text,
+        text: "it's \$(whoami) `id`\nnext",
+      );
+      expect(
+        cmd.toShell(hook),
+        "'$hook' 'respond' 'ev1' '--action' 'text' '--text' "
+        "'it'\\''s \$(whoami) `id`\nnext' '--json'",
+      );
     });
 
     test('respond allow has no --text', () {
-      expect(HookCommand.respond('ev1', RespondAction.allow).argv,
-          ['respond', 'ev1', '--action', 'allow', '--json']);
+      expect(HookCommand.respond('ev1', RespondAction.allow).argv, [
+        'respond',
+        'ev1',
+        '--action',
+        'allow',
+        '--json',
+      ]);
     });
 
     test('respond text strips control characters except newline and caps size', () {
@@ -39,24 +55,33 @@ void main() {
         () => HookCommand.respond('e', RespondAction.text, text: 'x' * 4097),
         throwsA(isA<ValidationFailure>()),
       );
-      expect(() => HookCommand.respond('e', RespondAction.text),
-          throwsA(isA<ValidationFailure>()));
+      expect(() => HookCommand.respond('e', RespondAction.text), throwsA(isA<ValidationFailure>()));
     });
 
     test('empty or oversized ids are rejected; hyphen-leading ids are allowed', () {
       expect(() => HookCommand.respond('', RespondAction.allow), throwsA(isA<ValidationFailure>()));
-      expect(() => HookCommand.respond('a' * 129, RespondAction.allow), throwsA(isA<ValidationFailure>()));
+      expect(
+        () => HookCommand.respond('a' * 129, RespondAction.allow),
+        throwsA(isA<ValidationFailure>()),
+      );
       expect(HookCommand.respond('-AbC', RespondAction.allow).argv[1], '-AbC');
     });
 
     test('set-endpoint uses the JSON envelope', () {
-      expect(HookCommand.setEndpoint('-d1', 'https://ntfy.sh/up').argv,
-          ['devices', 'set-endpoint', '-d1', 'https://ntfy.sh/up', '--json']);
+      expect(HookCommand.setEndpoint('-d1', 'https://ntfy.sh/up').argv, [
+        'devices',
+        'set-endpoint',
+        '-d1',
+        'https://ntfy.sh/up',
+        '--json',
+      ]);
     });
 
     test('hook path resolution probe is a fixed command', () {
-      expect(HookCommand.resolvePathScript,
-          r'command -v openmosh-hook || echo "$HOME/.local/bin/openmosh-hook"');
+      expect(
+        HookCommand.resolvePathScript,
+        r'command -v openmosh-hook || echo "$HOME/.local/bin/openmosh-hook"',
+      );
     });
   });
 
@@ -67,13 +92,16 @@ void main() {
 
     test('maps error envelope to HookFailure with code', () {
       Object? f() => parseHookEnvelope(
-          utf8.encode('{"ok":false,"error":{"code":"not_found","message":"no such event"}}'));
+        utf8.encode('{"ok":false,"error":{"code":"not_found","message":"no such event"}}'),
+      );
       expect(f, throwsA(isA<HookFailure>().having((e) => e.code, 'code', 'not_found')));
     });
 
     test('non-JSON output is a protocol error', () {
-      expect(() => parseHookEnvelope(utf8.encode('bash: openmosh-hook: not found')),
-          throwsA(isA<HookFailure>().having((e) => e.code, 'code', 'protocol')));
+      expect(
+        () => parseHookEnvelope(utf8.encode('bash: openmosh-hook: not found')),
+        throwsA(isA<HookFailure>().having((e) => e.code, 'code', 'protocol')),
+      );
     });
   });
 }

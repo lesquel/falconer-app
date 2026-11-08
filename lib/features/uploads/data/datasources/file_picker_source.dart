@@ -23,7 +23,8 @@ class FilePickerSource implements FileSource {
     final direct = f.path;
     if (direct != null) return PickedFile(path: direct, name: f.name, size: size);
 
-    final dir = await Directory('${(await getTemporaryDirectory()).path}/uploads').create(recursive: true);
+    final dir = await Directory('${(await getTemporaryDirectory()).path}/uploads')
+        .create(recursive: true);
     final tmp = File('${dir.path}/${randomUploadPrefix()}');
     final sink = tmp.openWrite();
     var copied = 0;

@@ -7,6 +7,8 @@ class MonoText extends StatelessWidget {
   final double size;
 
   @override
-  Widget build(BuildContext context) =>
-      SelectableText(text, style: TextStyle(fontFamily: 'monospace', fontSize: size));
+  Widget build(BuildContext context) => SelectableText(
+    text,
+    style: TextStyle(fontFamily: 'monospace', fontSize: size),
+  );
 }

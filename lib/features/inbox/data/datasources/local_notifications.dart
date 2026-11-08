@@ -27,7 +27,9 @@ class LocalEventNotifier implements EventNotifier {
     if (d?.didNotificationLaunchApp != true || r?.payload == null) return null;
     final uri = Uri.parse(r!.payload!);
     final a = r.actionId;
-    return a == null || a == 'open' ? uri.path : Uri(path: uri.path, queryParameters: {'action': a}).toString();
+    return a == null || a == 'open'
+        ? uri.path
+        : Uri(path: uri.path, queryParameters: {'action': a}).toString();
   }
 
   static const channelId = 'agent_events';
@@ -35,17 +37,21 @@ class LocalEventNotifier implements EventNotifier {
   static Future<FlutterLocalNotificationsPlugin> init({NotificationTap? onTap}) async {
     final plugin = FlutterLocalNotificationsPlugin();
     await plugin.initialize(
-      settings: const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher')),
+      settings: const InitializationSettings(
+        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+      ),
       onDidReceiveNotificationResponse: (r) => _route(r, onTap),
     );
     await plugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(const AndroidNotificationChannel(
-          channelId,
-          'Agent events',
-          description: 'An agent needs approval, has a question or finished',
-          importance: Importance.high,
-        ));
+        ?.createNotificationChannel(
+          const AndroidNotificationChannel(
+            channelId,
+            'Agent events',
+            description: 'An agent needs approval, has a question or finished',
+            importance: Importance.high,
+          ),
+        );
     return plugin;
   }
 
@@ -81,7 +87,9 @@ class LocalEventNotifier implements EventNotifier {
           importance: Importance.high,
           priority: Priority.high,
           category: AndroidNotificationCategory.message,
-          visibility: content.lockScreenSafe ? NotificationVisibility.public : NotificationVisibility.private,
+          visibility: content.lockScreenSafe
+              ? NotificationVisibility.public
+              : NotificationVisibility.private,
           actions: actions,
         ),
       ),
@@ -89,5 +97,6 @@ class LocalEventNotifier implements EventNotifier {
   }
 
   @override
-  Future<void> cancel(String hostId, String eventId) => _plugin.cancel(id: notificationId(hostId, eventId));
+  Future<void> cancel(String hostId, String eventId) =>
+      _plugin.cancel(id: notificationId(hostId, eventId));
 }

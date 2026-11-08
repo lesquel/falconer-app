@@ -34,9 +34,17 @@ abstract final class PairCrypto {
   }) async {
     final eph = ephemeral ?? await c.newX25519KeyPair();
     final kReq = await c.deriveKey(
-        private: eph, remotePublic: hostPublicKey, salt: token, info: 'openmosh/pair/v1/req');
+      private: eph,
+      remotePublic: hostPublicKey,
+      salt: token,
+      info: 'openmosh/pair/v1/req',
+    );
     final kResp = await c.deriveKey(
-        private: eph, remotePublic: hostPublicKey, salt: token, info: 'openmosh/pair/v1/resp');
+      private: eph,
+      remotePublic: hostPublicKey,
+      salt: token,
+      info: 'openmosh/pair/v1/resp',
+    );
     final n = nonce ?? c.randomBytes(c.nonceLength);
     final ct = await c.seal(key: kReq, nonce: n, plaintext: plaintext, aad: _aad);
     final line = jsonEncode({
@@ -53,8 +61,9 @@ abstract final class PairCrypto {
 
   static Future<PairResponse> openResponse(String line, SecretKey responseKey) async {
     const rejected = PairingFailure(
-        'The host rejected pairing. Check that both devices use the same Tailscale account '
-        'and that the code is still valid.');
+      'The host rejected pairing. Check that both devices use the same Tailscale account '
+      'and that the code is still valid.',
+    );
     const invalid = PairingFailure('The host sent an invalid pairing response.');
     final Object? json;
     try {
@@ -69,7 +78,12 @@ abstract final class PairCrypto {
     if (n is! String || ct is! String) throw invalid;
     final List<int> pt;
     try {
-      pt = await c.open(key: responseKey, nonce: b64uDecode(n), combined: b64uDecode(ct), aad: _aad);
+      pt = await c.open(
+        key: responseKey,
+        nonce: b64uDecode(n),
+        combined: b64uDecode(ct),
+        aad: _aad,
+      );
     } on FormatException {
       throw invalid;
     } on SecretBoxAuthenticationError {

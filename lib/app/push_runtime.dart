@@ -41,9 +41,11 @@ final class PushRuntime {
       previews: () async => (await settings.load()).notificationPreviews,
       kidOf: PushCrypto.kidOf,
     );
-    await endpoints.initialize(onMessage: (body) async {
-      await handle(body);
-    });
+    await endpoints.initialize(
+      onMessage: (body) async {
+        await handle(body);
+      },
+    );
     return PushRuntime._(db, storage, notifier, endpoints);
   }
 }

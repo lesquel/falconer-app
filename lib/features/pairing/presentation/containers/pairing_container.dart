@@ -21,26 +21,31 @@ class PairingContainer extends ConsumerWidget {
 
     final body = switch (state.step) {
       PairStep.review || PairStep.pairing => PairReviewView(
-          code: state.code!,
-          busy: state.step == PairStep.pairing,
-          onPair: ctrl.confirm,
-          onCancel: ctrl.reset,
-        ),
+        code: state.code!,
+        busy: state.step == PairStep.pairing,
+        onPair: ctrl.confirm,
+        onCancel: ctrl.reset,
+      ),
       _ => PairScanView(
-          error: state.error,
-          onDismissError: ctrl.reset,
-          onSubmit: ctrl.scanned,
-          scanner: ReaderWidget(
-            codeFormat: Format.qrCode,
-            showGallery: false,
-            showToggleCamera: false,
-            onScan: (code) {
-              final text = code.text;
-              if (code.isValid && text != null) ctrl.scanned(text);
-            },
-          ),
+        error: state.error,
+        onDismissError: ctrl.reset,
+        onSubmit: ctrl.scanned,
+        scanner: ReaderWidget(
+          codeFormat: Format.qrCode,
+          showGallery: false,
+          showToggleCamera: false,
+          onScan: (code) {
+            final text = code.text;
+            if (code.isValid && text != null) ctrl.scanned(text);
+          },
         ),
+      ),
     };
-    return SecureScreen(child: Scaffold(appBar: AppBar(title: const Text('Pair a host')), body: body));
+    return SecureScreen(
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Pair a host')),
+        body: body,
+      ),
+    );
   }
 }

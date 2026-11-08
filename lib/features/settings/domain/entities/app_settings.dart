@@ -23,12 +23,17 @@ final class AppSettings {
     return (c >= 0x61 && c <= 0x7a) ? String.fromCharCode(c - 0x60) : '\x02';
   }
 
-  AppSettings copyWith({bool? notificationPreviews, bool? darkTheme, double? fontSize, PresetName? keyPreset, String? herdrPrefix}) =>
-      AppSettings(
-        notificationPreviews: notificationPreviews ?? this.notificationPreviews,
-        darkTheme: darkTheme ?? this.darkTheme,
-        fontSize: (fontSize ?? this.fontSize).clamp(8, 32).toDouble(),
-        keyPreset: keyPreset ?? this.keyPreset,
-        herdrPrefix: herdrPrefix ?? this.herdrPrefix,
-      );
+  AppSettings copyWith({
+    bool? notificationPreviews,
+    bool? darkTheme,
+    double? fontSize,
+    PresetName? keyPreset,
+    String? herdrPrefix,
+  }) => AppSettings(
+    notificationPreviews: notificationPreviews ?? this.notificationPreviews,
+    darkTheme: darkTheme ?? this.darkTheme,
+    fontSize: (fontSize ?? this.fontSize).clamp(8, 32).toDouble(),
+    keyPreset: keyPreset ?? this.keyPreset,
+    herdrPrefix: herdrPrefix ?? this.herdrPrefix,
+  );
 }

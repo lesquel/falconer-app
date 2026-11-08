@@ -28,31 +28,36 @@ class ExtraKeysBar extends StatelessWidget {
   bool _active(Modifier m) => m == Modifier.ctrl ? modifiers.ctrl : modifiers.alt;
 
   Widget _row(List<ExtraKey> keys, {List<Widget> extra = const []}) => SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Row(children: [
-          for (final k in keys)
-            k.modifier != null
-                ? KeyCap(
-                    label: k.label,
-                    active: _active(k.modifier!),
-                    onTap: () => onModifier(k.modifier!),
-                    onLongPress: () => onModifierLock(k.modifier!),
-                  )
-                : KeyCap(label: k.label, onTap: () => onKey(k.sequence!)),
-          ...extra,
-        ]),
-      );
+    scrollDirection: Axis.horizontal,
+    padding: const EdgeInsets.symmetric(horizontal: 4),
+    child: Row(
+      children: [
+        for (final k in keys)
+          k.modifier != null
+              ? KeyCap(
+                  label: k.label,
+                  active: _active(k.modifier!),
+                  onTap: () => onModifier(k.modifier!),
+                  onLongPress: () => onModifierLock(k.modifier!),
+                )
+              : KeyCap(label: k.label, onTap: () => onKey(k.sequence!)),
+        ...extra,
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) => Material(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        child: SafeArea(
-          top: false,
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            _row(base, extra: trailing),
-            if (preset.isNotEmpty) _row(preset),
-          ]),
-        ),
-      );
+    color: Theme.of(context).colorScheme.surfaceContainer,
+    child: SafeArea(
+      top: false,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _row(base, extra: trailing),
+          if (preset.isNotEmpty) _row(preset),
+        ],
+      ),
+    ),
+  );
 }

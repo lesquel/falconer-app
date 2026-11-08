@@ -12,13 +12,12 @@ void main() {
   final v = loadVector('push_v1.json');
   final skip = v == null ? vectorsPending : false;
 
-  Future<Map<String, Object?>> openVector(String body, {String? deviceId}) async =>
-      PushCrypto.open(
-        body: utf8.encode(body),
-        devicePrivate: b64uDecode(v!['device_priv']! as String),
-        hostPublicKey: b64uDecode(v['host_pub']! as String),
-        deviceId: deviceId ?? v['device_id']! as String,
-      );
+  Future<Map<String, Object?>> openVector(String body, {String? deviceId}) async => PushCrypto.open(
+    body: utf8.encode(body),
+    devicePrivate: b64uDecode(v!['device_priv']! as String),
+    hostPublicKey: b64uDecode(v['host_pub']! as String),
+    deviceId: deviceId ?? v['device_id']! as String,
+  );
 
   test('derived key matches the shared vector', () async {
     final key = await PushCrypto.deriveKey(
@@ -43,8 +42,10 @@ void main() {
   }, skip: skip);
 
   test('wrong kid is rejected before decrypting', () async {
-    expect(openVector(v!['body']! as String, deviceId: 'someone-else'),
-        throwsA(isA<PushFailure>()));
+    expect(
+      openVector(v!['body']! as String, deviceId: 'someone-else'),
+      throwsA(isA<PushFailure>()),
+    );
   }, skip: skip);
 
   group('without vectors', () {
@@ -65,12 +66,21 @@ void main() {
         info: 'openmosh/push/v1/$id',
       );
       final n = c.randomBytes(24);
-      final ct = await c.seal(key: key, nonce: n, plaintext: utf8.encode('{"id":"e"}'), aad: 'openmosh/push/v1');
+      final ct = await c.seal(
+        key: key,
+        nonce: n,
+        plaintext: utf8.encode('{"id":"e"}'),
+        aad: 'openmosh/push/v1',
+      );
       body = {'v': 1, 'kid': id, 'n': b64uEncode(n), 'c': b64uEncode(ct)};
     });
 
     Future<Map<String, Object?>> openBody(Map<String, Object?> b) => PushCrypto.open(
-        body: utf8.encode(jsonEncode(b)), devicePrivate: devPriv, hostPublicKey: hostPub, deviceId: id);
+      body: utf8.encode(jsonEncode(b)),
+      devicePrivate: devPriv,
+      hostPublicKey: hostPub,
+      deviceId: id,
+    );
 
     test('round trip with host-side sealing', () async {
       expect(await openBody(body), {'id': 'e'});
@@ -80,8 +90,15 @@ void main() {
       expect(openBody({...body, 'v': 2}), throwsA(isA<PushFailure>()));
       expect(openBody({...body, 'n': b64uEncode(List.filled(24, 0))}), throwsA(isA<PushFailure>()));
       expect(openBody({...body, 'kid': 'x'}), throwsA(isA<PushFailure>()));
-      expect(PushCrypto.open(body: utf8.encode('nope'), devicePrivate: devPriv, hostPublicKey: hostPub, deviceId: id),
-          throwsA(isA<PushFailure>()));
+      expect(
+        PushCrypto.open(
+          body: utf8.encode('nope'),
+          devicePrivate: devPriv,
+          hostPublicKey: hostPub,
+          deviceId: id,
+        ),
+        throwsA(isA<PushFailure>()),
+      );
     });
 
     test('kidOf reads the routing id without decrypting', () {

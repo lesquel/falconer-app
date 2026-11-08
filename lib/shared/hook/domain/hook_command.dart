@@ -24,12 +24,12 @@ final class HookCommand {
   factory HookCommand.agentsList() => const HookCommand._(['agents', 'list', '--json']);
 
   factory HookCommand.inboxList({int? since, int? limit}) => HookCommand._([
-        'inbox',
-        'list',
-        '--json',
-        if (since != null) ...['--since', '$since'],
-        if (limit != null) ...['--limit', '$limit'],
-      ]);
+    'inbox',
+    'list',
+    '--json',
+    if (since != null) ...['--since', '$since'],
+    if (limit != null) ...['--limit', '$limit'],
+  ]);
 
   factory HookCommand.respond(String eventId, RespondAction action, {String? text}) {
     _checkId(eventId);
@@ -77,7 +77,13 @@ String sanitizeResponseText(String text) {
 int _utf8Length(String s) {
   var n = 0;
   for (final r in s.runes) {
-    n += r < 0x80 ? 1 : r < 0x800 ? 2 : r < 0x10000 ? 3 : 4;
+    n += r < 0x80
+        ? 1
+        : r < 0x800
+        ? 2
+        : r < 0x10000
+        ? 3
+        : 4;
   }
   return n;
 }

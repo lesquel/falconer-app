@@ -17,3 +17,6 @@ linter:
     prefer_const_constructors: true
     prefer_final_locals: true
     unawaited_futures: true
+
+formatter:
+  page_width: 100

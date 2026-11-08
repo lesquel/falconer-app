@@ -20,13 +20,15 @@ final class PairRequestBody {
   final List<int> pushPublicKey;
   final String endpoint;
 
-  List<int> toJsonBytes() => utf8.encode(jsonEncode({
-        'tok': b64uEncode(token),
-        'name': name,
-        'ssh_pub': sshPublicKey,
-        'ppk': b64uEncode(pushPublicKey),
-        'endpoint': endpoint,
-      }));
+  List<int> toJsonBytes() => utf8.encode(
+    jsonEncode({
+      'tok': b64uEncode(token),
+      'name': name,
+      'ssh_pub': sshPublicKey,
+      'ppk': b64uEncode(pushPublicKey),
+      'endpoint': endpoint,
+    }),
+  );
 }
 
 final class PairResponse {

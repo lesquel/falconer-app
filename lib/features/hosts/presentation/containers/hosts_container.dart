@@ -16,8 +16,16 @@ class HostsContainer extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Hosts'),
         actions: [
-          IconButton(tooltip: 'Scan pairing code', icon: const Icon(Icons.qr_code_scanner), onPressed: () => context.push('/pair')),
-          IconButton(tooltip: 'Add host manually', icon: const Icon(Icons.add), onPressed: () => context.push('/hosts/new')),
+          IconButton(
+            tooltip: 'Scan pairing code',
+            icon: const Icon(Icons.qr_code_scanner),
+            onPressed: () => context.push('/pair'),
+          ),
+          IconButton(
+            tooltip: 'Add host manually',
+            icon: const Icon(Icons.add),
+            onPressed: () => context.push('/hosts/new'),
+          ),
         ],
       ),
       body: hosts.when(

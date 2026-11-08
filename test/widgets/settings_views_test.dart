@@ -8,7 +8,9 @@ Widget app(Widget child) => MaterialApp(home: Scaffold(body: child));
 void main() {
   testWidgets('settings: previews are off by default and can be enabled', (t) async {
     AppSettings? changed;
-    await t.pumpWidget(app(SettingsView(settings: const AppSettings(), onChanged: (s) => changed = s)));
+    await t.pumpWidget(
+      app(SettingsView(settings: const AppSettings(), onChanged: (s) => changed = s)),
+    );
     final sw = t.widget<SwitchListTile>(find.byKey(const Key('previews')));
     expect(sw.value, isFalse);
     await t.tap(find.byKey(const Key('previews')));

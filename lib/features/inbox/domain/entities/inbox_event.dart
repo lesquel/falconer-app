@@ -58,19 +58,18 @@ final class InboxEvent {
     required String summary,
     required String pane,
     required DateTime at,
-  }) =>
-      InboxEvent(
-        id: id,
-        hostId: hostId,
-        seq: seq,
-        agent: agent,
-        kind: kind,
-        title: title,
-        summary: summary,
-        pane: pane,
-        at: at,
-        status: kind.actionable ? InboxStatus.pending : InboxStatus.info,
-      );
+  }) => InboxEvent(
+    id: id,
+    hostId: hostId,
+    seq: seq,
+    agent: agent,
+    kind: kind,
+    title: title,
+    summary: summary,
+    pane: pane,
+    at: at,
+    status: kind.actionable ? InboxStatus.pending : InboxStatus.info,
+  );
 
   final String id;
   final String hostId;
@@ -109,23 +108,23 @@ final class InboxEvent {
       _rank(incoming.status) > _rank(status) ? incoming : this;
 
   static int _rank(InboxStatus s) => switch (s) {
-        InboxStatus.pending || InboxStatus.info => 0,
-        InboxStatus.failed => 1,
-        InboxStatus.responding => 2,
-        InboxStatus.resolved => 3,
-      };
+    InboxStatus.pending || InboxStatus.info => 0,
+    InboxStatus.failed => 1,
+    InboxStatus.responding => 2,
+    InboxStatus.resolved => 3,
+  };
 
   InboxEvent _with(InboxStatus s, ResponseKind? r) => InboxEvent(
-        id: id,
-        hostId: hostId,
-        seq: seq,
-        agent: agent,
-        kind: kind,
-        title: title,
-        summary: summary,
-        pane: pane,
-        at: at,
-        status: s,
-        response: r,
-      );
+    id: id,
+    hostId: hostId,
+    seq: seq,
+    agent: agent,
+    kind: kind,
+    title: title,
+    summary: summary,
+    pane: pane,
+    at: at,
+    status: s,
+    response: r,
+  );
 }

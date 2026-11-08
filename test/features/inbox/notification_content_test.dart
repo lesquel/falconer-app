@@ -3,8 +3,16 @@ import 'package:openmosh/features/inbox/data/models/notification_content.dart';
 import 'package:openmosh/features/inbox/domain/entities/inbox_event.dart';
 
 InboxEvent e(EventKind kind) => InboxEvent.received(
-    id: 'ev1', hostId: 'h1', seq: 1, agent: 'claude', kind: kind,
-    title: 'Delete prod DB?', summary: 'DROP TABLE users', pane: 'p', at: DateTime.utc(2026));
+  id: 'ev1',
+  hostId: 'h1',
+  seq: 1,
+  agent: 'claude',
+  kind: kind,
+  title: 'Delete prod DB?',
+  summary: 'DROP TABLE users',
+  pane: 'p',
+  at: DateTime.utc(2026),
+);
 
 void main() {
   test('default notification reveals only alias and agent', () {
@@ -23,7 +31,10 @@ void main() {
   });
 
   test('done events say finished', () {
-    expect(notificationContent(e(EventKind.done), hostAlias: 'w', preview: false).title, 'w: claude finished');
+    expect(
+      notificationContent(e(EventKind.done), hostAlias: 'w', preview: false).title,
+      'w: claude finished',
+    );
   });
 
   test('ids are stable and payloads carry only ids', () {

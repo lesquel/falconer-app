@@ -29,7 +29,12 @@ class HostFormContainer extends ConsumerWidget {
         body: HostFormView(
           keys: keys,
           lockAddress: true,
-          initial: HostDraft(alias: host.alias, address: host.address, port: host.port, user: host.user),
+          initial: HostDraft(
+            alias: host.alias,
+            address: host.address,
+            port: host.port,
+            user: host.user,
+          ),
           initialKeyId: host.keyId,
           error: state.error,
           onSubmit: (d, k) async {

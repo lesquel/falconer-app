@@ -10,18 +10,18 @@ import 'package:openmosh/shared/domain/failure.dart';
 import 'package:openmosh/shared/ssh/domain/ssh_ports.dart';
 
 Host testHost({String id = 'h1', String? hookPath, String? deviceId, String? hpk}) => Host(
-      id: id,
-      alias: 'work',
-      address: '100.100.1.2',
-      port: 22,
-      user: 'me',
-      fingerprint: 'SHA256:i2cBF5DBtTy5/U7Y27668/2F1HhY/qwC4eALG8QAiQM',
-      pairedVia: PairedVia.qr,
-      createdAt: DateTime.utc(2026),
-      hookPath: hookPath,
-      deviceId: deviceId,
-      hostPushKey: hpk,
-    );
+  id: id,
+  alias: 'work',
+  address: '100.100.1.2',
+  port: 22,
+  user: 'me',
+  fingerprint: 'SHA256:i2cBF5DBtTy5/U7Y27668/2F1HhY/qwC4eALG8QAiQM',
+  pairedVia: PairedVia.qr,
+  createdAt: DateTime.utc(2026),
+  hookPath: hookPath,
+  deviceId: deviceId,
+  hostPushKey: hpk,
+);
 
 class FakeHostRepository implements HostRepository {
   final Map<String, Host> rows = {};
@@ -58,12 +58,13 @@ class FakeVault implements KeyVault {
 
   @override
   Future<SshKeyInfo> ensureDeviceKey({required String comment}) async => SshKeyInfo(
-      id: SshKeyInfo.deviceKeyId,
-      label: 'device',
-      publicKey: 'ssh-ed25519 AAAAC3 device',
-      fingerprint: 'SHA256:x',
-      imported: false,
-      createdAt: DateTime.utc(2026));
+    id: SshKeyInfo.deviceKeyId,
+    label: 'device',
+    publicKey: 'ssh-ed25519 AAAAC3 device',
+    fingerprint: 'SHA256:x',
+    imported: false,
+    createdAt: DateTime.utc(2026),
+  );
 
   @override
   Future<SshKeyInfo?> byId(String id) async => null;
@@ -96,13 +97,18 @@ class FakeConnection implements SshConnection {
   @override
   Future<void> close() async => closed = true;
   @override
-  Future<ShellChannel> openShell({required int cols, required int rows}) => throw UnimplementedError();
+  Future<ShellChannel> openShell({required int cols, required int rows}) =>
+      throw UnimplementedError();
   @override
-  Future<String> upload(String localPath, String remoteName) async => '/home/me/.openmosh/uploads/$remoteName';
+  Future<String> upload(String localPath, String remoteName) async =>
+      '/home/me/.openmosh/uploads/$remoteName';
 }
 
 ExecOutput ok(Object? data) => ExecOutput(
-    exitCode: 0, stdout: Uint8List.fromList(utf8.encode(jsonEncode({'ok': true, 'data': data}))), stderr: Uint8List(0));
+  exitCode: 0,
+  stdout: Uint8List.fromList(utf8.encode(jsonEncode({'ok': true, 'data': data}))),
+  stderr: Uint8List(0),
+);
 
 ExecOutput text(String s, {int code = 0}) =>
     ExecOutput(exitCode: code, stdout: Uint8List.fromList(utf8.encode(s)), stderr: Uint8List(0));

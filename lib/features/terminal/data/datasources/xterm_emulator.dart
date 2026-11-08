@@ -11,9 +11,8 @@ import '../../domain/repositories/terminal_emulator.dart';
 
 class XtermEmulator implements TerminalEmulator {
   XtermEmulator() : terminal = Terminal(maxLines: 10000) {
-    _sink = const Utf8Decoder(allowMalformed: true).startChunkedConversion(
-      _StringSink(terminal.write),
-    );
+    _sink = const Utf8Decoder(allowMalformed: true)
+        .startChunkedConversion(_StringSink(terminal.write));
     terminal.onOutput = _input.add;
     terminal.onResize = (w, h, _, _) => _resizes.add((w, h));
   }

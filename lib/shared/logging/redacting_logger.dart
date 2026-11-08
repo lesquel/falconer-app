@@ -31,11 +31,8 @@ abstract final class Log {
   static void warning(String tag, String message) => _emit(LogLevel.warning, tag, message);
 
   /// Errors are logged by type only; their text may carry remote data.
-  static void error(String tag, String message, [Object? error]) => _emit(
-        LogLevel.error,
-        tag,
-        error == null ? message : '$message (${error.runtimeType})',
-      );
+  static void error(String tag, String message, [Object? error]) =>
+      _emit(LogLevel.error, tag, error == null ? message : '$message (${error.runtimeType})');
 
   static void _emit(LogLevel level, String tag, String message) {
     if (kReleaseMode && level.index < LogLevel.warning.index) return;

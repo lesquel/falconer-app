@@ -59,21 +59,20 @@ final class Host {
     String? endpointSent,
     String? lastAttach,
     PairedVia? pairedVia,
-  }) =>
-      Host(
-        id: id,
-        alias: alias ?? this.alias,
-        address: address ?? this.address,
-        port: port ?? this.port,
-        user: user ?? this.user,
-        fingerprint: fingerprint,
-        pairedVia: pairedVia ?? this.pairedVia,
-        createdAt: createdAt,
-        keyId: keyId ?? this.keyId,
-        hookPath: hookPath ?? this.hookPath,
-        deviceId: deviceId ?? this.deviceId,
-        hostPushKey: hostPushKey ?? this.hostPushKey,
-        endpointSent: endpointSent ?? this.endpointSent,
-        lastAttach: lastAttach ?? this.lastAttach,
-      );
+  }) => Host(
+    id: id,
+    alias: alias ?? this.alias,
+    address: address ?? this.address,
+    port: port ?? this.port,
+    user: user ?? this.user,
+    fingerprint: fingerprint,
+    pairedVia: pairedVia ?? this.pairedVia,
+    createdAt: createdAt,
+    keyId: keyId ?? this.keyId,
+    hookPath: hookPath ?? this.hookPath,
+    deviceId: deviceId ?? this.deviceId,
+    hostPushKey: hostPushKey ?? this.hostPushKey,
+    endpointSent: endpointSent ?? this.endpointSent,
+    lastAttach: lastAttach ?? this.lastAttach,
+  );
 }

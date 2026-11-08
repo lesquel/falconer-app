@@ -9,7 +9,10 @@ import '../../../../shared/domain/failure.dart';
 import '../models/pair_crypto.dart';
 
 class PairSocket {
-  const PairSocket({this.connectTimeout = const Duration(seconds: 10), this.replyTimeout = const Duration(seconds: 20)});
+  const PairSocket({
+    this.connectTimeout = const Duration(seconds: 10),
+    this.replyTimeout = const Duration(seconds: 20),
+  });
 
   final Duration connectTimeout;
   final Duration replyTimeout;
@@ -20,7 +23,8 @@ class PairSocket {
       socket = await Socket.connect(ip, port, timeout: connectTimeout);
     } on SocketException {
       throw const PairingFailure(
-          'Could not reach the host. Check that Tailscale is on and openmosh-hook pair is still running.');
+        'Could not reach the host. Check that Tailscale is on and openmosh-hook pair is still running.',
+      );
     }
     try {
       socket.add(utf8.encode('$line\n'));
@@ -30,7 +34,9 @@ class PairSocket {
         for (final b in chunk) {
           if (b == 0x0a) return utf8.decode(buf);
           buf.add(b);
-          if (buf.length > maxPairLineBytes) throw const PairingFailure('Pairing reply is too large.');
+          if (buf.length > maxPairLineBytes) {
+            throw const PairingFailure('Pairing reply is too large.');
+          }
         }
       }
       throw const PairingFailure('The host closed the connection.');

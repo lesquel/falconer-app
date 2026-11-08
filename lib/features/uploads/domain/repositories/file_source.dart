@@ -1,5 +1,10 @@
 final class PickedFile {
-  const PickedFile({required this.path, required this.name, required this.size, this.temporary = false});
+  const PickedFile({
+    required this.path,
+    required this.name,
+    required this.size,
+    this.temporary = false,
+  });
   final String path;
   final String name;
   final int size;
