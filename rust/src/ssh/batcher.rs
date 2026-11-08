@@ -1,5 +1,6 @@
 //! Groups terminal output so bytes cross the FFI bridge in batches of at
-//! least `MIN_BATCH` bytes or every `FLUSH_INTERVAL`, whichever comes first.
+//! least `MIN_BATCH` bytes or `FLUSH_INTERVAL` after the first pending byte,
+//! whichever comes first.
 use std::time::Duration;
 
 pub const MIN_BATCH: usize = 8 * 1024;
@@ -21,7 +22,11 @@ impl OutputBatcher {
         }
     }
 
-    /// Called on the timer tick or at end of stream.
+    pub fn is_empty(&self) -> bool {
+        self.buf.is_empty()
+    }
+
+    /// Called when the flush deadline passes or at end of stream.
     pub fn flush(&mut self) -> Option<Vec<u8>> {
         if self.buf.is_empty() {
             None

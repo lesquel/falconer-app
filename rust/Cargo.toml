@@ -24,4 +24,6 @@ zeroize = "1.9.1"
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
 
 [dev-dependencies]
+bytes = "1.12.1"
 tempfile = "3.27.0"
+tokio = { version = "1.54.1", features = ["test-util"] }
