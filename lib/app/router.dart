@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../features/hosts/presentation/containers/host_detail_container.dart';
 import '../features/hosts/presentation/containers/host_form_container.dart';
 import '../features/hosts/presentation/containers/hosts_container.dart';
+import '../features/inbox/presentation/containers/event_confirm_container.dart';
+import '../features/inbox/presentation/containers/inbox_container.dart';
 import '../features/keys/presentation/containers/keys_container.dart';
 import '../features/settings/presentation/containers/settings_container.dart';
 import 'home_shell.dart';
@@ -26,6 +28,7 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
           builder: (_, _, shell) => HomeShell(shell: shell),
           branches: [
             StatefulShellBranch(routes: [GoRoute(path: '/', builder: (_, _) => const HostsContainer())]),
+            StatefulShellBranch(routes: [GoRoute(path: '/inbox', builder: (_, _) => const InboxContainer())]),
             StatefulShellBranch(routes: [GoRoute(path: '/keys', builder: (_, _) => const KeysContainer())]),
             StatefulShellBranch(routes: [GoRoute(path: '/settings', builder: (_, _) => const SettingsContainer())]),
           ],
@@ -33,5 +36,13 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
         GoRoute(path: '/hosts/new', builder: (_, _) => const HostFormContainer()),
         GoRoute(path: '/hosts/:id', builder: (_, s) => HostDetailContainer(hostId: s.pathParameters['id']!)),
         GoRoute(path: '/hosts/:id/edit', builder: (_, s) => HostFormContainer(hostId: s.pathParameters['id']!)),
+        GoRoute(
+          path: '/inbox/:host/:event',
+          builder: (_, s) => EventConfirmContainer(
+            hostId: s.pathParameters['host']!,
+            eventId: s.pathParameters['event']!,
+            action: s.uri.queryParameters['action'],
+          ),
+        ),
       ],
     );

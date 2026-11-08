@@ -13,6 +13,7 @@ class HomeShell extends StatelessWidget {
           onDestinationSelected: (i) => shell.goBranch(i, initialLocation: i == shell.currentIndex),
           destinations: const [
             NavigationDestination(icon: Icon(Icons.computer), label: 'Hosts'),
+            NavigationDestination(icon: Icon(Icons.inbox_outlined), label: 'Inbox'),
             NavigationDestination(icon: Icon(Icons.key), label: 'Keys'),
             NavigationDestination(icon: Icon(Icons.settings_outlined), label: 'Settings'),
           ],
