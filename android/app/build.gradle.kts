@@ -56,6 +56,14 @@ android {
         }
     }
 
+    // Compressed native libraries: the APK download is about half the size.
+    // They are extracted once at install instead of mapped from the APK.
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
     buildTypes {
         release {
             signingConfig = if (releaseStoreFile != null) {
