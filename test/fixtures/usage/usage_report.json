@@ -1,0 +1,48 @@
+{
+  "days": 7,
+  "generated_at": 1794168000,
+  "agents": [
+    {
+      "agent": "claude",
+      "available": true,
+      "note": null,
+      "today": {"input": 120000, "output": 30000, "cache_read": 1000000, "cache_write": 50000, "total": 1200000},
+      "period": {"input": 850000, "output": 150000, "cache_read": 7000000, "cache_write": 400000, "total": 8400000},
+      "projects": [
+        {"project": "OpenMosh", "tokens": {"input": 600000, "output": 100000, "cache_read": 5000000, "cache_write": 300000, "total": 6000000}},
+        {"project": "dotfiles", "tokens": {"input": 250000, "output": 50000, "cache_read": 2000000, "cache_write": 100000, "total": 2400000}}
+      ],
+      "models": [
+        {"model": "claude-opus", "tokens": {"input": 850000, "output": 150000, "cache_read": 7000000, "cache_write": 400000, "total": 8400000}}
+      ],
+      "limits": []
+    },
+    {
+      "agent": "codex",
+      "available": true,
+      "note": null,
+      "today": {"input": 40000, "output": 5000, "cache_read": 0, "cache_write": 0, "total": 45000},
+      "period": {"input": 800000, "output": 50000, "cache_read": 0, "cache_write": 0, "total": 850000},
+      "projects": [
+        {"project": "api", "tokens": {"input": 800000, "output": 50000, "cache_read": 0, "cache_write": 0, "total": 850000}}
+      ],
+      "models": [
+        {"model": "gpt-5-codex", "tokens": {"input": 800000, "output": 50000, "cache_read": 0, "cache_write": 0, "total": 850000}}
+      ],
+      "limits": [
+        {"name": "5h", "used_percent": 42.0, "window_minutes": 300, "resets_at": 1794175200},
+        {"name": "weekly", "used_percent": 7, "window_minutes": 10080, "resets_at": null}
+      ]
+    },
+    {
+      "agent": "opencode",
+      "available": false,
+      "note": "No local usage logs.",
+      "today": {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0, "total": 0},
+      "period": {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0, "total": 0},
+      "projects": [],
+      "models": [],
+      "limits": []
+    }
+  ]
+}

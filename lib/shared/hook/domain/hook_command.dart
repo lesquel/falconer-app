@@ -61,6 +61,13 @@ final class HookCommand {
     return HookCommand._(['devices', 'revoke', deviceId, '--json']);
   }
 
+  /// Token usage per agent over the last [days] days (1..31), read by the
+  /// hook from the agents' local logs.
+  factory HookCommand.usage({int days = 7}) {
+    if (days < 1 || days > 31) throw const ValidationFailure('The period must be 1–31 days.');
+    return HookCommand._(['usage', '--days', '$days', '--json']);
+  }
+
   String toShell(String hookPath) => shJoin([hookPath, ...argv]);
 
   /// Script for [execCommand]: the quoted command line, with [stdin] piped in

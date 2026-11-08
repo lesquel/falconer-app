@@ -8,6 +8,23 @@ import 'package:openmosh/shared/hook/domain/hook_envelope.dart';
 void main() {
   const hook = '/home/me/.local/bin/openmosh-hook';
 
+  group('HookCommand.usage', () {
+    test('defaults to 7 days', () {
+      expect(HookCommand.usage().argv, ['usage', '--days', '7', '--json']);
+      expect(HookCommand.usage().toShell(hook), "'$hook' 'usage' '--days' '7' '--json'");
+    });
+
+    test('passes the period', () {
+      expect(HookCommand.usage(days: 1).argv, ['usage', '--days', '1', '--json']);
+      expect(HookCommand.usage(days: 30).argv, ['usage', '--days', '30', '--json']);
+    });
+
+    test('rejects a period outside 1..31', () {
+      expect(() => HookCommand.usage(days: 0), throwsA(isA<ValidationFailure>()));
+      expect(() => HookCommand.usage(days: 32), throwsA(isA<ValidationFailure>()));
+    });
+  });
+
   group('HookCommand.toShell', () {
     test('sessions list', () {
       expect(HookCommand.sessionsList().toShell(hook), "'$hook' 'sessions' 'list' '--json'");
