@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/molecules/mosh_tile.dart';
 import '../../../../shared/ui/organisms/thumb_page.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
@@ -23,16 +24,17 @@ class SettingsView extends StatelessWidget {
   final ValueChanged<bool> onAppLockChanged;
   final VoidCallback? onOpenColors;
 
-  static String themeLabel(ThemePreference p) => switch (p) {
-    ThemePreference.system => 'system theme',
-    ThemePreference.light => 'light theme',
-    ThemePreference.dark => 'dark theme',
+  static String themeLabel(AppLocalizations l, ThemePreference p) => switch (p) {
+    ThemePreference.system => l.themeSummarySystem,
+    ThemePreference.light => l.themeSummaryLight,
+    ThemePreference.dark => l.themeSummaryDark,
   };
 
   @override
   Widget build(BuildContext context) {
     final s = settings;
     final c = MoshColors.of(context);
+    final l = context.l10n;
     Widget card(List<Widget> children) => Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: MoshTile(
@@ -41,7 +43,7 @@ class SettingsView extends StatelessWidget {
       ),
     );
     return ThumbPage(
-      title: const Text('Settings'),
+      title: Text(l.settingsTitle),
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
@@ -62,13 +64,13 @@ class SettingsView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Colors',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-                      ),
+                      Text(l.colors, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
                       Text(
-                        '${s.accent.label} accent · ${themeLabel(s.themePreference)} · '
-                        '${s.terminalScheme.label} terminal',
+                        l.colorsSummary(
+                          l.accentName(s.accent),
+                          themeLabel(l, s.themePreference),
+                          l.schemeName(s.terminalScheme),
+                        ),
                         style: TextStyle(color: c.muted, fontSize: 13),
                       ),
                     ],
@@ -82,38 +84,29 @@ class SettingsView extends StatelessWidget {
         card([
           SwitchListTile(
             key: const Key('previews'),
-            title: const Text('Notification previews'),
-            subtitle: const Text(
-              'Off: notifications only say "<host>: <agent> needs you". '
-              'On: they show the request text, hidden on the lock screen.',
-            ),
+            title: Text(l.notificationPreviews),
+            subtitle: Text(l.notificationPreviewsBody),
             value: s.notificationPreviews,
             onChanged: (v) => onChanged(s.copyWith(notificationPreviews: v)),
           ),
           SwitchListTile(
             key: const Key('keep_connected'),
-            title: const Text('Keep sessions connected'),
-            subtitle: const Text(
-              'Terminals stay open and keep reconnecting after you leave them, until you '
-              'disconnect or close the app.',
-            ),
+            title: Text(l.keepConnected),
+            subtitle: Text(l.keepConnectedBody),
             value: s.keepConnected,
             onChanged: (v) => onChanged(s.copyWith(keepConnected: v)),
           ),
           SwitchListTile(
             key: const Key('app_lock'),
-            title: const Text('Lock OpenMosh'),
-            subtitle: const Text(
-              'Ask for your fingerprint, face or screen lock when OpenMosh opens and after '
-              'a minute in the background. Turning it on or off asks for it too.',
-            ),
+            title: Text(l.lockApp),
+            subtitle: Text(l.lockAppBody),
             value: s.appLock,
             onChanged: onAppLockChanged,
           ),
         ]),
         card([
           ListTile(
-            title: Text('Terminal font size · ${s.fontSize.toStringAsFixed(0)}'),
+            title: Text(l.terminalFontSize(s.fontSize.toStringAsFixed(0))),
             subtitle: Slider(
               min: 8,
               max: 32,
@@ -124,21 +117,21 @@ class SettingsView extends StatelessWidget {
             ),
           ),
           ListTile(
-            title: const Text('Shortcut row'),
+            title: Text(l.shortcutRow),
             trailing: DropdownButton<PresetName>(
               value: s.keyPreset,
               underline: const SizedBox.shrink(),
               borderRadius: BorderRadius.circular(MoshRadii.key),
-              items: const [
-                DropdownMenuItem(value: PresetName.none, child: Text('None')),
-                DropdownMenuItem(value: PresetName.tmux, child: Text('tmux')),
-                DropdownMenuItem(value: PresetName.herdr, child: Text('Herdr')),
+              items: [
+                DropdownMenuItem(value: PresetName.none, child: Text(l.presetNone)),
+                const DropdownMenuItem(value: PresetName.tmux, child: Text('tmux')),
+                const DropdownMenuItem(value: PresetName.herdr, child: Text('Herdr')),
               ],
               onChanged: (v) => v == null ? null : onChanged(s.copyWith(keyPreset: v)),
             ),
           ),
           ListTile(
-            title: const Text('Herdr prefix'),
+            title: Text(l.herdrPrefix),
             subtitle: Text('Ctrl+${s.herdrPrefix.toUpperCase()}'),
             trailing: DropdownButton<String>(
               value: s.herdrPrefix,
@@ -152,14 +145,32 @@ class SettingsView extends StatelessWidget {
             ),
           ),
         ]),
-        card(const [
+        card([
           ListTile(
-            leading: Icon(Icons.shield_outlined),
-            title: Text('Privacy'),
-            subtitle: Text(
-              'No accounts, analytics or crash reporting. The app only talks to your hosts over '
-              'Tailscale and to your UnifiedPush server, which sees ciphertext only.',
+            key: const Key('language'),
+            leading: const Icon(Icons.translate),
+            title: Text(l.language),
+            trailing: DropdownButton<AppLanguage>(
+              value: s.language,
+              underline: const SizedBox.shrink(),
+              borderRadius: BorderRadius.circular(MoshRadii.key),
+              items: [
+                for (final lang in AppLanguage.values)
+                  DropdownMenuItem(
+                    key: Key('language_${lang.name}'),
+                    value: lang,
+                    child: Text(l.languageName(lang)),
+                  ),
+              ],
+              onChanged: (v) => v == null ? null : onChanged(s.copyWith(language: v)),
             ),
+          ),
+        ]),
+        card([
+          ListTile(
+            leading: const Icon(Icons.shield_outlined),
+            title: Text(l.privacy),
+            subtitle: Text(l.privacyBody),
           ),
         ]),
       ],

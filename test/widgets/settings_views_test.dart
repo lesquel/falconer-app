@@ -3,7 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openmosh/features/settings/domain/entities/app_settings.dart';
 import 'package:openmosh/features/settings/presentation/views/settings_view.dart';
 
-Widget app(Widget child) => MaterialApp(home: Scaffold(body: child));
+import '../support/l10n_app.dart';
+
+Widget app(Widget child, {Locale locale = const Locale('en')}) => l10nApp(
+  home: Scaffold(body: child),
+  locale: locale,
+);
 
 void main() {
   testWidgets('settings: previews are off by default and can be enabled', (t) async {
@@ -59,6 +64,48 @@ void main() {
     await t.tap(sw);
     expect(toggled, isTrue);
     expect(changed, isNull, reason: 'the container saves only after verification');
+  });
+
+  testWidgets('settings: the language row saves Spanish', (t) async {
+    AppSettings? changed;
+    await t.pumpWidget(
+      app(
+        SettingsView(
+          settings: const AppSettings(),
+          onChanged: (s) => changed = s,
+          onAppLockChanged: (_) {},
+        ),
+      ),
+    );
+    final row = find.byKey(const Key('language'));
+    await t.scrollUntilVisible(row, 200);
+    expect(find.text('Language'), findsOneWidget);
+    expect(find.text('System'), findsOneWidget);
+    await t.tap(find.byType(DropdownButton<AppLanguage>));
+    await t.pumpAndSettle();
+    await t.tap(find.text('Español').last);
+    await t.pumpAndSettle();
+    expect(changed!.language, AppLanguage.es);
+  });
+
+  testWidgets('settings: renders in Spanish under the es locale', (t) async {
+    await t.pumpWidget(
+      app(
+        SettingsView(
+          settings: const AppSettings(language: AppLanguage.es),
+          onChanged: (_) {},
+          onAppLockChanged: (_) {},
+        ),
+        locale: const Locale('es'),
+      ),
+    );
+    expect(find.text('Ajustes'), findsOneWidget);
+    expect(find.text('Vista previa de notificaciones'), findsOneWidget);
+    expect(find.text('Mantener las sesiones conectadas'), findsOneWidget);
+    expect(find.text('Notification previews'), findsNothing);
+    await t.scrollUntilVisible(find.byKey(const Key('language')), 200);
+    expect(find.text('Idioma'), findsOneWidget);
+    expect(find.text('Español'), findsOneWidget);
   });
 
   test('font size is clamped to 8..32', () {
