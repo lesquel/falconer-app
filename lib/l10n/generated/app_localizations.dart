@@ -2060,6 +2060,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'To'**
   String get notifyTo;
+
+  /// Settings row: light, dark or system theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get appTheme;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

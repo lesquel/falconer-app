@@ -327,5 +327,6 @@
   "notifyUseAppSetting": "Usar el ajuste de la app",
   "notifyOnlyBetween": "Solo entre",
   "notifyFrom": "Desde",
-  "notifyTo": "Hasta"
+  "notifyTo": "Hasta",
+  "appTheme": "Tema"
 }

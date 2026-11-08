@@ -908,5 +908,9 @@
   "notifyTo": "To",
   "@notifyTo": {
     "description": "Notification hours setting."
+  },
+  "appTheme": "Theme",
+  "@appTheme": {
+    "description": "Settings row: light, dark or system theme."
   }
 }

@@ -85,6 +85,45 @@ class SettingsView extends StatelessWidget {
             ),
           ),
         ),
+        // Light / dark at a glance; Colors keeps the accent and terminal.
+        card([
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l.appTheme, style: const TextStyle(fontWeight: FontWeight.w700)),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<ThemePreference>(
+                    key: const Key('theme_switch'),
+                    segments: [
+                      ButtonSegment(
+                        value: ThemePreference.system,
+                        icon: const Icon(Icons.brightness_auto_outlined),
+                        label: Text(l.themeName(ThemePreference.system)),
+                      ),
+                      ButtonSegment(
+                        value: ThemePreference.light,
+                        icon: const Icon(Icons.light_mode_outlined),
+                        label: Text(l.themeName(ThemePreference.light)),
+                      ),
+                      ButtonSegment(
+                        value: ThemePreference.dark,
+                        icon: const Icon(Icons.dark_mode_outlined),
+                        label: Text(l.themeName(ThemePreference.dark)),
+                      ),
+                    ],
+                    selected: {s.themePreference},
+                    showSelectedIcon: false,
+                    onSelectionChanged: (v) => onChanged(s.copyWith(themePreference: v.first)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ]),
         card([
           SwitchListTile(
             key: const Key('previews'),

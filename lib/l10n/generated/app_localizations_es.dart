@@ -1151,4 +1151,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get notifyTo => 'Hasta';
+
+  @override
+  String get appTheme => 'Tema';
 }

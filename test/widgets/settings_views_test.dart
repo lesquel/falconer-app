@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openmosh/features/settings/domain/entities/app_settings.dart';
+import 'package:openmosh/features/settings/domain/entities/appearance.dart';
 import 'package:openmosh/features/settings/presentation/views/settings_view.dart';
 
 import '../support/l10n_app.dart';
@@ -80,7 +81,7 @@ void main() {
     final row = find.byKey(const Key('language'));
     await t.scrollUntilVisible(row, 200);
     expect(find.text('Language'), findsOneWidget);
-    expect(find.text('System'), findsOneWidget);
+    expect(find.descendant(of: row, matching: find.text('System')), findsOneWidget);
     await t.tap(find.byType(DropdownButton<AppLanguage>));
     await t.pumpAndSettle();
     await t.tap(find.text('Español').last);

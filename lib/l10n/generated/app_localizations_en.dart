@@ -1146,4 +1146,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notifyTo => 'To';
+
+  @override
+  String get appTheme => 'Theme';
 }
