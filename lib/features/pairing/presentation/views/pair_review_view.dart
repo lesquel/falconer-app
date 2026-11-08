@@ -63,7 +63,12 @@ class _PairReviewViewState extends State<PairReviewView> {
           padding: const EdgeInsets.fromLTRB(8, 10, 8, 16),
           child: Text(l.pairReviewNote, style: TextStyle(color: muted)),
         ),
-        if (widget.busy) ...[const LinearProgressIndicator(), const SizedBox(height: 10)],
+        if (widget.busy) ...[
+          const LinearProgressIndicator(),
+          const SizedBox(height: 10),
+          Text(l.pairConfirmOnComputer, key: const Key('pair_confirm_hint')),
+          const SizedBox(height: 10),
+        ],
         FilledButton(
           onPressed: widget.busy ? null : () => widget.onPair(_name.text),
           child: Text(widget.busy ? l.pairing : l.pair),

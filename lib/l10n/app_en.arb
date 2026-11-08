@@ -960,5 +960,9 @@
   "chooseKeyFile": "Choose file",
   "@chooseKeyFile": {
     "description": "Import key dialog: pick the private key file with the system file picker."
+  },
+  "pairConfirmOnComputer": "Confirm on your computer: type y in the terminal where openmosh-hook pair is running.",
+  "@pairConfirmOnComputer": {
+    "description": "Shown while pairing waits for the host user's y/N confirmation."
   }
 }

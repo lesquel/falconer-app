@@ -340,5 +340,6 @@
   "showFullText": "Ver el texto completo",
   "showLess": "Ver menos",
   "keyPassphrase": "Frase de contraseña (si la clave tiene una)",
-  "chooseKeyFile": "Elegir archivo"
+  "chooseKeyFile": "Elegir archivo",
+  "pairConfirmOnComputer": "Confirma en tu computadora: escribe y en la terminal donde corre openmosh-hook pair."
 }

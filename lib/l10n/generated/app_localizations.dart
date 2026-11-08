@@ -2138,6 +2138,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose file'**
   String get chooseKeyFile;
+
+  /// Shown while pairing waits for the host user's y/N confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm on your computer: type y in the terminal where openmosh-hook pair is running.'**
+  String get pairConfirmOnComputer;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

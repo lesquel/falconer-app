@@ -9,7 +9,9 @@ import '../../../../shared/domain/failure.dart';
 import '../models/pair_crypto.dart';
 
 class PairSocket {
-  const PairSocket({this.deadline = const Duration(seconds: 15)});
+  /// The host asks its user to confirm the pairing (y/N) before replying,
+  /// so the deadline leaves time for that.
+  const PairSocket({this.deadline = const Duration(seconds: 120)});
 
   /// One budget for connect + write + read of the whole reply line, so a host
   /// that trickles bytes cannot hold the exchange open.
