@@ -13,6 +13,7 @@ import '../features/keys/data/datasources/secure_key_storage.dart';
 import '../features/keys/data/repositories/secure_key_vault.dart';
 import '../features/settings/data/repositories/drift_settings_repository.dart';
 import '../shared/data/app_database.dart';
+import '../shared/domain/once.dart';
 
 final class PushRuntime {
   PushRuntime._(this.db, this.storage, this.notifier, this.endpoints);
@@ -33,19 +34,23 @@ final class PushRuntime {
       write: (v) => storage.writePush(_endpointKey, v),
     ));
     final settings = DriftSettingsRepository(db);
-    final handle = HandlePushMessage(
-      hosts: DriftHostRepository(db),
-      inbox: DriftInboxRepository(db),
-      opener: CryptoPushOpener(SecurePushKeyStore(storage)),
-      notifier: notifier,
-      previews: () async => (await settings.load()).notificationPreviews,
-      allowed: (hostId, at) async => (await settings.load()).notificationsAllowed(hostId, at),
-      kidOf: PushCrypto.kidOf,
-      now: DateTime.now,
-    );
+    final hosts = DriftHostRepository(db);
+    final inbox = DriftInboxRepository(db);
+    final opener = CryptoPushOpener(SecurePushKeyStore(storage));
     await endpoints.initialize(
       onMessage: (body) async {
-        await handle(body);
+        // Settings are read at most once per message, and only when needed.
+        final current = once(settings.load);
+        await HandlePushMessage(
+          hosts: hosts,
+          inbox: inbox,
+          opener: opener,
+          notifier: notifier,
+          previews: () async => (await current()).notificationPreviews,
+          allowed: (hostId, at) async => (await current()).notificationsAllowed(hostId, at),
+          kidOf: PushCrypto.kidOf,
+          now: DateTime.now,
+        )(body);
       },
     );
     return PushRuntime._(db, storage, notifier, endpoints);
