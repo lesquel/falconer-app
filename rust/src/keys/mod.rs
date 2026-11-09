@@ -112,35 +112,57 @@ mod tests {
         assert_ne!(a.fingerprint, b.fingerprint);
     }
 
-    // `ssh-keygen -t ed25519 -N 'correct horse' -C fixture`, a throwaway key.
-    const ENC: &str = "-----BEGIN OPENSSH PRIVATE KEY-----
-b3BlbnNzaC1rZXktdjEAAAAACmFlczI1Ni1jdHIAAAAGYmNyeXB0AAAAGAAAABCmrFjB/C
-PW9O5jlJae2uI3AAAAIAAAAAEAAAAzAAAAC3NzaC1lZDI1NTE5AAAAIIO+7N5fVfjXDfx9
-bB2wZjB7fDXImDYiPSnb8rudKerXAAAAkBLh+GzH/W6nn+UreV3tuaJdtj//i1U6Rtt0uJ
-nouYWKfQBkKUAxSXf9zYs/zsw863HHBUZGZ86vp8ARiXNDv40qjkO2wumss74F4ahPAbKT
-xBODKGhWUdCx8ecZA0ms4oSY+stYd3H2L+ZvxZF2U70L3HYzDjqssf+lgRW8XEz7AYcSiZ
-vIoJUliEfvEblJDQ==
------END OPENSSH PRIVATE KEY-----
-";
-    const ENC_FP: &str = "SHA256:e3XaXzU3klK3a3Rh54xGCpIDjiLQjlfDuionKtiXkAg";
+    /// The OS random source for key encryption in tests.
+    struct OsRandom;
+    impl russh::keys::ssh_key::rand_core::TryRng for OsRandom {
+        type Error = core::convert::Infallible;
+        fn try_next_u32(&mut self) -> Result<u32, Self::Error> {
+            let mut b = [0u8; 4];
+            self.try_fill_bytes(&mut b)?;
+            Ok(u32::from_le_bytes(b))
+        }
+        fn try_next_u64(&mut self) -> Result<u64, Self::Error> {
+            let mut b = [0u8; 8];
+            self.try_fill_bytes(&mut b)?;
+            Ok(u64::from_le_bytes(b))
+        }
+        fn try_fill_bytes(&mut self, dst: &mut [u8]) -> Result<(), Self::Error> {
+            getrandom::fill(dst).expect("OS random source");
+            Ok(())
+        }
+    }
+    impl russh::keys::ssh_key::rand_core::TryCryptoRng for OsRandom {}
+
+    /// A passphrase-protected key made at test time (no private key is kept
+    /// in the repository), and its fingerprint.
+    fn encrypted_fixture() -> (String, String) {
+        let plain = generate_ed25519("fixture").unwrap();
+        let key = PrivateKey::from_openssh(plain.private_openssh.as_bytes()).unwrap();
+        let enc = key.encrypt(&mut OsRandom, "correct horse").unwrap();
+        let text = enc.to_openssh(LineEnding::LF).unwrap().to_string();
+        (text, plain.fingerprint)
+    }
 
     #[test]
     fn passphrase_protected_key_imports_with_its_passphrase() {
-        let m = import_private(ENC, Some("correct horse")).unwrap();
-        assert_eq!(m.fingerprint, ENC_FP);
+        let (enc, fp) = encrypted_fixture();
+        assert!(enc.starts_with("-----BEGIN"));
+        let m = import_private(&enc, Some("correct horse")).unwrap();
+        assert_eq!(m.fingerprint, fp);
         // Stored decrypted: later connections need no passphrase.
         let again = import_private(&m.private_openssh, None).unwrap();
-        assert_eq!(again.fingerprint, ENC_FP);
+        assert_eq!(again.fingerprint, fp);
     }
 
     #[test]
     fn passphrase_protected_key_needs_the_right_passphrase() {
+        let (enc, _) = encrypted_fixture();
         assert_eq!(
-            import_private(ENC, None).err().map(|e| e.code()),
+            import_private(&enc, None).err().map(|e| e.code()),
             Some("invalid_key")
         );
         assert_eq!(
-            import_private(ENC, Some("wrong")).err().map(|e| e.code()),
+            import_private(&enc, Some("wrong")).err().map(|e| e.code()),
             Some("invalid_key")
         );
     }
