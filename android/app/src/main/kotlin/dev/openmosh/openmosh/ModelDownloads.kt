@@ -75,6 +75,10 @@ class ModelDownloads(private val context: Context) {
         file.parentFile?.mkdirs()
         val request = DownloadManager.Request(uri)
             .setTitle(title)
+            // The relative path travels with the row: COLUMN_LOCAL_URI stays
+            // empty until the download thread has the response headers, so a
+            // queued row could not be matched by its file.
+            .setDescription(path)
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
             // The size was shown and confirmed before the tap.
             .setAllowedOverMetered(true)
@@ -88,16 +92,16 @@ class ModelDownloads(private val context: Context) {
         val rows = mutableListOf<Map<String, Any?>>()
         manager.query(DownloadManager.Query()).use { c ->
             val id = c.getColumnIndexOrThrow(DownloadManager.COLUMN_ID)
-            val local = c.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI)
+            val desc = c.getColumnIndexOrThrow(DownloadManager.COLUMN_DESCRIPTION)
             val status = c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS)
             val got = c.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
             val total = c.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
             val reason = c.getColumnIndexOrThrow(DownloadManager.COLUMN_REASON)
             while (c.moveToNext()) {
-                val file = c.getString(local)?.let { Uri.parse(it).path }
-                    ?.let { File(it).canonicalFile } ?: continue
+                val rel = c.getString(desc) ?: continue
+                // Not one of ours, or a path that would leave the staging dir.
+                val file = runCatching { inside(root, File(root, rel)) }.getOrNull() ?: continue
                 val path = file.path.removePrefix(root.path + File.separator)
-                if (path == file.path) continue // Not one of ours.
                 rows.add(
                     mapOf(
                         "id" to c.getLong(id),
@@ -122,7 +126,7 @@ class ModelDownloads(private val context: Context) {
     /** Streams the staging file into [dest] and the digest at once. */
     private fun adopt(path: String, dest: String, sha: String, size: Long): Boolean {
         val src = inside(base(), File(base(), path))
-        val out = inside(context.dataDir.canonicalFile, File(dest))
+        val out = inside(File(context.filesDir, "voice_models").canonicalFile, File(dest))
         out.parentFile?.mkdirs()
         val digest = MessageDigest.getInstance("SHA-256")
         var copied = 0L
