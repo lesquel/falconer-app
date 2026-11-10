@@ -12,6 +12,8 @@ import '../features/settings/presentation/containers/colors_container.dart';
 import '../features/settings/presentation/containers/settings_container.dart';
 import '../features/terminal/presentation/containers/terminal_container.dart';
 import '../features/usage/presentation/containers/usage_container.dart';
+import '../features/voice/presentation/containers/voice_mic_button.dart';
+import '../features/voice/presentation/containers/voice_settings_container.dart';
 import '../l10n/l10n.dart';
 import 'home_shell.dart';
 
@@ -77,6 +79,8 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
         ),
       ],
     ),
+    // Full screen so the chat mic can open it on top of a terminal.
+    GoRoute(path: voiceSettingsRoute, builder: (_, _) => const VoiceSettingsContainer()),
     // The terminal stays full screen (outside the shell) to keep its rows.
     GoRoute(
       path: '/terminal/:id',

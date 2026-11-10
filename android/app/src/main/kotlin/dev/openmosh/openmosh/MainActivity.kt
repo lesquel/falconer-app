@@ -38,6 +38,8 @@ class MainActivity : FlutterFragmentActivity() {
                     result.notImplemented()
                 }
             }
+        // Speech model files, only when the user taps Download.
+        ModelDownloads(applicationContext).register(flutterEngine.dartExecutor.binaryMessenger)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "dev.openmosh/clipboard")
             .setMethodCallHandler { call, result ->
                 val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

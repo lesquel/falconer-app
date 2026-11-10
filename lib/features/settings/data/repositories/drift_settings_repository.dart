@@ -3,6 +3,7 @@ import 'dart:convert';
 import '../../../../shared/data/app_database.dart';
 import '../../../keyboard/domain/entities/extra_key.dart';
 import '../../../keyboard/domain/entities/key_presets.dart';
+import '../../../voice/domain/entities/voice_model.dart';
 import '../../domain/entities/app_settings.dart';
 import '../../domain/entities/appearance.dart';
 import '../../domain/entities/notification_hours.dart';
@@ -58,6 +59,19 @@ class DriftSettingsRepository implements SettingsRepository {
     }
   }
 
+  /// `[{...}, ...]` custom speech models; malformed entries are dropped.
+  static List<VoiceModel> _voiceModels(String? raw) {
+    if (raw == null) return const [];
+    try {
+      final list = jsonDecode(raw) as List<dynamic>;
+      return [for (final e in list) ?VoiceModel.fromJson(e)];
+    } on FormatException {
+      return const [];
+    } on TypeError {
+      return const [];
+    }
+  }
+
   AppSettings _parse(List<SettingRow> rows) {
     final m = {for (final r in rows) r.key: r.value};
     const d = AppSettings();
@@ -75,6 +89,12 @@ class DriftSettingsRepository implements SettingsRepository {
       customKeys: _keys(m['custom_keys']) ?? d.customKeys,
       notificationHours: NotificationHours.parse(m['notify_hours']),
       hostNotificationHours: _hostHours(m['notify_hours_hosts']),
+      voiceModelId: switch (m['voice_model']) {
+        null || '' => null,
+        final id => id,
+      },
+      voiceLanguage: m['voice_language'] ?? d.voiceLanguage,
+      customVoiceModels: _voiceModels(m['voice_custom_models']),
     );
   }
 
@@ -108,6 +128,12 @@ class DriftSettingsRepository implements SettingsRepository {
         value: jsonEncode({
           for (final e in s.hostNotificationHours.entries) e.key: e.value.encode(),
         }),
+      ),
+      SettingRowsCompanion.insert(key: 'voice_model', value: s.voiceModelId ?? ''),
+      SettingRowsCompanion.insert(key: 'voice_language', value: s.voiceLanguage),
+      SettingRowsCompanion.insert(
+        key: 'voice_custom_models',
+        value: jsonEncode([for (final m in s.customVoiceModels) m.toJson()]),
       ),
       SettingRowsCompanion.insert(
         key: 'custom_keys',

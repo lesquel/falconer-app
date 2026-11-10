@@ -5,8 +5,9 @@ import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
 import '../controllers/chat_attachment.dart';
 
-/// Chat-style input: write (or dictate with the keyboard's mic) a whole
-/// message with attached images or files, then send it to the terminal.
+/// Chat-style input: write (or dictate) a whole message with attached images
+/// or files, then send it to the terminal. Dictated text is inserted at the
+/// cursor for editing; only the send button sends.
 class ChatComposer extends StatefulWidget {
   const ChatComposer({
     super.key,
@@ -18,6 +19,7 @@ class ChatComposer extends StatefulWidget {
     required this.onRemoveAttachment,
     required this.onClose,
     this.busy = false,
+    this.micBuilder,
   });
 
   final String initialText;
@@ -28,6 +30,9 @@ class ChatComposer extends StatefulWidget {
   final ValueChanged<int> onRemoveAttachment;
   final VoidCallback onClose;
   final bool busy;
+
+  /// Builds the mic button; it calls the given function with dictated text.
+  final Widget Function(ValueChanged<String> insert)? micBuilder;
 
   @override
   State<ChatComposer> createState() => _ChatComposerState();
@@ -46,15 +51,29 @@ class _ChatComposerState extends State<ChatComposer> {
   Future<void> _paste() async {
     final clip = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
     if (clip == null || clip.isEmpty || !mounted) return;
+    _insert(clip);
+  }
+
+  /// Replaces the selection (or inserts at the cursor, else at the end).
+  void _insert(String insert) {
     final v = _text.value;
     final start = v.selection.isValid ? v.selection.start : v.text.length;
     final end = v.selection.isValid ? v.selection.end : v.text.length;
-    final text = v.text.replaceRange(start, end, clip);
+    final text = v.text.replaceRange(start, end, insert);
     _text.value = TextEditingValue(
       text: text,
-      selection: TextSelection.collapsed(offset: start + clip.length),
+      selection: TextSelection.collapsed(offset: start + insert.length),
     );
     widget.onChanged(text);
+  }
+
+  /// Dictated words, separated by a space from the text before the cursor.
+  void _dictated(String words) {
+    if (!mounted || words.isEmpty) return;
+    final v = _text.value;
+    final at = v.selection.isValid ? v.selection.start : v.text.length;
+    final before = at > 0 ? v.text[at - 1] : '';
+    _insert(before.isEmpty || before.trim().isEmpty ? words : ' $words');
   }
 
   void _send() {
@@ -115,6 +134,7 @@ class _ChatComposerState extends State<ChatComposer> {
                       decoration: InputDecoration(hintText: l.chatHint, isDense: true),
                     ),
                   ),
+                  ?widget.micBuilder?.call(_dictated),
                   IconButton(
                     key: const Key('chat-paste'),
                     tooltip: l.paste,

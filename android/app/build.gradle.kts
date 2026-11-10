@@ -61,6 +61,8 @@ android {
     packaging {
         jniLibs {
             useLegacyPackaging = true
+            // sherpa-onnx: Dart loads only the C API; the C++ API library is unused.
+            excludes += "**/libsherpa-onnx-cxx-api.so"
         }
     }
 

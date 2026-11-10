@@ -6,6 +6,7 @@ import 'package:openmosh/features/settings/data/repositories/drift_settings_repo
 import 'package:openmosh/features/settings/domain/entities/app_settings.dart';
 import 'package:openmosh/features/settings/domain/entities/appearance.dart';
 import 'package:openmosh/features/settings/domain/entities/notification_hours.dart';
+import 'package:openmosh/features/voice/domain/entities/voice_model.dart';
 import 'package:openmosh/shared/data/app_database.dart';
 
 void main() {
@@ -126,5 +127,37 @@ void main() {
     final cleared = await repo.load();
     expect(cleared.notificationHours, isNull);
     expect(cleared.hostNotificationHours, isEmpty);
+  });
+
+  test('voice model, language and custom models persist; clearing the model works', () async {
+    const custom = VoiceModel(
+      id: 'custom-ab',
+      name: 'Mine',
+      url: 'https://example.org/m.tar.bz2',
+      sha256: 'abababababababababababababababababababababababababababababababab',
+      family: ModelFamily.senseVoice,
+      languages: ['zh'],
+      files: {ModelRole.model: 'm/model.onnx', ModelRole.tokens: 'm/tokens.txt'},
+      custom: true,
+    );
+    await repo.save(
+      const AppSettings(
+        voiceLanguage: 'es',
+        customVoiceModels: [custom],
+      ).withVoiceModel('whisper-base'),
+    );
+    final s = await repo.load();
+    expect(s.voiceModelId, 'whisper-base');
+    expect(s.voiceLanguage, 'es');
+    expect(s.customVoiceModels.single.toJson(), custom.toJson());
+    await repo.save(s.withVoiceModel(null));
+    expect((await repo.load()).voiceModelId, isNull);
+  });
+
+  test('a fresh install has no voice model and the automatic language', () async {
+    final s = await repo.load();
+    expect(s.voiceModelId, isNull);
+    expect(s.voiceLanguage, '');
+    expect(s.customVoiceModels, isEmpty);
   });
 }

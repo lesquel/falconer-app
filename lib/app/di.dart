@@ -4,9 +4,11 @@
 library;
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../features/hosts/data/repositories/drift_host_repository.dart';
 import '../features/hosts/domain/entities/host.dart';
@@ -39,6 +41,11 @@ import '../features/settings/domain/repositories/settings_repository.dart';
 import '../features/uploads/data/datasources/file_picker_source.dart';
 import '../features/uploads/domain/repositories/file_source.dart';
 import '../features/uploads/domain/usecases/upload_file.dart';
+import '../features/voice/data/datasources/channel_native_downloader.dart';
+import '../features/voice/data/datasources/record_voice_recorder.dart';
+import '../features/voice/data/datasources/sherpa_speech_recognizer.dart';
+import '../features/voice/data/repositories/file_model_store.dart';
+import '../features/voice/domain/repositories/voice_ports.dart';
 import '../shared/data/secure_clipboard.dart';
 import '../shared/domain/monotonic.dart';
 import '../shared/data/app_database.dart';
@@ -263,3 +270,22 @@ final appLockProvider = Provider<AppLock>(
 final settingsProvider = StreamProvider<AppSettings>(
   (ref) => ref.watch(settingsRepositoryProvider).watch(),
 );
+
+/// Downloaded speech models, under the app's private support directory. On
+/// Android the catalog files come through the system DownloadManager.
+final modelStoreProvider = Provider<ModelStore>(
+  (ref) => FileModelStore(
+    root: () async => Directory('${(await getApplicationSupportDirectory()).path}/voice_models'),
+    native: Platform.isAndroid ? const ChannelNativeDownloader() : null,
+  ),
+);
+
+/// Microphone for dictation; created only while recording.
+final voiceRecorderProvider = Provider<VoiceRecorder>((ref) => RecordVoiceRecorder());
+
+/// On-device speech to text; loads a model on first use, frees it when idle.
+final speechRecognizerProvider = Provider<SpeechRecognizer>((ref) {
+  final r = SherpaSpeechRecognizer();
+  ref.onDispose(() => unawaited(r.release()));
+  return r;
+});

@@ -5,6 +5,7 @@ import '../../../../shared/ui/molecules/mosh_tile.dart';
 import '../../../../shared/ui/organisms/thumb_page.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
 import '../../../keyboard/domain/entities/key_presets.dart';
+import '../../../voice/domain/entities/voice_selection.dart';
 import '../../domain/entities/app_settings.dart';
 import '../../domain/entities/appearance.dart';
 import 'notification_hours_tile.dart';
@@ -16,6 +17,7 @@ class SettingsView extends StatelessWidget {
     required this.onChanged,
     required this.onAppLockChanged,
     this.onOpenColors,
+    this.onOpenVoice,
   });
 
   final AppSettings settings;
@@ -24,6 +26,7 @@ class SettingsView extends StatelessWidget {
   /// The lock setting is saved by the container after user verification.
   final ValueChanged<bool> onAppLockChanged;
   final VoidCallback? onOpenColors;
+  final VoidCallback? onOpenVoice;
 
   static String themeLabel(AppLocalizations l, ThemePreference p) => switch (p) {
     ThemePreference.system => l.themeSummarySystem,
@@ -220,6 +223,16 @@ class SettingsView extends StatelessWidget {
               ],
               onChanged: (v) => v == null ? null : onChanged(s.copyWith(herdrPrefix: v)),
             ),
+          ),
+        ]),
+        card([
+          ListTile(
+            key: const Key('open_voice'),
+            leading: const Icon(Icons.mic_none),
+            title: Text(l.voiceTitle),
+            subtitle: Text(selectedVoiceModel(s)?.name ?? l.voiceSummaryNone),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: onOpenVoice,
           ),
         ]),
         card([
