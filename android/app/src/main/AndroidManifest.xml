@@ -6,9 +6,11 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
-    <!-- Least privilege: the camera plugin declares these, the app never
-         records audio and picks files through the system picker. -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" tools:node="remove" />
+    <!-- Chat dictation: asked at run time only when the user taps the mic
+         with a downloaded model. Audio is decoded on the phone, never saved. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Least privilege: plugins declare these, the app picks files through
+         the system picker. -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove" />
 

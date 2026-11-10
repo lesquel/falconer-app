@@ -445,7 +445,7 @@
     "description": "Always the endonym."
   },
   "privacy": "Privacy",
-  "privacyBody": "No accounts, analytics or crash reporting. The app only talks to your hosts over Tailscale and to your UnifiedPush server, which sees ciphertext only.",
+  "privacyBody": "No accounts, analytics or crash reporting. The app only talks to your hosts over Tailscale and to your UnifiedPush server, which sees ciphertext only. Voice models are downloaded only when you ask, and speech is turned into text on the phone.",
   "colorsCaption": "Settings › Colors",
   "sectionAccent": "Accent",
   "sectionApp": "App",
@@ -968,5 +968,94 @@
   "enterKey": "Enter",
   "@enterKey": {
     "description": "Accessibility label of the Enter key in the arrow cross."
-  }
+  },
+  "voiceTitle": "Voice input",
+  "voiceSummaryNone": "No model yet: tap to set up",
+  "voiceIntro": "Dictate into the chat with the mic button. Speech becomes text on this phone and the audio is never saved or sent. Models are downloaded only when you tap Download, once, and stay until you delete them.",
+  "voiceLanguage": "Spoken language",
+  "voiceLanguageAuto": "Automatic",
+  "voiceLanguageAutoOnly": "This model detects the language by itself.",
+  "voiceEnglishOnly": "English only",
+  "voiceLanguagesCount": "{count} languages",
+  "@voiceLanguagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceRecommended": "Recommended",
+  "voiceCustomBadge": "Your model",
+  "voiceModels": "Models",
+  "voiceDownload": "Download",
+  "voiceDownloadTitle": "Download {name}?",
+  "@voiceDownloadTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceDownloadBody": "{size} will be downloaded from {host} and checked against its SHA-256 before use. Use Wi-Fi if your mobile data is limited.",
+  "@voiceDownloadBody": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceDownloadBodyUnknown": "The size is unknown until the download starts. It comes from {host} and is checked against its SHA-256 before use.",
+  "@voiceDownloadBodyUnknown": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceUnpacking": "Checking and unpacking…",
+  "voiceCancelDownload": "Cancel download",
+  "voiceUse": "Use",
+  "voiceInUse": "In use",
+  "voiceDelete": "Delete model",
+  "voiceDeleteTitle": "Delete {name}?",
+  "@voiceDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceDeleteBody": "The files are removed from the phone. You can download the model again later.",
+  "voiceDeleteCustomBody": "The files and this entry are removed from the phone.",
+  "voiceReady": "{name} is ready.",
+  "@voiceReady": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceChecksum": "The download did not match its SHA-256 and was deleted.",
+  "voiceMissingFiles": "The archive does not have the files this model type needs.",
+  "voiceUnsafe": "The archive was refused: it tries to write outside its folder or contains links.",
+  "voiceDownloadFailed": "The download failed. Check the connection and try again.",
+  "voiceAddCustom": "Add a model",
+  "voiceAddCustomBody": "A sherpa-onnx .tar.bz2 archive over HTTPS, with its SHA-256. It is downloaded only when you tap Download.",
+  "voiceCustomName": "Name",
+  "voiceCustomUrl": "Archive URL (https://…tar.bz2)",
+  "voiceCustomSha": "SHA-256 of the archive",
+  "voiceCustomFamily": "Model type",
+  "voiceCustomLanguages": "Languages (optional, e.g. es, en)",
+  "voiceErrName": "Enter a name.",
+  "voiceErrUrl": "Use an https:// address.",
+  "voiceErrSha": "Enter the 64 hexadecimal characters of the SHA-256.",
+  "voiceErrLanguages": "Use language codes such as es, en, pt, separated by commas.",
+  "voiceDictate": "Dictate",
+  "voiceStop": "Stop and transcribe",
+  "voiceTranscribing": "Transcribing…",
+  "voiceMicDenied": "Dictation needs the microphone permission.",
+  "voiceFailed": "Could not transcribe. Try again."
 }

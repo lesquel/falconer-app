@@ -1086,7 +1086,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyBody.
   ///
   /// In en, this message translates to:
-  /// **'No accounts, analytics or crash reporting. The app only talks to your hosts over Tailscale and to your UnifiedPush server, which sees ciphertext only.'**
+  /// **'No accounts, analytics or crash reporting. The app only talks to your hosts over Tailscale and to your UnifiedPush server, which sees ciphertext only. Voice models are downloaded only when you ask, and speech is turned into text on the phone.'**
   String get privacyBody;
 
   /// No description provided for @colorsCaption.
@@ -2150,6 +2150,270 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter'**
   String get enterKey;
+
+  /// No description provided for @voiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input'**
+  String get voiceTitle;
+
+  /// No description provided for @voiceSummaryNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No model yet: tap to set up'**
+  String get voiceSummaryNone;
+
+  /// No description provided for @voiceIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Dictate into the chat with the mic button. Speech becomes text on this phone and the audio is never saved or sent. Models are downloaded only when you tap Download, once, and stay until you delete them.'**
+  String get voiceIntro;
+
+  /// No description provided for @voiceLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Spoken language'**
+  String get voiceLanguage;
+
+  /// No description provided for @voiceLanguageAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get voiceLanguageAuto;
+
+  /// No description provided for @voiceLanguageAutoOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'This model detects the language by itself.'**
+  String get voiceLanguageAutoOnly;
+
+  /// No description provided for @voiceEnglishOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'English only'**
+  String get voiceEnglishOnly;
+
+  /// No description provided for @voiceLanguagesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} languages'**
+  String voiceLanguagesCount(int count);
+
+  /// No description provided for @voiceRecommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get voiceRecommended;
+
+  /// No description provided for @voiceCustomBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Your model'**
+  String get voiceCustomBadge;
+
+  /// No description provided for @voiceModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Models'**
+  String get voiceModels;
+
+  /// No description provided for @voiceDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get voiceDownload;
+
+  /// No description provided for @voiceDownloadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Download {name}?'**
+  String voiceDownloadTitle(String name);
+
+  /// No description provided for @voiceDownloadBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} will be downloaded from {host} and checked against its SHA-256 before use. Use Wi-Fi if your mobile data is limited.'**
+  String voiceDownloadBody(String size, String host);
+
+  /// No description provided for @voiceDownloadBodyUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'The size is unknown until the download starts. It comes from {host} and is checked against its SHA-256 before use.'**
+  String voiceDownloadBodyUnknown(String host);
+
+  /// No description provided for @voiceUnpacking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking and unpacking…'**
+  String get voiceUnpacking;
+
+  /// No description provided for @voiceCancelDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel download'**
+  String get voiceCancelDownload;
+
+  /// No description provided for @voiceUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Use'**
+  String get voiceUse;
+
+  /// No description provided for @voiceInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'In use'**
+  String get voiceInUse;
+
+  /// No description provided for @voiceDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete model'**
+  String get voiceDelete;
+
+  /// No description provided for @voiceDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}?'**
+  String voiceDeleteTitle(String name);
+
+  /// No description provided for @voiceDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The files are removed from the phone. You can download the model again later.'**
+  String get voiceDeleteBody;
+
+  /// No description provided for @voiceDeleteCustomBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The files and this entry are removed from the phone.'**
+  String get voiceDeleteCustomBody;
+
+  /// No description provided for @voiceReady.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is ready.'**
+  String voiceReady(String name);
+
+  /// No description provided for @voiceChecksum.
+  ///
+  /// In en, this message translates to:
+  /// **'The download did not match its SHA-256 and was deleted.'**
+  String get voiceChecksum;
+
+  /// No description provided for @voiceMissingFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'The archive does not have the files this model type needs.'**
+  String get voiceMissingFiles;
+
+  /// No description provided for @voiceUnsafe.
+  ///
+  /// In en, this message translates to:
+  /// **'The archive was refused: it tries to write outside its folder or contains links.'**
+  String get voiceUnsafe;
+
+  /// No description provided for @voiceDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The download failed. Check the connection and try again.'**
+  String get voiceDownloadFailed;
+
+  /// No description provided for @voiceAddCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a model'**
+  String get voiceAddCustom;
+
+  /// No description provided for @voiceAddCustomBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A sherpa-onnx .tar.bz2 archive over HTTPS, with its SHA-256. It is downloaded only when you tap Download.'**
+  String get voiceAddCustomBody;
+
+  /// No description provided for @voiceCustomName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get voiceCustomName;
+
+  /// No description provided for @voiceCustomUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive URL (https://…tar.bz2)'**
+  String get voiceCustomUrl;
+
+  /// No description provided for @voiceCustomSha.
+  ///
+  /// In en, this message translates to:
+  /// **'SHA-256 of the archive'**
+  String get voiceCustomSha;
+
+  /// No description provided for @voiceCustomFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Model type'**
+  String get voiceCustomFamily;
+
+  /// No description provided for @voiceCustomLanguages.
+  ///
+  /// In en, this message translates to:
+  /// **'Languages (optional, e.g. es, en)'**
+  String get voiceCustomLanguages;
+
+  /// No description provided for @voiceErrName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name.'**
+  String get voiceErrName;
+
+  /// No description provided for @voiceErrUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Use an https:// address.'**
+  String get voiceErrUrl;
+
+  /// No description provided for @voiceErrSha.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 64 hexadecimal characters of the SHA-256.'**
+  String get voiceErrSha;
+
+  /// No description provided for @voiceErrLanguages.
+  ///
+  /// In en, this message translates to:
+  /// **'Use language codes such as es, en, pt, separated by commas.'**
+  String get voiceErrLanguages;
+
+  /// No description provided for @voiceDictate.
+  ///
+  /// In en, this message translates to:
+  /// **'Dictate'**
+  String get voiceDictate;
+
+  /// No description provided for @voiceStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop and transcribe'**
+  String get voiceStop;
+
+  /// No description provided for @voiceTranscribing.
+  ///
+  /// In en, this message translates to:
+  /// **'Transcribing…'**
+  String get voiceTranscribing;
+
+  /// No description provided for @voiceMicDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Dictation needs the microphone permission.'**
+  String get voiceMicDenied;
+
+  /// No description provided for @voiceFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not transcribe. Try again.'**
+  String get voiceFailed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

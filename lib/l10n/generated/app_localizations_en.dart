@@ -601,7 +601,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyBody =>
-      'No accounts, analytics or crash reporting. The app only talks to your hosts over Tailscale and to your UnifiedPush server, which sees ciphertext only.';
+      'No accounts, analytics or crash reporting. The app only talks to your hosts over Tailscale and to your UnifiedPush server, which sees ciphertext only. Voice models are downloaded only when you ask, and speech is turned into text on the phone.';
 
   @override
   String get colorsCaption => 'Settings › Colors';
@@ -1195,4 +1195,152 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enterKey => 'Enter';
+
+  @override
+  String get voiceTitle => 'Voice input';
+
+  @override
+  String get voiceSummaryNone => 'No model yet: tap to set up';
+
+  @override
+  String get voiceIntro =>
+      'Dictate into the chat with the mic button. Speech becomes text on this phone and the audio is never saved or sent. Models are downloaded only when you tap Download, once, and stay until you delete them.';
+
+  @override
+  String get voiceLanguage => 'Spoken language';
+
+  @override
+  String get voiceLanguageAuto => 'Automatic';
+
+  @override
+  String get voiceLanguageAutoOnly => 'This model detects the language by itself.';
+
+  @override
+  String get voiceEnglishOnly => 'English only';
+
+  @override
+  String voiceLanguagesCount(int count) {
+    return '$count languages';
+  }
+
+  @override
+  String get voiceRecommended => 'Recommended';
+
+  @override
+  String get voiceCustomBadge => 'Your model';
+
+  @override
+  String get voiceModels => 'Models';
+
+  @override
+  String get voiceDownload => 'Download';
+
+  @override
+  String voiceDownloadTitle(String name) {
+    return 'Download $name?';
+  }
+
+  @override
+  String voiceDownloadBody(String size, String host) {
+    return '$size will be downloaded from $host and checked against its SHA-256 before use. Use Wi-Fi if your mobile data is limited.';
+  }
+
+  @override
+  String voiceDownloadBodyUnknown(String host) {
+    return 'The size is unknown until the download starts. It comes from $host and is checked against its SHA-256 before use.';
+  }
+
+  @override
+  String get voiceUnpacking => 'Checking and unpacking…';
+
+  @override
+  String get voiceCancelDownload => 'Cancel download';
+
+  @override
+  String get voiceUse => 'Use';
+
+  @override
+  String get voiceInUse => 'In use';
+
+  @override
+  String get voiceDelete => 'Delete model';
+
+  @override
+  String voiceDeleteTitle(String name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String get voiceDeleteBody =>
+      'The files are removed from the phone. You can download the model again later.';
+
+  @override
+  String get voiceDeleteCustomBody => 'The files and this entry are removed from the phone.';
+
+  @override
+  String voiceReady(String name) {
+    return '$name is ready.';
+  }
+
+  @override
+  String get voiceChecksum => 'The download did not match its SHA-256 and was deleted.';
+
+  @override
+  String get voiceMissingFiles => 'The archive does not have the files this model type needs.';
+
+  @override
+  String get voiceUnsafe =>
+      'The archive was refused: it tries to write outside its folder or contains links.';
+
+  @override
+  String get voiceDownloadFailed => 'The download failed. Check the connection and try again.';
+
+  @override
+  String get voiceAddCustom => 'Add a model';
+
+  @override
+  String get voiceAddCustomBody =>
+      'A sherpa-onnx .tar.bz2 archive over HTTPS, with its SHA-256. It is downloaded only when you tap Download.';
+
+  @override
+  String get voiceCustomName => 'Name';
+
+  @override
+  String get voiceCustomUrl => 'Archive URL (https://…tar.bz2)';
+
+  @override
+  String get voiceCustomSha => 'SHA-256 of the archive';
+
+  @override
+  String get voiceCustomFamily => 'Model type';
+
+  @override
+  String get voiceCustomLanguages => 'Languages (optional, e.g. es, en)';
+
+  @override
+  String get voiceErrName => 'Enter a name.';
+
+  @override
+  String get voiceErrUrl => 'Use an https:// address.';
+
+  @override
+  String get voiceErrSha => 'Enter the 64 hexadecimal characters of the SHA-256.';
+
+  @override
+  String get voiceErrLanguages => 'Use language codes such as es, en, pt, separated by commas.';
+
+  @override
+  String get voiceDictate => 'Dictate';
+
+  @override
+  String get voiceStop => 'Stop and transcribe';
+
+  @override
+  String get voiceTranscribing => 'Transcribing…';
+
+  @override
+  String get voiceMicDenied => 'Dictation needs the microphone permission.';
+
+  @override
+  String get voiceFailed => 'Could not transcribe. Try again.';
 }

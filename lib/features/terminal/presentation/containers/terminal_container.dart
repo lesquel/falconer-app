@@ -17,6 +17,7 @@ import '../../../hosts/domain/usecases/host_connections.dart';
 import '../../../keyboard/domain/entities/key_presets.dart';
 import '../../../keyboard/presentation/views/extra_keys_bar.dart';
 import '../../../settings/domain/entities/app_settings.dart';
+import '../../../voice/presentation/containers/voice_mic_button.dart';
 import '../../data/datasources/connectivity_signals.dart';
 import '../../domain/usecases/terminal_runner.dart';
 import '../controllers/chat_attachment.dart';
@@ -473,6 +474,7 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
                 onAttach: () => unawaited(_attachToChat()),
                 onRemoveAttachment: (i) => setState(() => _session.attachments.removeAt(i)),
                 onClose: _toggleChat,
+                micBuilder: (insert) => VoiceMicButton(onTranscript: insert),
               )
             : null,
         keysBar: ValueListenableBuilder(

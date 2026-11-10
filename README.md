@@ -41,6 +41,16 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
   scrollback each). In the background a dropped session waits for the app or the network to come
   back instead of retrying; after 10 minutes in the background every shell and SSH connection
   closes, and an open terminal reconnects when the app returns. Notifications do not use SSH.
+- **Voice input** — the chat's mic button dictates into the message, on the phone and offline.
+  Pick a speech model in *Settings → Voice input*: Parakeet TDT 0.6B v3 (recommended, 25
+  European languages), Whisper Tiny, Base, Small and Turbo (99 languages), Moonshine Tiny
+  (English only) or SenseVoice (Chinese, English, Japanese, Korean, Cantonese), each listed with
+  its size and languages, or add your own sherpa-onnx `.tar.bz2` archive by HTTPS URL and
+  SHA-256. A model is downloaded only when you tap *Download* (its size is shown first; progress
+  and cancel), once, and stays until you delete it; after that dictation needs no connection. The
+  spoken language is *Automatic* or a fixed one (Whisper always transcribes, never translates).
+  The text is inserted at the cursor for editing and never sent on its own. Without a model, the
+  mic opens the voice settings.
 - **Sessions** — lists Herdr/tmux sessions and agents through the hook and attaches to one.
 - **Agent usage** — per host, the tokens the agents recorded on that computer (today and the
   period, projects, models) and plan limits with their reset time, from `openmosh-hook usage`.
@@ -109,7 +119,8 @@ downloaded at runtime.
 | Lock screen | Previews off by default: notifications say only `<host>: <agent> needs you`. Every notification is `VISIBILITY_PRIVATE`, so a secure lock screen shows Android's redacted version, never the host alias. |
 | Screens | `FLAG_SECURE` on the whole app, always: `MainActivity.onCreate` sets it before the first frame and no screen clears it (no screenshots, screen recording or recents thumbnail of the terminal, keys, pairing, inbox or answer screens). |
 | Backups | `allowBackup="false"`, backup and data-extraction rules exclude everything. |
-| Network | No HTTP calls from the app. `network_security_config` refuses cleartext except `*.ts.net` (domain configs cannot express the 100.64.0.0/10 range; SSH and pairing use raw TCP inside the tailnet anyway). Pairing refuses codes whose address is outside 100.64.0.0/10. |
+| Voice | Speech is decoded on the phone by sherpa-onnx; audio stays in memory and is never written to storage or sent. The microphone permission is requested only when the mic is tapped with a downloaded model. Models come over HTTPS only from an explicit tap; each archive is checked against its pinned SHA-256 (and size) before it is unpacked, in a background isolate, into a staging folder that refuses absolute paths, `..` and links, then renamed into place; partial or failed downloads are deleted. Custom models need an HTTPS URL and a SHA-256. The model is loaded on first use and freed after 2 minutes idle. |
+| Network | No HTTP calls from the app except speech model downloads the user starts. `network_security_config` refuses cleartext except `*.ts.net` (domain configs cannot express the 100.64.0.0/10 range; SSH and pairing use raw TCP inside the tailnet anyway). Pairing refuses codes whose address is outside 100.64.0.0/10. |
 | Pairing input | QR codes and host replies are untrusted: IPv4 octets must be plain decimal, device ids must be b64u (at most 64 characters), host-sent aliases are limited to 64 characters and stripped of control, bidi, zero-width and separator characters, and a reply that is not UTF-8 is refused. Code expiry and single use are enforced by the host, which rejects late or reused codes. The pairing TCP exchange has one 120 s deadline (the host asks its user to confirm) and a 16 KiB reply cap. |
 | Hook calls | The SSH exec request is always the constant `sh -s`, so the host's login shell (bash, fish, csh…) never parses app-built text. The script goes on the channel's stdin, then EOF: every argument of the `openmosh-hook` command is single-quoted (POSIX), and request JSON for `pair-ssh` is piped in with a quoted `printf '%s' '…' \| …`. |
 | Uploads | Random hex prefix, names reduced to `[A-Za-z0-9._-]`, 50 MB limit, directory `0700`, files `0600`. Picked files copied into the app cache (by the app or by `file_picker`) are deleted after the upload, whether it succeeded or failed. |
