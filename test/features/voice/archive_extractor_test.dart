@@ -64,4 +64,22 @@ void main() {
       throwsA(isA<UnsafeArchive>()),
     );
   });
+
+  test('stops when the unpacked files exceed the size budget', () {
+    final out = '${tmp.path}/out';
+    expect(
+      () => extractTarBz2(write({'m/a.bin': 'x' * 600, 'm/b.bin': 'y' * 600}), out, maxBytes: 1000),
+      throwsA(isA<UnsafeArchive>()),
+    );
+  });
+
+  test('the size budget counts only the kept files', () {
+    final paths = extractTarBz2(
+      write({'m/tokens.txt': 't', 'm/big.onnx': 'w' * 5000}),
+      '${tmp.path}/out',
+      keep: {'m/tokens.txt'},
+      maxBytes: 100,
+    );
+    expect(paths, ['m/tokens.txt']);
+  });
 }
