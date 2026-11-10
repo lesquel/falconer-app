@@ -4,7 +4,7 @@ Mobile client of [OpenMosh](https://github.com/lesquel/OpenMosh): an SSH termina
 AI coding agents, with end-to-end encrypted push notifications and one-tap approvals.
 **Android first.**
 
-> Status: v0.2.0. Android 9+. The release APK for most phones (`arm64-v8a`) is about 15.5 MB.
+> Status: v0.2.0. Android 9+. The release APK for most phones (`arm64-v8a`) is about 26.4 MB (the on-device speech engine adds about 11 MB; models are downloaded separately, only on request).
 > Download it from the [latest release](https://github.com/lesquel/openmosh-app/releases/latest).
 
 ## What it does
