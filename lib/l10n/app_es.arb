@@ -359,6 +359,7 @@
   "voiceDownloadBody": "Se descargarán {size} desde {host} y se verificará su SHA-256 antes de usarlo. Usa Wi-Fi si tus datos móviles son limitados.",
   "voiceDownloadBodyUnknown": "El tamaño se conoce cuando empieza la descarga. Viene de {host} y se verifica su SHA-256 antes de usarlo.",
   "voiceUnpacking": "Verificando y descomprimiendo…",
+  "voiceVerifying": "Verificando los archivos…",
   "voiceCancelDownload": "Cancelar descarga",
   "voiceUse": "Usar",
   "voiceInUse": "En uso",

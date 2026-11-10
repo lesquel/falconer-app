@@ -1254,6 +1254,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get voiceUnpacking => 'Checking and unpacking…';
 
   @override
+  String get voiceVerifying => 'Checking the files…';
+
+  @override
   String get voiceCancelDownload => 'Cancel download';
 
   @override

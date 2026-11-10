@@ -16,17 +16,29 @@ class FakeModelStore implements ModelStore {
   final bool offline;
   final downloads = <String>[];
 
+  /// Ids an earlier run left with the system downloader.
+  final interruptedIds = <String>{};
+  final resumed = <String>[];
+
   @override
   Future<Set<String>> installed() async => {...ids};
+
+  @override
+  Future<Set<String>> interrupted(Set<String> known) async => interruptedIds.intersection(known);
 
   @override
   Future<VoiceModel> download(
     VoiceModel model, {
     required DownloadProgress onProgress,
     required DownloadCancel cancel,
+    bool resumeOnly = false,
   }) async {
     if (offline) throw StateError('network used in airplane mode');
-    downloads.add(model.id);
+    if (resumeOnly) {
+      resumed.add(model.id);
+    } else {
+      downloads.add(model.id);
+    }
     ids.add(model.id);
     return model;
   }

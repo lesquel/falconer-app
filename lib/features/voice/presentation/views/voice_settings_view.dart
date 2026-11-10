@@ -218,7 +218,7 @@ class _ModelTile extends StatelessWidget {
                 Expanded(
                   child: Text(
                     d.unpacking
-                        ? l.voiceUnpacking
+                        ? (m.parts.isEmpty ? l.voiceUnpacking : l.voiceVerifying)
                         : [
                             formatBytes(d.received),
                             if (d.total != null) formatBytes(d.total!),

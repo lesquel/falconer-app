@@ -15,17 +15,33 @@ final _safeId = RegExp(r'^[a-z0-9][a-z0-9._-]{0,80}$');
 /// Upper bound for an archive whose size is not pinned (custom models).
 const _maxUnpinnedBytes = 4 * 1024 * 1024 * 1024;
 
-/// Models live in `<root>/<id>/`. A download goes to `<id>.part`, is checked
-/// against the pinned SHA-256, unpacked in an isolate into `<id>.extracting/`
-/// and renamed to `<id>/` only when complete, so a folder named after a model
-/// is always usable.
+/// Models live in `<root>/<id>/`, and a folder named after a model is always
+/// usable: files are assembled in `<id>.extracting/` and renamed into place
+/// only when every one of them matched its pinned SHA-256.
+///
+/// A model made of separate files ([VoiceModel.parts], the catalog) is fetched
+/// by the system downloader when there is one ([native]: background, resume
+/// after network drops, notification), and each file is hashed natively while
+/// it is copied into private storage. Without it each file is fetched here.
+/// An archive (custom models) goes to `<id>.part`, is checked against its
+/// SHA-256 and unpacked in an isolate.
 class FileModelStore implements ModelStore {
-  FileModelStore({required this.root, http.Client Function()? client})
-    : _client = client ?? http.Client.new;
+  FileModelStore({
+    required this.root,
+    http.Client Function()? client,
+    this.native,
+    this.poll = const Duration(milliseconds: 500),
+  }) : _client = client ?? http.Client.new;
 
   /// Folder that holds the models, created on first use.
   final Future<Directory> Function() root;
   final http.Client Function() _client;
+
+  /// The phone's download service; null where there is none (tests, desktop).
+  final NativeDownloader? native;
+
+  /// How often [native] is asked for progress.
+  final Duration poll;
 
   /// Ids being downloaded right now; their partial files are not stale.
   final _active = <String>{};
@@ -66,6 +82,38 @@ class FileModelStore implements ModelStore {
   @override
   Future<void> delete(String id) => folderOf(id).then(_remove);
 
+  /// Model id of a staging path `<id>/<file>`, or null.
+  static String? _ownerOf(String path) {
+    final i = path.indexOf('/');
+    final id = i <= 0 ? null : path.substring(0, i);
+    return id != null && _safeId.hasMatch(id) ? id : null;
+  }
+
+  @override
+  Future<Set<String>> interrupted(Set<String> known) async {
+    final n = native;
+    if (n == null) return {};
+    final dir = (await _dir()).path;
+    final ids = <String>{};
+    final stale = <int>[];
+    for (final d in await n.list()) {
+      final id = _ownerOf(d.path);
+      if (id != null && _active.contains(id)) continue;
+      final usable =
+          id != null &&
+          known.contains(id) &&
+          d.status != NativeDownloadStatus.failed &&
+          !Directory('$dir/$id').existsSync();
+      if (usable) {
+        ids.add(id);
+      } else {
+        stale.add(d.id);
+      }
+    }
+    if (stale.isNotEmpty) await n.remove(stale);
+    return ids;
+  }
+
   static Future<void> _remove(String path) async {
     final type = FileSystemEntity.typeSync(path, followLinks: false);
     if (type == FileSystemEntityType.notFound) return;
@@ -79,19 +127,172 @@ class FileModelStore implements ModelStore {
     VoiceModel model, {
     required DownloadProgress onProgress,
     required DownloadCancel cancel,
+    bool resumeOnly = false,
   }) async {
     final id = _checkId(model.id);
-    final uri = Uri.parse(model.url);
-    if (uri.scheme != 'https') throw ArgumentError.value(model.url, 'url', 'must be https');
+    final urls = model.parts.isEmpty ? [model.url] : model.parts.map((p) => p.url);
+    for (final url in urls) {
+      if (Uri.parse(url).scheme != 'https') throw ArgumentError.value(url, 'url', 'must be https');
+    }
+    if (model.parts.isNotEmpty) _checkParts(model);
+    if (resumeOnly && (native == null || model.parts.isEmpty)) throw const DownloadCancelled();
     if (!_active.add(id)) throw StateError('$id is already downloading');
-    final dir = (await _dir()).path;
+    try {
+      final dir = (await _dir()).path;
+      if (model.parts.isEmpty) return await _downloadArchive(model, dir, onProgress, cancel);
+      final staging = '$dir/$id.extracting';
+      await _remove(staging);
+      try {
+        if (native case final n?) {
+          await _downloadNative(n, model, staging, onProgress, cancel, resumeOnly);
+        } else {
+          await _downloadParts(model, staging, onProgress, cancel);
+        }
+        if (cancel.isCancelled) throw const DownloadCancelled();
+        final target = '$dir/$id';
+        await _remove(target);
+        await Directory(staging).rename(target);
+        return model;
+      } catch (_) {
+        await _remove(staging);
+        rethrow;
+      }
+    } finally {
+      _active.remove(id);
+    }
+  }
+
+  /// Catalog data, but a part must never point outside the model folder.
+  static void _checkParts(VoiceModel model) {
+    for (final p in model.parts) {
+      final segs = p.path.split('/');
+      if (p.path.startsWith('/') || segs.any((s) => s.isEmpty || s == '.' || s == '..')) {
+        throw UnsafeArchive(p.path);
+      }
+    }
+  }
+
+  /// The system downloader fetches every file into its staging area; each one
+  /// is then hashed while copied into [staging]. Every outcome, success
+  /// included, removes the system's copies.
+  Future<void> _downloadNative(
+    NativeDownloader n,
+    VoiceModel model,
+    String staging,
+    DownloadProgress onProgress,
+    DownloadCancel cancel,
+    bool resumeOnly,
+  ) async {
+    String rel(ModelPart p) => '${model.id}/${p.path}';
+    final wanted = {for (final p in model.parts) rel(p)};
+    final mine = (await n.list()).where((d) => _ownerOf(d.path) == model.id).toList();
+    final ids = <String, int>{};
+    final stale = <int>[];
+    for (final d in mine) {
+      final keep =
+          wanted.contains(d.path) &&
+          d.status != NativeDownloadStatus.failed &&
+          !ids.containsKey(d.path);
+      keep ? ids[d.path] = d.id : stale.add(d.id);
+    }
+    if (stale.isNotEmpty) await n.remove(stale);
+    try {
+      if (resumeOnly && !wanted.every(ids.containsKey)) throw const DownloadCancelled();
+      final total = model.sizeBytes;
+      final parts = model.parts;
+      for (var i = 0; i < parts.length; i++) {
+        if (cancel.isCancelled) throw const DownloadCancelled();
+        final path = rel(parts[i]);
+        if (ids.containsKey(path)) continue;
+        ids[path] = await n.enqueue(
+          url: parts[i].url,
+          path: path,
+          title: '${model.name} (${i + 1}/${parts.length})',
+        );
+      }
+      onProgress(0, total);
+      while (true) {
+        if (cancel.isCancelled) throw const DownloadCancelled();
+        final now = {for (final d in await n.list()) d.id: d};
+        var received = 0;
+        var done = true;
+        for (final id in ids.values) {
+          final d = now[id];
+          // Gone means the user removed it from the system's download list.
+          if (d == null) throw const DownloadCancelled();
+          if (d.status == NativeDownloadStatus.failed) throw NativeDownloadFailed(d.reason);
+          if (d.status != NativeDownloadStatus.done) done = false;
+          received += d.received;
+        }
+        if (done) break;
+        onProgress(total == null ? received : received.clamp(0, total), total);
+        await Future.any([Future<void>.delayed(poll), cancel.whenCancelled]);
+      }
+      // All bytes are in: what is left is the check.
+      onProgress(total ?? 0, total);
+      for (final p in parts) {
+        if (cancel.isCancelled) throw const DownloadCancelled();
+        final ok = await n.adopt(
+          path: rel(p),
+          dest: '$staging/${p.path}',
+          sha256: p.sha256,
+          size: p.sizeBytes,
+        );
+        if (!ok) throw const ChecksumMismatch();
+      }
+    } finally {
+      await n.remove(ids.values.toList());
+    }
+  }
+
+  /// Without a system downloader: each file straight into [staging], hashed
+  /// as it arrives.
+  Future<void> _downloadParts(
+    VoiceModel model,
+    String staging,
+    DownloadProgress onProgress,
+    DownloadCancel cancel,
+  ) async {
+    final total = model.sizeBytes;
+    var before = 0;
+    onProgress(0, total);
+    for (final p in model.parts) {
+      final file = File('$staging/${p.path}');
+      await file.parent.create(recursive: true);
+      await _fetch(
+        Uri.parse(p.url),
+        file.path,
+        size: p.sizeBytes,
+        sha: p.sha256,
+        onProgress: (r, _) => onProgress(before + r, total),
+        cancel: cancel,
+      );
+      before += p.sizeBytes;
+      if (cancel.isCancelled) throw const DownloadCancelled();
+    }
+  }
+
+  Future<VoiceModel> _downloadArchive(
+    VoiceModel model,
+    String dir,
+    DownloadProgress onProgress,
+    DownloadCancel cancel,
+  ) async {
+    final id = model.id;
     final part = '$dir/$id.part';
     final staging = '$dir/$id.extracting';
     final target = '$dir/$id';
     try {
       await _remove(part);
       await _remove(staging);
-      await _fetch(uri, part, model, onProgress, cancel);
+      await _fetch(
+        Uri.parse(model.url),
+        part,
+        size: model.sizeBytes,
+        sha: model.sha256,
+        onProgress: onProgress,
+        cancel: cancel,
+      );
       if (cancel.isCancelled) throw const DownloadCancelled();
       final keep = model.files.isEmpty ? null : model.files.values.toSet();
       final written = await _extract(part, staging, keep);
@@ -111,8 +312,6 @@ class FileModelStore implements ModelStore {
       await _remove(part);
       await _remove(staging);
       rethrow;
-    } finally {
-      _active.remove(id);
     }
   }
 
@@ -131,18 +330,21 @@ class FileModelStore implements ModelStore {
     }
   }
 
+  /// Streams [uri] into [path], hashing as it goes; throws [ChecksumMismatch]
+  /// when the size ([size], if known) or SHA-256 differs.
   Future<void> _fetch(
     Uri uri,
-    String part,
-    VoiceModel model,
-    DownloadProgress onProgress,
-    DownloadCancel cancel,
-  ) async {
+    String path, {
+    required int? size,
+    required String sha,
+    required DownloadProgress onProgress,
+    required DownloadCancel cancel,
+  }) async {
     final client = _client();
-    final sink = File(part).openWrite();
+    final sink = File(path).openWrite();
     final digest = _DigestSink();
     final hasher = sha256.startChunkedConversion(digest);
-    final limit = model.sizeBytes ?? _maxUnpinnedBytes;
+    final limit = size ?? _maxUnpinnedBytes;
     var received = 0;
     StreamSubscription<List<int>>? sub;
     final done = Completer<void>();
@@ -158,7 +360,7 @@ class FileModelStore implements ModelStore {
       ]);
       if (res == null) throw const DownloadCancelled();
       if (res.statusCode != 200) throw DownloadHttpFailure(res.statusCode);
-      final total = model.sizeBytes ?? res.contentLength;
+      final total = size ?? res.contentLength;
       onProgress(0, total);
       sub = res.stream.listen(
         (chunk) {
@@ -179,8 +381,7 @@ class FileModelStore implements ModelStore {
       );
       await done.future;
       hasher.close();
-      final size = model.sizeBytes;
-      if ((size != null && received != size) || digest.value.toString() != model.sha256) {
+      if ((size != null && received != size) || digest.value.toString() != sha) {
         throw const ChecksumMismatch();
       }
     } finally {

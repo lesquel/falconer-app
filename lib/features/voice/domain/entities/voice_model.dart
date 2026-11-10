@@ -46,8 +46,29 @@ enum ModelRole {
   static ModelRole? byName(String? name) => values.where((r) => r.name == name).firstOrNull;
 }
 
-/// A downloadable speech model: a sherpa-onnx `.tar.bz2` archive pinned by
-/// its SHA-256.
+/// One file of a model fetched on its own, pinned by size and SHA-256.
+final class ModelPart {
+  const ModelPart({
+    required this.path,
+    required this.url,
+    required this.sizeBytes,
+    required this.sha256,
+  });
+
+  /// Where the file goes, relative to the model folder (one of [VoiceModel.files]).
+  final String path;
+
+  /// HTTPS URL at an immutable revision.
+  final String url;
+  final int sizeBytes;
+
+  /// Lower-case hex SHA-256 of the file.
+  final String sha256;
+}
+
+/// A downloadable speech model: either the separate files it needs ([parts],
+/// catalog models, nothing to unpack) or a sherpa-onnx `.tar.bz2` archive
+/// pinned by its SHA-256 (custom models).
 final class VoiceModel {
   const VoiceModel({
     required this.id,
@@ -58,6 +79,7 @@ final class VoiceModel {
     this.sizeBytes,
     this.languages = const [],
     this.files = const {},
+    this.parts = const [],
     this.recommended = false,
     this.custom = false,
   });
@@ -65,13 +87,16 @@ final class VoiceModel {
   /// File-system safe identifier, also the model's folder name.
   final String id;
   final String name;
+
+  /// The archive, or for a model made of [parts] the page they come from.
   final String url;
 
-  /// Lower-case hex SHA-256 of the archive.
+  /// Lower-case hex SHA-256 of the archive; empty for a model made of [parts].
   final String sha256;
   final ModelFamily family;
 
-  /// Archive size; null for a custom model (unknown until downloaded).
+  /// Bytes to download (archive, or all [parts]); null for a custom model
+  /// (unknown until downloaded).
   final int? sizeBytes;
 
   /// ISO 639-1 codes (`yue` for Cantonese, `haw` for Hawaiian); empty when unknown.
@@ -80,6 +105,9 @@ final class VoiceModel {
   /// Path of each needed file relative to the model folder. Catalog models pin
   /// them; custom models are filled in after extraction.
   final Map<ModelRole, String> files;
+
+  /// Files downloaded one by one instead of an archive; empty for an archive.
+  final List<ModelPart> parts;
   final bool recommended;
   final bool custom;
 
@@ -97,6 +125,7 @@ final class VoiceModel {
     sizeBytes: sizeBytes,
     languages: languages,
     files: files,
+    parts: parts,
     recommended: recommended,
     custom: custom,
   );

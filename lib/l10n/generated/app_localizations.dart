@@ -2247,6 +2247,12 @@ abstract class AppLocalizations {
   /// **'Checking and unpacking…'**
   String get voiceUnpacking;
 
+  /// No description provided for @voiceVerifying.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking the files…'**
+  String get voiceVerifying;
+
   /// No description provided for @voiceCancelDownload.
   ///
   /// In en, this message translates to:

@@ -15,17 +15,33 @@ void main() {
     }
   });
 
-  test('every catalog model is an https sherpa-onnx release with a pinned size and SHA-256', () {
+  test('every catalog model is its separate files, each pinned at an immutable revision', () {
+    final pinned = RegExp(r'^https://huggingface\.co/csukuangfj/[\w.-]+/resolve/[0-9a-f]{40}/');
     for (final m in voiceCatalog) {
-      expect(
-        m.url,
-        startsWith('https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/'),
-      );
-      expect(m.url, endsWith('.tar.bz2'));
-      expect(hex64.hasMatch(m.sha256), isTrue, reason: m.id);
+      expect(m.parts, isNotEmpty, reason: m.id);
+      expect(m.parts.map((p) => p.path).toSet(), m.files.values.toSet(), reason: m.id);
+      for (final p in m.parts) {
+        expect(pinned.hasMatch(p.url), isTrue, reason: p.url);
+        expect(p.url, endsWith('/${p.path.split('/').last}'));
+        expect(hex64.hasMatch(p.sha256), isTrue, reason: p.url);
+        expect(p.sizeBytes, greaterThan(0), reason: p.url);
+      }
+      expect(m.sizeBytes, m.parts.fold<int>(0, (a, p) => a + p.sizeBytes), reason: m.id);
       expect(m.sizeBytes, greaterThan(1000000), reason: m.id);
       expect(m.languages, isNotEmpty, reason: m.id);
     }
+  });
+
+  test('catalog files keep the folder layout of the earlier archive downloads', () {
+    // Models installed from the archives stay usable after the update.
+    expect(
+      catalogModel('parakeet-tdt-0.6b-v3-int8')!.files[ModelRole.encoder],
+      'sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8/encoder.int8.onnx',
+    );
+    expect(
+      catalogModel('sense-voice-int8-2024-07-17')!.files[ModelRole.model],
+      'sherpa-onnx-sense-voice-zh-en-ja-ko-yue-int8-2024-07-17/model.int8.onnx',
+    );
   });
 
   test('catalog models pin every file their family needs, and detection agrees', () {

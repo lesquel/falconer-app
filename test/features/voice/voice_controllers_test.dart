@@ -19,6 +19,18 @@ void main() {
     expect(store.downloads, isEmpty);
   });
 
+  test('opening voice settings finishes an interrupted download, never starts one', () async {
+    final store = FakeModelStore()..interruptedIds.addAll({'parakeet-tdt-0.6b-v3-int8', 'gone'});
+    final (:container, :db) = voiceContainer(store: store);
+    addTearDown(db.close);
+    addTearDown(container.dispose);
+    container.read(voiceModelsControllerProvider);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(store.resumed, ['parakeet-tdt-0.6b-v3-int8']);
+    expect(store.downloads, isEmpty);
+    expect(container.read(voiceModelsControllerProvider).installed, {'parakeet-tdt-0.6b-v3-int8'});
+  });
+
   test('a download happens only when asked and selects the model when none was', () async {
     final store = FakeModelStore();
     final (:container, :db) = voiceContainer(store: store);

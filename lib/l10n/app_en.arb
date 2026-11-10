@@ -1016,6 +1016,7 @@
     }
   },
   "voiceUnpacking": "Checking and unpacking…",
+  "voiceVerifying": "Checking the files…",
   "voiceCancelDownload": "Cancel download",
   "voiceUse": "Use",
   "voiceInUse": "In use",

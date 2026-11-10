@@ -41,6 +41,7 @@ import '../features/settings/domain/repositories/settings_repository.dart';
 import '../features/uploads/data/datasources/file_picker_source.dart';
 import '../features/uploads/domain/repositories/file_source.dart';
 import '../features/uploads/domain/usecases/upload_file.dart';
+import '../features/voice/data/datasources/channel_native_downloader.dart';
 import '../features/voice/data/datasources/record_voice_recorder.dart';
 import '../features/voice/data/datasources/sherpa_speech_recognizer.dart';
 import '../features/voice/data/repositories/file_model_store.dart';
@@ -270,10 +271,12 @@ final settingsProvider = StreamProvider<AppSettings>(
   (ref) => ref.watch(settingsRepositoryProvider).watch(),
 );
 
-/// Downloaded speech models, under the app's private support directory.
+/// Downloaded speech models, under the app's private support directory. On
+/// Android the catalog files come through the system DownloadManager.
 final modelStoreProvider = Provider<ModelStore>(
   (ref) => FileModelStore(
     root: () async => Directory('${(await getApplicationSupportDirectory()).path}/voice_models'),
+    native: Platform.isAndroid ? const ChannelNativeDownloader() : null,
   ),
 );
 

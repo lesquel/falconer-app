@@ -39,12 +39,21 @@ final class VoiceModelsState {
 enum DownloadOutcome { done, cancelled, checksum, missingFiles, unsafe, failed }
 
 /// Downloads start only from [download], i.e. from a tap: building this
-/// controller only reads which models are already on the device.
+/// controller reads which models are on the device and finishes (or cleans
+/// up) a download the user started before the app was closed, never a new one.
 class VoiceModelsController extends Notifier<VoiceModelsState> {
   @override
   VoiceModelsState build() {
-    unawaited(refresh());
+    unawaited(refresh().then((_) => _reconcile()));
     return const VoiceModelsState();
+  }
+
+  Future<void> _reconcile() async {
+    final models = allVoiceModels(await _settings());
+    final ids = await _store.interrupted({for (final m in models) m.id});
+    for (final m in models) {
+      if (ids.contains(m.id) && ref.mounted) unawaited(_run(m, resumeOnly: true));
+    }
   }
 
   ModelStore get _store => ref.read(modelStoreProvider);
@@ -57,7 +66,9 @@ class VoiceModelsController extends Notifier<VoiceModelsState> {
     if (ref.mounted) state = state.copyWith(installed: ids);
   }
 
-  Future<DownloadOutcome> download(VoiceModel model) async {
+  Future<DownloadOutcome> download(VoiceModel model) => _run(model);
+
+  Future<DownloadOutcome> _run(VoiceModel model, {bool resumeOnly = false}) async {
     if (state.downloads.containsKey(model.id)) return DownloadOutcome.failed;
     final cancel = DownloadCancel();
     void put(ModelDownload? d) {
@@ -72,6 +83,7 @@ class VoiceModelsController extends Notifier<VoiceModelsState> {
       final ready = await _store.download(
         model,
         cancel: cancel,
+        resumeOnly: resumeOnly,
         onProgress: (r, t) => put(ModelDownload(cancel: cancel, received: r, total: t)),
       );
       final s = await _settings();
