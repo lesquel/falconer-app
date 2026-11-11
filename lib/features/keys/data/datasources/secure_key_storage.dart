@@ -134,7 +134,7 @@ class SecureKeyStorage {
   Future<String?> readSshPrivate(String id) => _guard(() => _ssh.read(_k(id)));
 
   /// No prompt: presence only.
-  Future<bool> hasBoundSshPrivate(String id) => _ssh.containsKey(_k(id));
+  Future<bool> hasBoundSshPrivate(String id) => _guard(() => _ssh.containsKey(_k(id)));
 
   Future<bool> hasLegacySshPrivate(String id) => _legacySsh.containsKey(_k(id));
   Future<String?> readLegacySshPrivate(String id) => _legacySsh.read(_k(id));
@@ -173,13 +173,23 @@ class SecureKeyStorage {
       return await op();
     } on PlatformException catch (e) {
       final detail = '${e.code} ${e.message}';
-      final code = _keychainStatus(e);
-      if (code == _errSecNotAvailable) {
-        throw const ValidationFailure(
-          'Set a screen lock (PIN, pattern, password or biometrics) to store SSH keys.',
-        );
+      final code = _isApple(null) ? _keychainStatus(e) : null;
+      if (code != null) {
+        switch (code) {
+          case _errSecUserCanceled || _errSecAuthFailed:
+            throw const UserCancelledFailure();
+          case _errSecNotAvailable:
+            throw const ValidationFailure(
+              'Set a screen lock (PIN, pattern, password or biometrics) to store SSH keys.',
+            );
+          case _errSecInteractionNotAllowed:
+            throw const ValidationFailure('Unlock this device and try again.');
+          default:
+            // Not a cancel: surface it so a real keychain problem (e.g. a
+            // missing entitlement) is not mistaken for the user backing out.
+            throw ValidationFailure('The keychain refused the operation (OSStatus $code).');
+        }
       }
-      if (code != null) throw const UserCancelledFailure();
       if (detail.contains('BIOMETRIC_UNAVAILABLE')) {
         throw const ValidationFailure(
           'Set a screen lock (PIN, pattern, password or biometrics) to store SSH keys.',
@@ -197,6 +207,13 @@ class SecureKeyStorage {
 
   /// `errSecNotAvailable`: no passcode is set on the device.
   static const _errSecNotAvailable = -25291;
+
+  /// `errSecUserCanceled` / `errSecAuthFailed`: the prompt was dismissed or failed.
+  static const _errSecUserCanceled = -128;
+  static const _errSecAuthFailed = -25293;
+
+  /// `errSecInteractionNotAllowed`: the device is locked.
+  static const _errSecInteractionNotAllowed = -25308;
 
   /// OSStatus reported by the Darwin plugin (`details`, or "Code: -128" in the
   /// message); null on Android.

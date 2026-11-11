@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openmosh/features/keys/data/datasources/secure_key_storage.dart';
@@ -77,6 +78,10 @@ void main() {
   });
 
   group('keychain errors', () {
+    // OSStatus codes only exist on Apple platforms.
+    setUp(() => debugDefaultTargetPlatformOverride = TargetPlatform.iOS);
+    tearDown(() => debugDefaultTargetPlatformOverride = null);
+
     Future<Object?> failWith(PlatformException e) async {
       final ssh = _Mem()..failRead = e;
       final storage = SecureKeyStorage(ssh: ssh, legacySsh: _Mem(), push: _Mem());
@@ -110,6 +115,15 @@ void main() {
         PlatformException(code: 'Unexpected security result code', message: 'x', details: -25291),
       );
       expect(e, isA<ValidationFailure>());
+    });
+
+    test('a locked device (-25308) and a missing entitlement (-34018) are not cancels', () async {
+      for (final status in [-25308, -34018]) {
+        final e = await failWith(
+          PlatformException(code: 'Unexpected security result code', message: 'x', details: status),
+        );
+        expect(e, isA<ValidationFailure>(), reason: 'OSStatus $status');
+      }
     });
   });
 }
