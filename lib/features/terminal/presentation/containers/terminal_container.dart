@@ -13,6 +13,8 @@ import '../../../../shared/domain/failure.dart';
 import '../../../../shared/ui/atoms/circle_icon_button.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
 import '../../../../shared/ui/organisms/failure_panel.dart';
+import '../../../../shared/hook/domain/hook_command.dart';
+import '../../../herdr/presentation/containers/herdr_navigator_container.dart';
 import '../../../hosts/domain/usecases/host_connections.dart';
 import '../../../keyboard/domain/entities/key_presets.dart';
 import '../../../keyboard/presentation/views/extra_keys_bar.dart';
@@ -30,10 +32,19 @@ import '../views/terminal_palette.dart';
 import '../views/terminal_screen_view.dart';
 
 class TerminalContainer extends ConsumerStatefulWidget {
-  const TerminalContainer({super.key, required this.hostId, this.session, this.kind});
+  const TerminalContainer({
+    super.key,
+    required this.hostId,
+    this.session,
+    this.kind,
+    this.fromAgentView = false,
+  });
   final String hostId;
   final String? session;
   final String? kind;
+
+  /// Opened from the graphic agent view: switching back pops to it.
+  final bool fromAgentView;
 
   @override
   ConsumerState<TerminalContainer> createState() => _TerminalContainerState();
@@ -69,6 +80,21 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
 
   TerminalRunner get _runner => _session.runner;
 
+  /// A Herdr session on a hook with the navigator: offers the graphic mode.
+  bool _graphicMode = false;
+
+  bool _graphicChecked = false;
+
+  bool get _isHerdr => widget.kind == 'herdr' && widget.session != null;
+
+  /// Once the shell is connected (so the check reuses its connection and
+  /// never prompts on its own), asks the hook about the graphic mode.
+  void _maybeCheckGraphicMode() {
+    if (!_isHerdr || _graphicChecked || _phase != TerminalPhase.connected) return;
+    _graphicChecked = true;
+    unawaited(_checkGraphicMode());
+  }
+
   @override
   void initState() {
     super.initState();
@@ -89,7 +115,11 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     // On screen: the pool never evicts it while this screen is open.
     _pool.attach(_key);
     _phase = _runner.phase;
-    _phaseSub = _runner.phases.listen((p) => setState(() => _phase = p));
+    _phaseSub = _runner.phases.listen((p) {
+      setState(() => _phase = p);
+      _maybeCheckGraphicMode();
+    });
+    _maybeCheckGraphicMode();
     _net = networkRegained().listen((_) => _runner.wake());
     final reused = !fresh || _connections.isConnected(widget.hostId);
     if (reused) {
@@ -97,6 +127,45 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
       WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_verifyThenShow(fresh)));
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_runner.start()));
+    }
+  }
+
+  /// Any failure keeps the graphic mode hidden.
+  Future<void> _checkGraphicMode() async {
+    try {
+      final ok = await ref.read(herdrRepositoryProvider).supportsHerdr(widget.hostId);
+      if (mounted && ok) setState(() => _graphicMode = true);
+    } catch (_) {
+      // Stays the terminal only.
+    }
+  }
+
+  /// Opens the graphic view of the pane Herdr shows (S1: the other mode).
+  Future<void> _openGraphicMode() async {
+    if (widget.fromAgentView) {
+      context.pop();
+      return;
+    }
+    final l = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final session = isHerdrSessionName(widget.session!) ? widget.session : null;
+    try {
+      final snap = await ref
+          .read(herdrRepositoryProvider)
+          .snapshot(widget.hostId, session: session);
+      final pane = snap.body?.focusedPane;
+      if (!mounted) return;
+      if (pane == null) {
+        messenger.showSnackBar(SnackBar(content: Text(l.herdrNoFocusedPane)));
+        return;
+      }
+      unawaited(
+        context.push(
+          agentViewLocation(widget.hostId, pane.id, session: session, fromTerminal: true),
+        ),
+      );
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(l.failureText(e))));
     }
   }
 
@@ -416,6 +485,13 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
                               queryParameters: {'session': 'default', 'kind': 'herdr'},
                             ).toString(),
                           ),
+                        ),
+                      if (_isHerdr && _graphicMode)
+                        IconButton(
+                          key: const Key('switch_to_graphic'),
+                          tooltip: l.herdrGraphicMode,
+                          icon: const Icon(Icons.account_tree_outlined),
+                          onPressed: () => unawaited(_openGraphicMode()),
                         ),
                       IconButton(
                         tooltip: l.fullScreen,

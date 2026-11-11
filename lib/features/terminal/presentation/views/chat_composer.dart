@@ -20,16 +20,24 @@ class ChatComposer extends StatefulWidget {
     required this.onClose,
     this.busy = false,
     this.micBuilder,
+    this.autofocus = true,
   });
 
   final String initialText;
   final List<ChatAttachment> attachments;
   final ValueChanged<String> onSend;
   final ValueChanged<String> onChanged;
-  final VoidCallback onAttach;
+
+  /// Null hides the attach button (the agent view sends text only).
+  final VoidCallback? onAttach;
   final ValueChanged<int> onRemoveAttachment;
-  final VoidCallback onClose;
+
+  /// Null hides the close button.
+  final VoidCallback? onClose;
   final bool busy;
+
+  /// The terminal opens the composer to type at once; the agent view does not.
+  final bool autofocus;
 
   /// Builds the mic button; it calls the given function with dictated text.
   final Widget Function(ValueChanged<String> insert)? micBuilder;
@@ -116,16 +124,17 @@ class _ChatComposerState extends State<ChatComposer> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  IconButton(
-                    tooltip: l.chatAttach,
-                    icon: const Icon(Icons.add),
-                    onPressed: widget.busy ? null : widget.onAttach,
-                  ),
+                  if (widget.onAttach != null)
+                    IconButton(
+                      tooltip: l.chatAttach,
+                      icon: const Icon(Icons.add),
+                      onPressed: widget.busy ? null : widget.onAttach,
+                    ),
                   Expanded(
                     child: TextField(
                       key: const Key('chat-input'),
                       controller: _text,
-                      autofocus: true,
+                      autofocus: widget.autofocus,
                       minLines: 1,
                       maxLines: 6,
                       keyboardType: TextInputType.multiline,
@@ -141,11 +150,12 @@ class _ChatComposerState extends State<ChatComposer> {
                     icon: const Icon(Icons.content_paste),
                     onPressed: _paste,
                   ),
-                  IconButton(
-                    tooltip: l.chatClose,
-                    icon: const Icon(Icons.close),
-                    onPressed: widget.onClose,
-                  ),
+                  if (widget.onClose != null)
+                    IconButton(
+                      tooltip: l.chatClose,
+                      icon: const Icon(Icons.close),
+                      onPressed: widget.onClose,
+                    ),
                   IconButton.filled(
                     tooltip: l.chatSend,
                     style: IconButton.styleFrom(

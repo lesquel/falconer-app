@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/di.dart';
 import '../../../../l10n/l10n.dart';
+import '../../../agent_view/presentation/containers/agent_view_container.dart';
 import '../../domain/entities/herdr_action.dart';
 import '../../domain/entities/herdr_snapshot.dart';
 import '../controllers/herdr_navigator_controller.dart';
@@ -40,6 +41,10 @@ class _HerdrNavigatorContainerState extends ConsumerState<HerdrNavigatorContaine
 
   /// Another screen (the agent view) is on top: no polling until it pops.
   bool _covered = false;
+
+  /// Tablet split view: the list and the selected pane side by side.
+  bool _wide = false;
+  String? _selected;
 
   @override
   void initState() {
@@ -92,6 +97,10 @@ class _HerdrNavigatorContainerState extends ConsumerState<HerdrNavigatorContaine
   Future<void> _open(HerdrPane p) async {
     _show(await _ctrl.act(HerdrAction.paneFocus(p.id)));
     if (!mounted) return;
+    if (_wide) {
+      setState(() => _selected = p.id);
+      return;
+    }
     _covered = true;
     _ctrl.pause();
     await context.push(agentViewLocation(widget.hostId, p.id, session: widget.session));
@@ -149,29 +158,57 @@ class _HerdrNavigatorContainerState extends ConsumerState<HerdrNavigatorContaine
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    return Scaffold(
-      body: ListenableBuilder(
-        listenable: _ctrl,
-        builder: (context, _) => HerdrNavigatorView(
-          snapshot: _ctrl.snapshot,
-          error: _ctrl.error,
-          session: widget.session,
-          onBack: () => context.canPop() ? context.pop() : context.go('/hosts/${widget.hostId}'),
-          onRetry: _ctrl.retry,
-          onOpenPane: (p) => unawaited(_open(p)),
-          onCreateWorkspace: () => unawaited(_createWorkspace()),
-          onRenameWorkspace: (w) =>
-              unawaited(_rename(w.label, (n) => HerdrAction.workspaceRename(w.id, n))),
-          onCloseWorkspace: (w) => unawaited(
-            _close(l.herdrCloseWorkspaceTitle(w.label), () => HerdrAction.workspaceClose(w.id)),
-          ),
-          onCreateTab: (w) => unawaited(_createTab(w)),
-          onRenameTab: (t) => unawaited(_rename(t.label, (n) => HerdrAction.tabRename(t.id, n))),
-          onCloseTab: (t) =>
-              unawaited(_close(l.herdrCloseTabTitle(t.label), () => HerdrAction.tabClose(t.id))),
-          onStartAgent: (p) => unawaited(_startAgent(p)),
+    final list = ListenableBuilder(
+      listenable: _ctrl,
+      builder: (context, _) => HerdrNavigatorView(
+        selectedPaneId: _wide ? _selected : null,
+        snapshot: _ctrl.snapshot,
+        error: _ctrl.error,
+        session: widget.session,
+        onBack: () => context.canPop() ? context.pop() : context.go('/hosts/${widget.hostId}'),
+        onRetry: _ctrl.retry,
+        onOpenPane: (p) => unawaited(_open(p)),
+        onCreateWorkspace: () => unawaited(_createWorkspace()),
+        onRenameWorkspace: (w) =>
+            unawaited(_rename(w.label, (n) => HerdrAction.workspaceRename(w.id, n))),
+        onCloseWorkspace: (w) => unawaited(
+          _close(l.herdrCloseWorkspaceTitle(w.label), () => HerdrAction.workspaceClose(w.id)),
         ),
+        onCreateTab: (w) => unawaited(_createTab(w)),
+        onRenameTab: (t) => unawaited(_rename(t.label, (n) => HerdrAction.tabRename(t.id, n))),
+        onCloseTab: (t) =>
+            unawaited(_close(l.herdrCloseTabTitle(t.label), () => HerdrAction.tabClose(t.id))),
+        onStartAgent: (p) => unawaited(_startAgent(p)),
+      ),
+    );
+    return Scaffold(
+      body: LayoutBuilder(
+        builder: (context, box) {
+          _wide = box.maxWidth >= herdrSplitWidth;
+          final selected = _selected;
+          if (!_wide) return list;
+          return Row(
+            children: [
+              SizedBox(width: 400, child: list),
+              const VerticalDivider(width: 1),
+              Expanded(
+                child: selected == null
+                    ? Center(child: Text(l.herdrPickPane))
+                    : AgentViewContainer(
+                        key: ValueKey(selected),
+                        hostId: widget.hostId,
+                        paneId: selected,
+                        session: widget.session,
+                        embedded: true,
+                      ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 }
+
+/// Width from which the navigator and the agent view sit side by side.
+const herdrSplitWidth = 840.0;

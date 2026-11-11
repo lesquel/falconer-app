@@ -25,6 +25,20 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
 - **Open Herdr / Shell** — the host screen has *Open Herdr*, which attaches the Herdr session
   through `openmosh-hook attach herdr` so the computer follows the tab and workspace picked on
   the phone (mirroring), and *Shell* for a plain login shell.
+- **Agents & workspaces (Herdr navigator)** — when the host's hook speaks the Herdr protocol
+  (`openmosh-hook version --json` reports `"herdr": 1`), the host screen also offers *Agents &
+  workspaces*: the session's workspaces, tabs and panes with each agent's live status (*needs you*
+  is highlighted, then working, done, idle). Create, rename and close workspaces and tabs (closing
+  asks first) and start an agent (Claude, Codex, Gemini, Cursor, Copilot, Kiro, OpenCode, Amp,
+  Pi) in a pane, all through the hook's fixed allowlist. Updates arrive by long-poll
+  (`herdr snapshot --since <rev> --wait-ms 15000`), only while the screen is open and the app is
+  in the foreground. On a tablet the list and the selected agent sit side by side.
+- **Graphic agent view** — tapping an agent focuses its pane on the computer and shows its screen
+  as cards: a permission or decision menu becomes big buttons (allow, allow always, deny, other)
+  that press the menu's keys, the input line becomes a composer (with dictation), and Esc, ↑, ↓,
+  Tab and Enter are one tap away. Screens it does not recognize stay plain text. It is a second
+  mode next to the terminal: *Terminal mode* opens the usual Herdr terminal on that pane, and a
+  Herdr terminal's *Graphic mode* button opens the focused pane's graphic view.
 - **Terminal** — full xterm emulation in the chosen color scheme. The system keyboard opens on
   demand. The keys bar is one compact row on a phone (Esc, Tab, Ctrl, *more keys*, Chat,
   Keyboard; the arrow cross opens with *more keys*) and a 2x3 grid with the arrow cross beside it

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/agent_view/presentation/containers/agent_view_container.dart';
 import '../features/herdr/presentation/containers/herdr_navigator_container.dart';
 import '../features/hosts/presentation/containers/host_detail_container.dart';
 import '../features/hosts/presentation/containers/host_form_container.dart';
@@ -103,7 +104,25 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
         hostId: s.pathParameters['id']!,
         session: s.uri.queryParameters['session'],
         kind: s.uri.queryParameters['kind'],
+        fromAgentView: s.uri.queryParameters['from'] == 'agent',
       ),
+    ),
+    // Graphic mode of one Herdr pane; full screen like the terminal it
+    // switches with. The pane id (`w1:p2`) is a query parameter.
+    GoRoute(
+      path: '/agent/:id',
+      builder: (context, s) {
+        final pane = s.uri.queryParameters['pane'];
+        if (pane == null || !isHerdrPaneId(pane)) {
+          return Scaffold(body: Center(child: Text(context.l10n.notFound)));
+        }
+        return AgentViewContainer(
+          hostId: s.pathParameters['id']!,
+          paneId: pane,
+          session: _herdrSession(s),
+          fromTerminal: s.uri.queryParameters['from'] == 'terminal',
+        );
+      },
     ),
     GoRoute(
       path: '/inbox/:host/:event',
