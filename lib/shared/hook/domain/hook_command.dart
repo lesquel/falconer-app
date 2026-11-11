@@ -107,7 +107,7 @@ final class HookCommand {
     int? lines,
   }) {
     if (!isHerdrPaneId(paneId)) throw const ValidationFailure('Invalid identifier.');
-    if (lines != null && (lines < 1 || lines > 400)) {
+    if (lines != null && (lines < 1 || lines > 2000)) {
       throw const ValidationFailure('Invalid identifier.');
     }
     return HookCommand._([

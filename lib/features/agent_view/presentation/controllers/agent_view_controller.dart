@@ -9,11 +9,10 @@ import '../../domain/usecases/parse_agent_screen.dart';
 import '../../domain/usecases/screen_history.dart';
 
 /// Lines of the first read, of each long-poll after it (merged into what
-/// was already read) and of "load earlier". `HookCommand.herdrRead` still
-/// accepts at most 400; the hook reads up to 2000.
-const agentViewFirstLines = 400;
+/// was already read) and of "load earlier" (the hook reads up to 2000).
+const agentViewFirstLines = 1000;
 const agentViewPollLines = 300;
-const agentViewEarlierLines = 400;
+const agentViewEarlierLines = 2000;
 
 /// One pane's screen, long-polled while shown. Every read is merged into
 /// the history seen while the screen is open, and parsed into blocks only

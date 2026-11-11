@@ -83,7 +83,9 @@ void main() {
       expect(() => HookCommand.herdrSnapshot(since: 'xyz'), throwsA(isA<ValidationFailure>()));
       expect(() => HookCommand.herdrSnapshot(waitMs: 20001), throwsA(isA<ValidationFailure>()));
       expect(() => HookCommand.herdrRead('w1:p1', lines: 0), throwsA(isA<ValidationFailure>()));
-      expect(() => HookCommand.herdrRead('w1:p1', lines: 401), throwsA(isA<ValidationFailure>()));
+      expect(() => HookCommand.herdrRead('w1:p1', lines: 2001), throwsA(isA<ValidationFailure>()));
+      // The hook reads up to 2000 lines of history.
+      expect(HookCommand.herdrRead('w1:p1', lines: 2000).argv, contains('2000'));
     });
   });
 
