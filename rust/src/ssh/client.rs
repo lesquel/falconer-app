@@ -11,6 +11,9 @@ use crate::error::{CoreError, CoreResult};
 use crate::keys::decode_private;
 
 pub const CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
+/// Public-key authentication; a server that never answers must not leave the
+/// app "connecting" forever.
+pub const AUTH_TIMEOUT: Duration = Duration::from_secs(20);
 
 /// Why the session ended (a server disconnect or a transport error), kept
 /// so the app can show it when a terminal drops.
@@ -119,18 +122,43 @@ pub async fn connect(
     let key = decode_private(private_openssh)?;
     let (mut session, closed) =
         handshake(host, port, PinPolicy::Pinned(pinned_fingerprint.into())).await?;
-    let auth = session
-        .authenticate_publickey(user, PrivateKeyWithHashAlg::new(Arc::new(key), None))
-        .await
-        .map_err(|e| CoreError::Connect(sanitize(&e.to_string())))?;
+    let auth = with_auth_timeout(
+        AUTH_TIMEOUT,
+        session.authenticate_publickey(user, PrivateKeyWithHashAlg::new(Arc::new(key), None)),
+    )
+    .await?
+    .map_err(|e| CoreError::Connect(sanitize(&e.to_string())))?;
     if !auth.success() {
         return Err(CoreError::AuthFailed);
     }
     Ok((session, closed))
 }
 
+async fn with_auth_timeout<F: std::future::Future>(d: Duration, fut: F) -> CoreResult<F::Output> {
+    tokio::time::timeout(d, fut)
+        .await
+        .map_err(|_| CoreError::AuthTimeout)
+}
+
 /// Keeps error text short and single-line; russh errors contain no secrets
 /// but may be long.
 pub fn sanitize(s: &str) -> String {
     s.chars().filter(|c| !c.is_control()).take(160).collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test(start_paused = true)]
+    async fn auth_that_never_answers_times_out() {
+        let r = with_auth_timeout(AUTH_TIMEOUT, std::future::pending::<()>()).await;
+        assert_eq!(r, Err(CoreError::AuthTimeout));
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn auth_that_answers_passes_through() {
+        let r = with_auth_timeout(AUTH_TIMEOUT, async { 7 }).await;
+        assert_eq!(r, Ok(7));
+    }
 }

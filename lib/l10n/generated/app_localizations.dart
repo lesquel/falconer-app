@@ -1251,6 +1251,12 @@ abstract class AppLocalizations {
   /// **'The host rejected this device key.'**
   String get errAuthRejected;
 
+  /// No description provided for @errAuthTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'The host did not answer the SSH key. If Tailscale SSH is enabled on it, run: sudo tailscale set --ssh=false'**
+  String get errAuthTimeout;
+
   /// No description provided for @errCannotReachHost.
   ///
   /// In en, this message translates to:

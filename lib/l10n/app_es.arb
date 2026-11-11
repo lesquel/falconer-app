@@ -193,6 +193,7 @@
   "schemeHighContrastShort": "Alto",
   "errHostKeyChanged": "La clave del equipo cambió. La conexión se bloqueó.",
   "errAuthRejected": "El equipo rechazó la clave de este dispositivo.",
+  "errAuthTimeout": "El equipo no respondió a la clave SSH. Si Tailscale SSH está activado en él, ejecuta: sudo tailscale set --ssh=false",
   "errCannotReachHost": "No se pudo conectar con el equipo.",
   "errUnlockCancelled": "Se canceló el desbloqueo.",
   "errAddressNeedsNewCheck": "Cambiar la dirección o el puerto requiere verificar de nuevo la clave del equipo. Vuelve a agregarlo.",

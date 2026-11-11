@@ -690,6 +690,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errAuthRejected => 'The host rejected this device key.';
 
   @override
+  String get errAuthTimeout =>
+      'The host did not answer the SSH key. If Tailscale SSH is enabled on it, run: sudo tailscale set --ssh=false';
+
+  @override
   String get errCannotReachHost => 'Could not reach the host.';
 
   @override

@@ -19,6 +19,8 @@ AppFailure mapCoreError(Object e) {
       return HostKeyMismatchFailure(expected: m?.group(1) ?? '', actual: m?.group(2) ?? '');
     case 'auth_failed':
       return const AuthFailure();
+    case 'auth_timeout':
+      return const AuthTimeoutFailure();
     case 'timeout':
       return const ConnectionFailure('The host did not answer in time.');
     case 'too_large':

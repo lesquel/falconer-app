@@ -25,6 +25,15 @@ final class AuthFailure extends AppFailure {
   const AuthFailure([super.message = 'The host rejected this device key.']);
 }
 
+/// The host accepted the connection but never answered the key (Tailscale SSH
+/// in "check" mode intercepts port 22). Retrying cannot help.
+final class AuthTimeoutFailure extends AppFailure {
+  const AuthTimeoutFailure()
+    : super(
+        'The host did not answer the SSH key. If Tailscale SSH is enabled on it, run: sudo tailscale set --ssh=false',
+      );
+}
+
 final class ConnectionFailure extends AppFailure {
   const ConnectionFailure([super.message = 'Could not reach the host.']);
 }

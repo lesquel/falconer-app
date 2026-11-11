@@ -156,6 +156,9 @@ final class TerminalRunner {
       } on AuthFailure catch (e) {
         _fail(e);
         break;
+      } on AuthTimeoutFailure catch (e) {
+        _fail(e);
+        break;
       } on AppFailure catch (e) {
         failure = e;
         emulator.notice('[${e.message} Retrying…]');
