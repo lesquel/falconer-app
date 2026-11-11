@@ -1352,4 +1352,127 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get voiceFailed => 'No se pudo transcribir. Inténtalo de nuevo.';
+
+  @override
+  String get herdrNavigator => 'Agentes y workspaces';
+
+  @override
+  String get herdrNavigatorHint =>
+      'Explora los workspaces, pestañas y agentes de Herdr y responde a los agentes con botones.';
+
+  @override
+  String get herdrStatusBlocked => 'te necesita';
+
+  @override
+  String get herdrFocused => 'en pantalla';
+
+  @override
+  String get herdrShellPane => 'Terminal';
+
+  @override
+  String get herdrNewWorkspace => 'Nuevo workspace';
+
+  @override
+  String get herdrNewTab => 'Nueva pestaña';
+
+  @override
+  String get herdrRename => 'Renombrar';
+
+  @override
+  String get herdrCreate => 'Crear';
+
+  @override
+  String get herdrStartAgent => 'Iniciar un agente';
+
+  @override
+  String get herdrStartAgentIn => 'Iniciar un agente en este panel';
+
+  @override
+  String herdrCloseWorkspaceTitle(String name) {
+    return '¿Cerrar el workspace $name?';
+  }
+
+  @override
+  String herdrCloseTabTitle(String name) {
+    return '¿Cerrar la pestaña $name?';
+  }
+
+  @override
+  String get herdrCloseBody => 'Todo lo que se ejecuta ahí en la computadora se detiene.';
+
+  @override
+  String get herdrName => 'Nombre';
+
+  @override
+  String get herdrNameOptional => 'Nombre (opcional)';
+
+  @override
+  String get herdrEmpty => 'Esta sesión de Herdr no tiene workspaces.';
+
+  @override
+  String get herdrNoTabs => 'Sin pestañas';
+
+  @override
+  String get herdrLoading => 'Leyendo Herdr…';
+
+  @override
+  String get herdrMoreActions => 'Más acciones';
+
+  @override
+  String get herdrPickPane => 'Elige un agente para verlo aquí.';
+
+  @override
+  String get herdrTerminalMode => 'Modo terminal';
+
+  @override
+  String get herdrGraphicMode => 'Modo gráfico';
+
+  @override
+  String get herdrNoFocusedPane => 'No hay ningún panel enfocado en Herdr.';
+
+  @override
+  String get herdrOutOfDate =>
+      'Se muestra el último estado; intentando conectar con Herdr de nuevo.';
+
+  @override
+  String get agentViewEmpty => 'El panel está vacío.';
+
+  @override
+  String agentViewDraft(String text) {
+    return 'Escrito en la computadora: $text';
+  }
+
+  @override
+  String get agentViewQuestion => 'El agente pregunta';
+
+  @override
+  String get herdrKeyUp => 'Arriba';
+
+  @override
+  String get herdrKeyDown => 'Abajo';
+
+  @override
+  String get herdrKeyEsc => 'Esc';
+
+  @override
+  String get herdrKeyEnter => 'Enter';
+
+  @override
+  String get herdrKeyTab => 'Tab';
+
+  @override
+  String get errHerdrInvalid => 'Herdr ya no tiene ese elemento. La lista se actualizó.';
+
+  @override
+  String get errHerdrNotRunning => 'Herdr no se está ejecutando en esta computadora.';
+
+  @override
+  String get errHerdrRefused => 'Herdr rechazó la solicitud.';
+
+  @override
+  String get errHerdrHookOutdated =>
+      'Actualiza openmosh-hook en esta computadora para usar el navegador de Herdr.';
+
+  @override
+  String get errMessageTooLong4000 => 'El mensaje tiene más de 4000 caracteres.';
 }

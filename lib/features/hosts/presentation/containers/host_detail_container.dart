@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/di.dart';
 import '../../../../l10n/l10n.dart';
+import '../../../../shared/hook/domain/hook_command.dart';
 import '../../../../shared/ui/molecules/themed_mole.dart';
 import '../../../../shared/ui/organisms/failure_panel.dart';
 import '../../../settings/domain/entities/app_settings.dart';
@@ -77,6 +78,14 @@ class HostDetailContainer extends ConsumerWidget {
     if (msg != null) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
+  /// The listed Herdr session the hook can address, else Herdr's default.
+  static String _herdrSession(List<RemoteSession> sessions) =>
+      sessions
+          .where((s) => s.kind == SessionKind.herdr && isHerdrSessionName(s.name))
+          .firstOrNull
+          ?.name ??
+      'default';
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final host = ref.watch(hostProvider(hostId)).value;
@@ -129,6 +138,15 @@ class HostDetailContainer extends ConsumerWidget {
                         'default',
                     'kind': SessionKind.herdr.name,
                   },
+                ).toString(),
+              ),
+        // Only once the sessions are loaded and the hook speaks `herdr`.
+        onHerdrNavigator: !state.herdr || state.sessions == null
+            ? null
+            : () => context.push(
+                Uri(
+                  path: '/hosts/$hostId/herdr',
+                  queryParameters: {'session': _herdrSession(state.sessions!)},
                 ).toString(),
               ),
         onAttach: (s) => context.push(

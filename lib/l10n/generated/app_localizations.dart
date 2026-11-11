@@ -2420,6 +2420,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not transcribe. Try again.'**
   String get voiceFailed;
+
+  /// Host action and screen title: structured view of the Herdr session.
+  ///
+  /// In en, this message translates to:
+  /// **'Agents & workspaces'**
+  String get herdrNavigator;
+
+  /// No description provided for @herdrNavigatorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse Herdr workspaces, tabs and agents and answer agents with buttons.'**
+  String get herdrNavigatorHint;
+
+  /// Herdr agent status: blocked waiting for the user.
+  ///
+  /// In en, this message translates to:
+  /// **'needs you'**
+  String get herdrStatusBlocked;
+
+  /// Marker of the workspace/tab/pane the computer shows.
+  ///
+  /// In en, this message translates to:
+  /// **'on screen'**
+  String get herdrFocused;
+
+  /// No description provided for @herdrShellPane.
+  ///
+  /// In en, this message translates to:
+  /// **'Terminal'**
+  String get herdrShellPane;
+
+  /// No description provided for @herdrNewWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'New workspace'**
+  String get herdrNewWorkspace;
+
+  /// No description provided for @herdrNewTab.
+  ///
+  /// In en, this message translates to:
+  /// **'New tab'**
+  String get herdrNewTab;
+
+  /// No description provided for @herdrRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get herdrRename;
+
+  /// No description provided for @herdrCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get herdrCreate;
+
+  /// No description provided for @herdrStartAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Start an agent'**
+  String get herdrStartAgent;
+
+  /// No description provided for @herdrStartAgentIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Start an agent in this pane'**
+  String get herdrStartAgentIn;
+
+  /// No description provided for @herdrCloseWorkspaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close workspace {name}?'**
+  String herdrCloseWorkspaceTitle(String name);
+
+  /// No description provided for @herdrCloseTabTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close tab {name}?'**
+  String herdrCloseTabTitle(String name);
+
+  /// No description provided for @herdrCloseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything running in it on the computer stops.'**
+  String get herdrCloseBody;
+
+  /// No description provided for @herdrName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get herdrName;
+
+  /// No description provided for @herdrNameOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (optional)'**
+  String get herdrNameOptional;
+
+  /// No description provided for @herdrEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'This Herdr session has no workspaces.'**
+  String get herdrEmpty;
+
+  /// No description provided for @herdrNoTabs.
+  ///
+  /// In en, this message translates to:
+  /// **'No tabs'**
+  String get herdrNoTabs;
+
+  /// No description provided for @herdrLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading Herdr…'**
+  String get herdrLoading;
+
+  /// No description provided for @herdrMoreActions.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get herdrMoreActions;
+
+  /// No description provided for @herdrPickPane.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick an agent to see it here.'**
+  String get herdrPickPane;
+
+  /// No description provided for @herdrTerminalMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Terminal mode'**
+  String get herdrTerminalMode;
+
+  /// No description provided for @herdrGraphicMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Graphic mode'**
+  String get herdrGraphicMode;
+
+  /// No description provided for @herdrNoFocusedPane.
+  ///
+  /// In en, this message translates to:
+  /// **'No pane is focused in Herdr.'**
+  String get herdrNoFocusedPane;
+
+  /// No description provided for @herdrOutOfDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing the last state; trying to reach Herdr again.'**
+  String get herdrOutOfDate;
+
+  /// No description provided for @agentViewEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'The pane is empty.'**
+  String get agentViewEmpty;
+
+  /// No description provided for @agentViewDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Typed on the computer: {text}'**
+  String agentViewDraft(String text);
+
+  /// No description provided for @agentViewQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'The agent is asking'**
+  String get agentViewQuestion;
+
+  /// No description provided for @herdrKeyUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Up'**
+  String get herdrKeyUp;
+
+  /// No description provided for @herdrKeyDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Down'**
+  String get herdrKeyDown;
+
+  /// No description provided for @herdrKeyEsc.
+  ///
+  /// In en, this message translates to:
+  /// **'Esc'**
+  String get herdrKeyEsc;
+
+  /// No description provided for @herdrKeyEnter.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter'**
+  String get herdrKeyEnter;
+
+  /// No description provided for @herdrKeyTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab'**
+  String get herdrKeyTab;
+
+  /// No description provided for @errHerdrInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Herdr no longer has that item. The list was refreshed.'**
+  String get errHerdrInvalid;
+
+  /// No description provided for @errHerdrNotRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Herdr is not running on this computer.'**
+  String get errHerdrNotRunning;
+
+  /// No description provided for @errHerdrRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'Herdr refused the request.'**
+  String get errHerdrRefused;
+
+  /// No description provided for @errHerdrHookOutdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Update openmosh-hook on this computer to use the Herdr navigator.'**
+  String get errHerdrHookOutdated;
+
+  /// No description provided for @errMessageTooLong4000.
+  ///
+  /// In en, this message translates to:
+  /// **'Message is longer than 4000 characters.'**
+  String get errMessageTooLong4000;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
