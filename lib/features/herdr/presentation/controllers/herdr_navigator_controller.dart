@@ -39,8 +39,21 @@ class HerdrNavigatorController extends ChangeNotifier {
   Object? error;
   bool _disposed = false;
 
-  void resume() => _poller.start();
-  void pause() => _poller.pause();
+  // Hidden screens never poll, even when an action finishes after hiding.
+  bool _hidden = false;
+
+  /// Whether a long-poll loop is active (the screen is shown).
+  bool get polling => _poller.running;
+
+  void resume() {
+    _hidden = false;
+    _poller.start();
+  }
+
+  void pause() {
+    _hidden = true;
+    _poller.pause();
+  }
 
   /// Retries after an error that stopped polling.
   void retry() {
@@ -60,7 +73,7 @@ class HerdrNavigatorController extends ChangeNotifier {
     } catch (e) {
       return e;
     } finally {
-      if (!_disposed) {
+      if (!_disposed && !_hidden) {
         _poller
           ..start()
           ..poke();
