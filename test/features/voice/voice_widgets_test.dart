@@ -77,4 +77,19 @@ void main() {
     expect(find.text('voice settings'), findsOneWidget);
     expect(recorder.calls, isEmpty);
   });
+
+  testWidgets('the mic closes cleanly when it was never used', (t) async {
+    final db = AppDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    await t.pumpWidget(
+      ProviderScope(
+        overrides: voiceOverrides(db, FakeModelStore(), FakeRecorder()),
+        child: MaterialApp(
+          home: Scaffold(body: VoiceMicButton(onTranscript: (_) {})),
+        ),
+      ),
+    );
+    await t.pumpWidget(const SizedBox());
+    expect(t.takeException(), isNull);
+  });
 }
