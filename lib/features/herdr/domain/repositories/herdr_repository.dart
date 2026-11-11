@@ -14,12 +14,14 @@ abstract interface class HerdrRepository {
     int waitMs = 0,
   });
 
+  /// The pane's last [lines] lines (the hook's default when null).
   Future<Polled<PaneScreen>> read(
     String hostId,
     String paneId, {
     String? session,
     String? since,
     int waitMs = 0,
+    int? lines,
   });
 
   /// Runs [action]; returns the new id for create/start actions.

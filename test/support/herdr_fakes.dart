@@ -61,6 +61,7 @@ class FakeHerdrRepository implements HerdrRepository {
   final List<String?> snapshotSince = [];
   final List<String?> readSince = [];
   final List<String> readPanes = [];
+  final List<int?> readLines = [];
   int _snapRev = 1;
   int _screenRev = 1;
   // Created by the waiting call, so they belong to the test's zone.
@@ -108,8 +109,10 @@ class FakeHerdrRepository implements HerdrRepository {
     String? session,
     String? since,
     int waitMs = 0,
+    int? lines,
   }) async {
     readPanes.add(paneId);
+    readLines.add(lines);
     readSince.add(since);
     if (since == _rev(_screenRev)) await (_screenChange ??= Completer<void>()).future;
     return Polled(_rev(_screenRev), false, screen);

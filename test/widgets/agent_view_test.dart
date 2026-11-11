@@ -186,7 +186,7 @@ void main() {
     expect(find.text('home'), findsOneWidget);
   });
 
-  test('the screen is parsed once per revision', () async {
+  test('the screen is parsed once per change of what was read', () async {
     final same = _SameRevRepository();
     final ctrl = AgentViewController(
       repository: same,
@@ -214,6 +214,7 @@ class _SameRevRepository implements HerdrRepository {
     String? session,
     String? since,
     int waitMs = 0,
+    int? lines,
   }) async {
     reads++;
     // Three answers, then a long-poll that never returns.

@@ -54,8 +54,15 @@ final class HookHerdrRepository implements HerdrRepository {
     String? session,
     String? since,
     int waitMs = 0,
+    int? lines,
   }) async {
-    final cmd = HookCommand.herdrRead(paneId, session: session, since: since, waitMs: waitMs);
+    final cmd = HookCommand.herdrRead(
+      paneId,
+      session: session,
+      since: since,
+      waitMs: waitMs,
+      lines: lines,
+    );
     return Polled.fromJson(await _run(hostId, cmd), PaneScreen.fromJson);
   }
 

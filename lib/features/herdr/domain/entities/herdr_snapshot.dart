@@ -133,6 +133,9 @@ final class HerdrSnapshot {
 }
 
 /// One pane's visible text, as `herdr read` returns it.
+/// Most lines one `herdr read` returns (the hook's `--lines` cap).
+const maxPaneReadLines = 2000;
+
 final class PaneScreen {
   const PaneScreen({this.agent, this.status = HerdrStatus.unknown, this.lines = const []});
   final String? agent;
@@ -149,7 +152,7 @@ final class PaneScreen {
       agent: raw['agent'] is String ? sanitizeText(raw['agent']! as String, max: 32) : null,
       status: _status(raw['agent_status']),
       lines: [
-        for (final l in lines.take(400))
+        for (final l in lines.take(maxPaneReadLines))
           if (l is String) truncateText(l.replaceAll(_invisible, ''), 1000),
       ],
     );
