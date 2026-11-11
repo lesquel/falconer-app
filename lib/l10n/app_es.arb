@@ -425,5 +425,11 @@
   "errHerdrNotRunning": "Herdr no se está ejecutando en esta computadora.",
   "errHerdrRefused": "Herdr rechazó la solicitud.",
   "errHerdrHookOutdated": "Actualiza openmosh-hook en esta computadora para usar el navegador de Herdr.",
-  "errMessageTooLong4000": "El mensaje tiene más de 4000 caracteres."
+  "errMessageTooLong4000": "El mensaje tiene más de 4000 caracteres.",
+  "herdrViewAsAgents": "Ver como agentes",
+  "herdrNewTerminal": "Nueva terminal",
+  "herdrAgentCount": "{count, plural, =1{1 agente} other{{count} agentes}}",
+  "herdrTerminalCount": "{count, plural, =1{1 terminal} other{{count} terminales}}",
+  "herdrWorkspaceGone": "Este workspace ya no está abierto.",
+  "herdrPickWorkspace": "Elige un workspace para ver sus terminales."
 }

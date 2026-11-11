@@ -1126,5 +1126,31 @@
   "errHerdrNotRunning": "Herdr is not running on this computer.",
   "errHerdrRefused": "Herdr refused the request.",
   "errHerdrHookOutdated": "Update openmosh-hook on this computer to use the Herdr navigator.",
-  "errMessageTooLong4000": "Message is longer than 4000 characters."
+  "errMessageTooLong4000": "Message is longer than 4000 characters.",
+  "herdrViewAsAgents": "View as agents",
+  "@herdrViewAsAgents": {
+    "description": "Host screen button next to Open Herdr and Shell: opens the graphic Herdr navigator."
+  },
+  "herdrNewTerminal": "New terminal",
+  "@herdrNewTerminal": {
+    "description": "Workspace screen action: opens a new Herdr tab (a shell) in this workspace."
+  },
+  "herdrAgentCount": "{count, plural, =1{1 agent} other{{count} agents}}",
+  "@herdrAgentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "herdrTerminalCount": "{count, plural, =1{1 terminal} other{{count} terminals}}",
+  "@herdrTerminalCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "herdrWorkspaceGone": "This workspace is no longer open.",
+  "herdrPickWorkspace": "Pick a workspace to see its terminals."
 }

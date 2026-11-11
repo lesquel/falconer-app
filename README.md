@@ -25,18 +25,23 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
 - **Open Herdr / Shell** — the host screen has *Open Herdr*, which attaches the Herdr session
   through `openmosh-hook attach herdr` so the computer follows the tab and workspace picked on
   the phone (mirroring), and *Shell* for a plain login shell.
-- **Agents & workspaces (Herdr navigator)** — when the host's hook speaks the Herdr protocol
-  (`openmosh-hook version --json` reports `"herdr": 1`), the host screen also offers *Agents &
-  workspaces*: the session's workspaces, tabs and panes with each agent's live status (*needs you*
-  is highlighted, then working, done, idle). Create, rename and close workspaces and tabs (closing
-  asks first) and start an agent (Claude, Codex, Gemini, Cursor, Copilot, Kiro, OpenCode, Amp,
-  Pi) in a pane, all through the hook's fixed allowlist. Updates arrive by long-poll
-  (`herdr snapshot --since <rev> --wait-ms 15000`), only while the screen is open and the app is
-  in the foreground. On a tablet the list and the selected agent sit side by side.
-- **Graphic agent view** — tapping an agent focuses its pane on the computer and shows its screen
-  as cards: a permission or decision menu becomes big buttons (allow, allow always, deny, other)
-  that press the menu's keys, the input line becomes a composer (with dictation), and Esc, ↑, ↓,
-  Tab and Enter are one tap away. Screens it does not recognize stay plain text. It is a second
+- **View as agents (Herdr navigator)** — when the host's hook speaks the Herdr protocol
+  (`openmosh-hook version --json` reports `"herdr": 1`), *View as agents* sits next to *Open
+  Herdr* and *Shell*. It lists the session's workspaces with how many agents and terminals each
+  holds, a *needs you* badge when one waits on you, and which one the computer shows; create,
+  rename and close them there. Tapping a workspace shows its tabs and panes: agents with live
+  status (working, done, idle) and plain terminals. *New terminal* opens a tab in that workspace
+  and shows it right away; you can also start an agent (Claude, Codex, Gemini, Cursor, Copilot,
+  Kiro, OpenCode, Amp, Pi) in a pane and rename or close tabs (closing asks first), all through the
+  hook's fixed allowlist. Updates arrive by long-poll (`herdr snapshot --since <rev> --wait-ms
+  15000`), only for the screen on view and while the app is in the foreground. On a tablet the
+  workspaces and their terminals, or a workspace and the selected pane, sit side by side.
+- **Graphic view** — tapping any pane, an agent or a plain terminal, focuses it on the computer and
+  shows its screen as a chat: your own prompts (or shell commands) in accent bubbles on the right,
+  the agent's replies as cards on the left, and tool runs and command output on monospace cards. A
+  permission or decision menu becomes big buttons (allow, allow always, deny, other) that press
+  the menu's keys, the composer (with dictation) types and submits into the pane, and Esc, ↑, ↓,
+  Tab and Enter are one tap away. What it does not recognize stays plain agent text. It is a second
   mode next to the terminal: *Terminal mode* opens the usual Herdr terminal on that pane, and a
   Herdr terminal's *Graphic mode* button opens the focused pane's graphic view.
 - **Terminal** — full xterm emulation in the chosen color scheme. The system keyboard opens on

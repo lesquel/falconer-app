@@ -1468,4 +1468,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errMessageTooLong4000 => 'Message is longer than 4000 characters.';
+
+  @override
+  String get herdrViewAsAgents => 'View as agents';
+
+  @override
+  String get herdrNewTerminal => 'New terminal';
+
+  @override
+  String herdrAgentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count agents',
+      one: '1 agent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String herdrTerminalCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count terminals',
+      one: '1 terminal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get herdrWorkspaceGone => 'This workspace is no longer open.';
+
+  @override
+  String get herdrPickWorkspace => 'Pick a workspace to see its terminals.';
+
+  @override
+  String get herdrOpeningTerminal => 'Opening the new terminal…';
 }

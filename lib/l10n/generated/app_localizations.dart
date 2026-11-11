@@ -2648,6 +2648,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Message is longer than 4000 characters.'**
   String get errMessageTooLong4000;
+
+  /// Host screen button next to Open Herdr and Shell: opens the graphic Herdr navigator.
+  ///
+  /// In en, this message translates to:
+  /// **'View as agents'**
+  String get herdrViewAsAgents;
+
+  /// Workspace screen action: opens a new Herdr tab (a shell) in this workspace.
+  ///
+  /// In en, this message translates to:
+  /// **'New terminal'**
+  String get herdrNewTerminal;
+
+  /// No description provided for @herdrAgentCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 agent} other{{count} agents}}'**
+  String herdrAgentCount(int count);
+
+  /// No description provided for @herdrTerminalCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 terminal} other{{count} terminals}}'**
+  String herdrTerminalCount(int count);
+
+  /// No description provided for @herdrWorkspaceGone.
+  ///
+  /// In en, this message translates to:
+  /// **'This workspace is no longer open.'**
+  String get herdrWorkspaceGone;
+
+  /// No description provided for @herdrPickWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a workspace to see its terminals.'**
+  String get herdrPickWorkspace;
+
+  /// No description provided for @herdrOpeningTerminal.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening the new terminal…'**
+  String get herdrOpeningTerminal;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

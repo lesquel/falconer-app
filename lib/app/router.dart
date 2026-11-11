@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/agent_view/presentation/containers/agent_view_container.dart';
 import '../features/herdr/presentation/containers/herdr_navigator_container.dart';
+import '../features/herdr/presentation/containers/herdr_workspace_container.dart';
 import '../features/hosts/presentation/containers/host_detail_container.dart';
 import '../features/hosts/presentation/containers/host_form_container.dart';
 import '../features/hosts/presentation/containers/hosts_container.dart';
@@ -71,6 +72,23 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
                         hostId: s.pathParameters['id']!,
                         session: _herdrSession(s),
                       ),
+                      routes: [
+                        // One workspace's terminals; its id is `?ws=`.
+                        GoRoute(
+                          path: 'workspace',
+                          builder: (context, s) {
+                            final ws = s.uri.queryParameters['ws'];
+                            if (ws == null || !isHerdrTargetId(ws)) {
+                              return Scaffold(body: Center(child: Text(context.l10n.notFound)));
+                            }
+                            return HerdrWorkspaceContainer(
+                              hostId: s.pathParameters['id']!,
+                              workspaceId: ws,
+                              session: _herdrSession(s),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),

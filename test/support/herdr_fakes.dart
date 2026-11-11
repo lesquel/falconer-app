@@ -53,6 +53,9 @@ class FakeHerdrRepository implements HerdrRepository {
   PaneScreen screen;
   bool supported = true;
   Object? actError;
+
+  /// Id the next actions return (`tab.create` → the new tab id).
+  String? actId;
   Object? snapshotError;
   final List<HerdrAction> actions = [];
   final List<String?> snapshotSince = [];
@@ -116,7 +119,7 @@ class FakeHerdrRepository implements HerdrRepository {
   Future<String?> act(String hostId, HerdrAction action, {String? session}) async {
     actions.add(action);
     if (actError != null) throw actError!;
-    return null;
+    return actId;
   }
 }
 
