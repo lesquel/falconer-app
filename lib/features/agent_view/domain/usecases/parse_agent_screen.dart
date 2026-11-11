@@ -16,7 +16,16 @@ List<ScreenBlock> parseAgentScreen(String? agent, List<String> lines) {
   final detector = detectorFor(agent);
   final region =
       _firstMatch(detector.choiceScanners, screen) ?? _firstMatch(detector.inputScanners, screen);
-  return _assemble(screen, region, detector);
+  return _assemble(screen, _withDetail(screen, region, detector), detector);
+}
+
+/// Adds the command or file a menu is about; its lines stay as text too.
+ScreenRegion? _withDetail(List<ScreenLine> screen, ScreenRegion? region, AgentDetector detector) {
+  final block = region?.block;
+  if (region == null || block is! ChoiceBlock) return region;
+  final detail = detector.choiceDetail(screen, region);
+  if (detail == null) return region;
+  return ScreenRegion(at: region.at, consumed: region.consumed, block: block.withDetail(detail));
 }
 
 ScreenRegion? _firstMatch(List<Object> scanners, List<ScreenLine> screen) {

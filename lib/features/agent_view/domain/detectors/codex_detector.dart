@@ -1,3 +1,4 @@
+import '../parsing/choice_details.dart';
 import '../parsing/choice_scanners.dart';
 import '../parsing/input_scanners.dart';
 import '../entities/screen_block.dart';
@@ -29,6 +30,10 @@ final class CodexDetector extends AgentDetector {
       ],
     ),
   ];
+
+  /// The `$ command` line of an approval.
+  @override
+  String? choiceDetail(List<ScreenLine> lines, ScreenRegion region) => dollarCommand(lines, region);
 
   @override
   List<String> get noise => const ['context left'];

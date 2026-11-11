@@ -51,7 +51,7 @@ void main() {
             always,
           ),
           ChoiceOption('No, and tell Claude what to do differently', ['3'], false, deny),
-        ]),
+        ], detail: 'npm install\nInstall project dependencies'),
       ]);
     });
 
@@ -68,8 +68,43 @@ void main() {
           ChoiceOption('Yes', ['1'], false, allow),
           ChoiceOption('Yes, allow all edits during this session', ['2'], true, always),
           ChoiceOption('No, and tell Claude what to do differently', ['3'], false, deny),
-        ]),
+        ], detail: 'src/cart.ts'),
       ]);
+    });
+
+    test('a menu without a command or file box has no detail', () {
+      final blocks = parseAgentScreen('claude', const [
+        'Bash command',
+        '',
+        '  ls',
+        '',
+        'Some unrelated paragraph that is long enough',
+        'and another line',
+        'one',
+        'two',
+        'three',
+        'four',
+        'five',
+        'six',
+        'seven',
+        'eight',
+        'nine',
+        'ten',
+        'eleven',
+        'twelve',
+        ' Do you want to proceed?',
+        ' ❯ 1. Yes',
+        '   2. No',
+      ]);
+      final choice = blocks.whereType<ChoiceBlock>().single;
+      expect(choice.detail, isNull);
+      expect(
+        parseAgentScreen('claude', const [' Continue?', ' ❯ 1. Yes', '   2. No']).last,
+        const ChoiceBlock('Continue?', [
+          ChoiceOption('Yes', ['1'], true, allow),
+          ChoiceOption('No', ['2'], false, deny),
+        ]),
+      );
     });
 
     test('plain output is only text, without borders or status noise', () {
@@ -117,7 +152,7 @@ void main() {
             always,
           ),
           ChoiceOption('No, and tell Codex what to do differently', ['3'], false, deny),
-        ]),
+        ], detail: 'npm install'),
       ]);
     });
 

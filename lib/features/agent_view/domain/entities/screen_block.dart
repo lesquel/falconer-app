@@ -36,22 +36,32 @@ final class TextBlock extends ScreenBlock {
       : 'TextBlock(${role.name}: ${_quote(text)})';
 }
 
-/// A permission or decision menu the agent is waiting on.
+/// A permission or decision menu the agent is waiting on. [detail] is the
+/// command or file the menu is about (Claude's command box, Codex's `$`
+/// line), only when the detector is sure; the lines also stay as text.
 final class ChoiceBlock extends ScreenBlock {
-  const ChoiceBlock(this.question, this.options);
+  const ChoiceBlock(this.question, this.options, {this.detail});
 
   final String question;
   final List<ChoiceOption> options;
+  final String? detail;
+
+  ChoiceBlock withDetail(String? detail) => ChoiceBlock(question, options, detail: detail);
 
   @override
   bool operator ==(Object other) =>
-      other is ChoiceBlock && other.question == question && _listEquals(other.options, options);
+      other is ChoiceBlock &&
+      other.question == question &&
+      other.detail == detail &&
+      _listEquals(other.options, options);
 
   @override
-  int get hashCode => Object.hash(question, Object.hashAll(options));
+  int get hashCode => Object.hash(question, detail, Object.hashAll(options));
 
   @override
-  String toString() => 'ChoiceBlock(${_quote(question)}, $options)';
+  String toString() => detail == null
+      ? 'ChoiceBlock(${_quote(question)}, $options)'
+      : 'ChoiceBlock(${_quote(question)}, $options, detail: ${_quote(detail!)})';
 }
 
 /// One answer of a [ChoiceBlock]. [keys] are pane key names (the hook's

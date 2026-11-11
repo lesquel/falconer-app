@@ -1,3 +1,4 @@
+import '../parsing/choice_details.dart';
 import '../parsing/choice_scanners.dart';
 import '../parsing/input_scanners.dart';
 import '../entities/screen_block.dart';
@@ -17,6 +18,15 @@ final class ClaudeDetector extends AgentDetector {
   List<InputScanner> get inputScanners => [
     FramedPromptInput(prompts: '>❯', placeholders: [RegExp(r'^Try ".*"$')]),
   ];
+
+  /// The command under `Bash command`, or the path under `Edit file`.
+  @override
+  String? choiceDetail(List<ScreenLine> lines, ScreenRegion region) => detailUnderHeader(
+    lines,
+    region,
+    paragraphHeaders: const {'Bash command'},
+    lineHeaders: const {'Edit file', 'Create file'},
+  );
 
   @override
   List<String> get noise => const ['accept edits on', 'plan mode on', 'bypass permissions on'];

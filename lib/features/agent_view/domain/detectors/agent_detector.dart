@@ -42,6 +42,10 @@ abstract class AgentDetector {
   /// paragraph.
   bool get userIsOneLine => false;
 
+  /// The command or file a recognized menu is about, when this agent draws
+  /// it in a way the detector is sure of; null otherwise.
+  String? choiceDetail(List<ScreenLine> lines, ScreenRegion region) => null;
+
   /// Lower-case fragments of status or footer lines to drop.
   List<String> get noise => const [];
 
