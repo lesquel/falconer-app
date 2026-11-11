@@ -10,8 +10,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'frb_generated.dart';
-import 'frb_generated.io.dart'
-    if (dart.library.js_interop) 'frb_generated.web.dart';
+import 'frb_generated.io.dart' if (dart.library.js_interop) 'frb_generated.web.dart';
 
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
@@ -50,12 +49,10 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   static void dispose() => instance.disposeImpl();
 
   @override
-  ApiImplConstructor<RustLibApiImpl, RustLibWire> get apiImplConstructor =>
-      RustLibApiImpl.new;
+  ApiImplConstructor<RustLibApiImpl, RustLibWire> get apiImplConstructor => RustLibApiImpl.new;
 
   @override
-  WireConstructor<RustLibWire> get wireConstructor =>
-      RustLibWire.fromExternalLibrary;
+  WireConstructor<RustLibWire> get wireConstructor => RustLibWire.fromExternalLibrary;
 
   @override
   Future<void> executeRustInitializers() async {
@@ -72,13 +69,12 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   @override
   int get rustContentHash => 1358235609;
 
-  static const kDefaultExternalLibraryLoaderConfig =
-      ExternalLibraryLoaderConfig(
-        stem: 'openmosh_core',
-        ioDirectory: 'rust/target/release/',
-        webPrefix: 'pkg/',
-        wasmBindgenName: 'wasm_bindgen',
-      );
+  static const kDefaultExternalLibraryLoaderConfig = ExternalLibraryLoaderConfig(
+    stem: 'openmosh_core',
+    ioDirectory: 'rust/target/release/',
+    webPrefix: 'pkg/',
+    wasmBindgenName: 'wasm_bindgen',
+  );
 }
 
 abstract class RustLibApi extends BaseApi {
@@ -94,10 +90,7 @@ abstract class RustLibApi extends BaseApi {
     required int rows,
   });
 
-  Future<void> crateApiSshShellSessionWrite({
-    required ShellSession that,
-    required List<int> data,
-  });
+  Future<void> crateApiSshShellSessionWrite({required ShellSession that, required List<int> data});
 
   String? crateApiSshSshClientCloseReason({required SshClient that});
 
@@ -140,26 +133,19 @@ abstract class RustLibApi extends BaseApi {
 
   Future<void> crateApiKeysInitApp();
 
-  Future<String> crateApiSshProbeHostFingerprint({
-    required String host,
-    required int port,
-  });
+  Future<String> crateApiSshProbeHostFingerprint({required String host, required int port});
 
   String crateApiKeysPublicKeyFingerprint({required String publicOpenssh});
 
-  RustArcIncrementStrongCountFnType
-  get rust_arc_increment_strong_count_ShellSession;
+  RustArcIncrementStrongCountFnType get rust_arc_increment_strong_count_ShellSession;
 
-  RustArcDecrementStrongCountFnType
-  get rust_arc_decrement_strong_count_ShellSession;
+  RustArcDecrementStrongCountFnType get rust_arc_decrement_strong_count_ShellSession;
 
   CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_ShellSessionPtr;
 
-  RustArcIncrementStrongCountFnType
-  get rust_arc_increment_strong_count_SshClient;
+  RustArcIncrementStrongCountFnType get rust_arc_increment_strong_count_SshClient;
 
-  RustArcDecrementStrongCountFnType
-  get rust_arc_decrement_strong_count_SshClient;
+  RustArcDecrementStrongCountFnType get rust_arc_decrement_strong_count_SshClient;
 
   CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_SshClientPtr;
 }
@@ -182,17 +168,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 1,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 1, port: port_);
         },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData: null,
-        ),
+        codec: SseCodec(decodeSuccessData: sse_decode_unit, decodeErrorData: null),
         constMeta: kCrateApiSshShellSessionCloseConstMeta,
         argValues: [that],
         apiImpl: this,
@@ -215,10 +193,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2)!;
         },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_bool,
-          decodeErrorData: null,
-        ),
+        codec: SseCodec(decodeSuccessData: sse_decode_bool, decodeErrorData: null),
         constMeta: kCrateApiSshShellSessionIsOpenConstMeta,
         argValues: [that],
         apiImpl: this,
@@ -227,15 +202,10 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   TaskConstMeta get kCrateApiSshShellSessionIsOpenConstMeta =>
-      const TaskConstMeta(
-        debugName: "ShellSession_is_open",
-        argNames: ["that"],
-      );
+      const TaskConstMeta(debugName: "ShellSession_is_open", argNames: ["that"]);
 
   @override
-  Stream<Uint8List> crateApiSshShellSessionOutput({
-    required ShellSession that,
-  }) {
+  Stream<Uint8List> crateApiSshShellSessionOutput({required ShellSession that}) {
     final sink = RustStreamSink<Uint8List>();
     unawaited(
       handler.executeNormal(
@@ -247,12 +217,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
               serializer,
             );
             sse_encode_StreamSink_list_prim_u_8_strict_Sse(sink, serializer);
-            pdeCallFfi(
-              generalizedFrbRustBinding,
-              serializer,
-              funcId: 3,
-              port: port_,
-            );
+            pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 3, port: port_);
           },
           codec: SseCodec(
             decodeSuccessData: sse_decode_unit,
@@ -268,10 +233,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   TaskConstMeta get kCrateApiSshShellSessionOutputConstMeta =>
-      const TaskConstMeta(
-        debugName: "ShellSession_output",
-        argNames: ["that", "sink"],
-      );
+      const TaskConstMeta(debugName: "ShellSession_output", argNames: ["that", "sink"]);
 
   @override
   Future<void> crateApiSshShellSessionResize({
@@ -289,12 +251,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           sse_encode_u_32(cols, serializer);
           sse_encode_u_32(rows, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 4,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 4, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -308,16 +265,10 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   TaskConstMeta get kCrateApiSshShellSessionResizeConstMeta =>
-      const TaskConstMeta(
-        debugName: "ShellSession_resize",
-        argNames: ["that", "cols", "rows"],
-      );
+      const TaskConstMeta(debugName: "ShellSession_resize", argNames: ["that", "cols", "rows"]);
 
   @override
-  Future<void> crateApiSshShellSessionWrite({
-    required ShellSession that,
-    required List<int> data,
-  }) {
+  Future<void> crateApiSshShellSessionWrite({required ShellSession that, required List<int> data}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -327,12 +278,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_list_prim_u_8_loose(data, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 5,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 5, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -346,10 +292,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   TaskConstMeta get kCrateApiSshShellSessionWriteConstMeta =>
-      const TaskConstMeta(
-        debugName: "ShellSession_write",
-        argNames: ["that", "data"],
-      );
+      const TaskConstMeta(debugName: "ShellSession_write", argNames: ["that", "data"]);
 
   @override
   String? crateApiSshSshClientCloseReason({required SshClient that}) {
@@ -363,10 +306,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 6)!;
         },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_opt_String,
-          decodeErrorData: null,
-        ),
+        codec: SseCodec(decodeSuccessData: sse_decode_opt_String, decodeErrorData: null),
         constMeta: kCrateApiSshSshClientCloseReasonConstMeta,
         argValues: [that],
         apiImpl: this,
@@ -375,10 +315,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   TaskConstMeta get kCrateApiSshSshClientCloseReasonConstMeta =>
-      const TaskConstMeta(
-        debugName: "SshClient_close_reason",
-        argNames: ["that"],
-      );
+      const TaskConstMeta(debugName: "SshClient_close_reason", argNames: ["that"]);
 
   @override
   Future<SshClient> crateApiSshSshClientConnect({
@@ -397,12 +334,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_String(user, serializer);
           sse_encode_String(pinnedFingerprint, serializer);
           sse_encode_String(privateOpenssh, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 7,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 7, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -416,17 +348,10 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     );
   }
 
-  TaskConstMeta get kCrateApiSshSshClientConnectConstMeta =>
-      const TaskConstMeta(
-        debugName: "SshClient_connect",
-        argNames: [
-          "host",
-          "port",
-          "user",
-          "pinnedFingerprint",
-          "privateOpenssh",
-        ],
-      );
+  TaskConstMeta get kCrateApiSshSshClientConnectConstMeta => const TaskConstMeta(
+    debugName: "SshClient_connect",
+    argNames: ["host", "port", "user", "pinnedFingerprint", "privateOpenssh"],
+  );
 
   @override
   Future<void> crateApiSshSshClientDisconnect({required SshClient that}) {
@@ -438,17 +363,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 8,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 8, port: port_);
         },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData: null,
-        ),
+        codec: SseCodec(decodeSuccessData: sse_decode_unit, decodeErrorData: null),
         constMeta: kCrateApiSshSshClientDisconnectConstMeta,
         argValues: [that],
         apiImpl: this,
@@ -457,10 +374,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   TaskConstMeta get kCrateApiSshSshClientDisconnectConstMeta =>
-      const TaskConstMeta(
-        debugName: "SshClient_disconnect",
-        argNames: ["that"],
-      );
+      const TaskConstMeta(debugName: "SshClient_disconnect", argNames: ["that"]);
 
   @override
   Future<ExecResult> crateApiSshSshClientExec({
@@ -478,12 +392,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           sse_encode_String(command, serializer);
           sse_encode_opt_list_prim_u_8_strict(stdin, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 9,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 9, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_exec_result,
@@ -496,10 +405,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     );
   }
 
-  TaskConstMeta get kCrateApiSshSshClientExecConstMeta => const TaskConstMeta(
-    debugName: "SshClient_exec",
-    argNames: ["that", "command", "stdin"],
-  );
+  TaskConstMeta get kCrateApiSshSshClientExecConstMeta =>
+      const TaskConstMeta(debugName: "SshClient_exec", argNames: ["that", "command", "stdin"]);
 
   @override
   bool crateApiSshSshClientIsClosed({required SshClient that}) {
@@ -513,10 +420,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 10)!;
         },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_bool,
-          decodeErrorData: null,
-        ),
+        codec: SseCodec(decodeSuccessData: sse_decode_bool, decodeErrorData: null),
         constMeta: kCrateApiSshSshClientIsClosedConstMeta,
         argValues: [that],
         apiImpl: this,
@@ -543,12 +447,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           sse_encode_u_32(cols, serializer);
           sse_encode_u_32(rows, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 11,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 11, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -563,10 +462,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   TaskConstMeta get kCrateApiSshSshClientOpenShellConstMeta =>
-      const TaskConstMeta(
-        debugName: "SshClient_open_shell",
-        argNames: ["that", "cols", "rows"],
-      );
+      const TaskConstMeta(debugName: "SshClient_open_shell", argNames: ["that", "cols", "rows"]);
 
   @override
   Future<String> crateApiSshSshClientUpload({
@@ -584,12 +480,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           sse_encode_String(localPath, serializer);
           sse_encode_String(remoteName, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 12,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 12, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -628,10 +519,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   TaskConstMeta get kCrateApiKeysGenerateEd25519KeyConstMeta =>
-      const TaskConstMeta(
-        debugName: "generate_ed25519_key",
-        argNames: ["comment"],
-      );
+      const TaskConstMeta(debugName: "generate_ed25519_key", argNames: ["comment"]);
 
   @override
   DeviceKeyMaterial crateApiKeysImportPrivateKey({
@@ -657,11 +545,10 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     );
   }
 
-  TaskConstMeta get kCrateApiKeysImportPrivateKeyConstMeta =>
-      const TaskConstMeta(
-        debugName: "import_private_key",
-        argNames: ["privateOpenssh", "passphrase"],
-      );
+  TaskConstMeta get kCrateApiKeysImportPrivateKeyConstMeta => const TaskConstMeta(
+    debugName: "import_private_key",
+    argNames: ["privateOpenssh", "passphrase"],
+  );
 
   @override
   Future<void> crateApiKeysInitApp() {
@@ -669,17 +556,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 15,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 15, port: port_);
         },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData: null,
-        ),
+        codec: SseCodec(decodeSuccessData: sse_decode_unit, decodeErrorData: null),
         constMeta: kCrateApiKeysInitAppConstMeta,
         argValues: [],
         apiImpl: this,
@@ -691,22 +570,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "init_app", argNames: []);
 
   @override
-  Future<String> crateApiSshProbeHostFingerprint({
-    required String host,
-    required int port,
-  }) {
+  Future<String> crateApiSshProbeHostFingerprint({required String host, required int port}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(host, serializer);
           sse_encode_u_16(port, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 16,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 16, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -720,10 +591,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   TaskConstMeta get kCrateApiSshProbeHostFingerprintConstMeta =>
-      const TaskConstMeta(
-        debugName: "probe_host_fingerprint",
-        argNames: ["host", "port"],
-      );
+      const TaskConstMeta(debugName: "probe_host_fingerprint", argNames: ["host", "port"]);
 
   @override
   String crateApiKeysPublicKeyFingerprint({required String publicOpenssh}) {
@@ -746,25 +614,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   TaskConstMeta get kCrateApiKeysPublicKeyFingerprintConstMeta =>
-      const TaskConstMeta(
-        debugName: "public_key_fingerprint",
-        argNames: ["publicOpenssh"],
-      );
+      const TaskConstMeta(debugName: "public_key_fingerprint", argNames: ["publicOpenssh"]);
 
-  RustArcIncrementStrongCountFnType
-  get rust_arc_increment_strong_count_ShellSession => wire
+  RustArcIncrementStrongCountFnType get rust_arc_increment_strong_count_ShellSession => wire
       .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerShellSession;
 
-  RustArcDecrementStrongCountFnType
-  get rust_arc_decrement_strong_count_ShellSession => wire
+  RustArcDecrementStrongCountFnType get rust_arc_decrement_strong_count_ShellSession => wire
       .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerShellSession;
 
-  RustArcIncrementStrongCountFnType
-  get rust_arc_increment_strong_count_SshClient => wire
+  RustArcIncrementStrongCountFnType get rust_arc_increment_strong_count_SshClient => wire
       .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSshClient;
 
-  RustArcDecrementStrongCountFnType
-  get rust_arc_decrement_strong_count_SshClient => wire
+  RustArcDecrementStrongCountFnType get rust_arc_decrement_strong_count_SshClient => wire
       .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSshClient;
 
   @protected
@@ -819,8 +680,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  SshClient
-  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSshClient(
+  SshClient dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSshClient(
     dynamic raw,
   ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
@@ -828,9 +688,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  RustStreamSink<Uint8List> dco_decode_StreamSink_list_prim_u_8_strict_Sse(
-    dynamic raw,
-  ) {
+  RustStreamSink<Uint8List> dco_decode_StreamSink_list_prim_u_8_strict_Sse(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     throw UnimplementedError();
   }
@@ -857,8 +715,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   DeviceKeyMaterial dco_decode_device_key_material(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 3)
-      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    if (arr.length != 3) throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
     return DeviceKeyMaterial(
       privateOpenssh: dco_decode_String(arr[0]),
       publicOpenssh: dco_decode_String(arr[1]),
@@ -870,8 +727,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ExecResult dco_decode_exec_result(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 3)
-      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    if (arr.length != 3) throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
     return ExecResult(
       exitCode: dco_decode_opt_box_autoadd_u_32(arr[0]),
       stdout: dco_decode_list_prim_u_8_strict(arr[1]),
@@ -1007,8 +863,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  SshClient
-  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSshClient(
+  SshClient sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSshClient(
     SseDeserializer deserializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -1046,9 +901,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  DeviceKeyMaterial sse_decode_device_key_material(
-    SseDeserializer deserializer,
-  ) {
+  DeviceKeyMaterial sse_decode_device_key_material(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_privateOpenssh = sse_decode_String(deserializer);
     var var_publicOpenssh = sse_decode_String(deserializer);
@@ -1066,11 +919,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_exitCode = sse_decode_opt_box_autoadd_u_32(deserializer);
     var var_stdout = sse_decode_list_prim_u_8_strict(deserializer);
     var var_stderr = sse_decode_list_prim_u_8_strict(deserializer);
-    return ExecResult(
-      exitCode: var_exitCode,
-      stdout: var_stdout,
-      stderr: var_stderr,
-    );
+    return ExecResult(exitCode: var_exitCode, stdout: var_stdout, stderr: var_stderr);
   }
 
   @protected
@@ -1156,10 +1005,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_AnyhowException(
-    AnyhowException self,
-    SseSerializer serializer,
-  ) {
+  void sse_encode_AnyhowException(AnyhowException self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.message, serializer);
   }
@@ -1171,10 +1017,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     SseSerializer serializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-      (self as ShellSessionImpl).frbInternalSseEncode(move: true),
-      serializer,
-    );
+    sse_encode_usize((self as ShellSessionImpl).frbInternalSseEncode(move: true), serializer);
   }
 
   @protected
@@ -1184,10 +1027,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     SseSerializer serializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-      (self as SshClientImpl).frbInternalSseEncode(move: true),
-      serializer,
-    );
+    sse_encode_usize((self as SshClientImpl).frbInternalSseEncode(move: true), serializer);
   }
 
   @protected
@@ -1197,49 +1037,34 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     SseSerializer serializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-      (self as ShellSessionImpl).frbInternalSseEncode(move: false),
-      serializer,
-    );
+    sse_encode_usize((self as ShellSessionImpl).frbInternalSseEncode(move: false), serializer);
   }
 
   @protected
-  void
-  sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSshClient(
+  void sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSshClient(
     SshClient self,
     SseSerializer serializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-      (self as SshClientImpl).frbInternalSseEncode(move: false),
-      serializer,
-    );
+    sse_encode_usize((self as SshClientImpl).frbInternalSseEncode(move: false), serializer);
   }
 
   @protected
-  void
-  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerShellSession(
+  void sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerShellSession(
     ShellSession self,
     SseSerializer serializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-      (self as ShellSessionImpl).frbInternalSseEncode(move: null),
-      serializer,
-    );
+    sse_encode_usize((self as ShellSessionImpl).frbInternalSseEncode(move: null), serializer);
   }
 
   @protected
-  void
-  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSshClient(
+  void sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSshClient(
     SshClient self,
     SseSerializer serializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-      (self as SshClientImpl).frbInternalSseEncode(move: null),
-      serializer,
-    );
+    sse_encode_usize((self as SshClientImpl).frbInternalSseEncode(move: null), serializer);
   }
 
   @protected
@@ -1278,10 +1103,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_device_key_material(
-    DeviceKeyMaterial self,
-    SseSerializer serializer,
-  ) {
+  void sse_encode_device_key_material(DeviceKeyMaterial self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.privateOpenssh, serializer);
     sse_encode_String(self.publicOpenssh, serializer);
@@ -1297,22 +1119,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_list_prim_u_8_loose(
-    List<int> self,
-    SseSerializer serializer,
-  ) {
+  void sse_encode_list_prim_u_8_loose(List<int> self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
-    serializer.buffer.putUint8List(
-      self is Uint8List ? self : Uint8List.fromList(self),
-    );
+    serializer.buffer.putUint8List(self is Uint8List ? self : Uint8List.fromList(self));
   }
 
   @protected
-  void sse_encode_list_prim_u_8_strict(
-    Uint8List self,
-    SseSerializer serializer,
-  ) {
+  void sse_encode_list_prim_u_8_strict(Uint8List self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     serializer.buffer.putUint8List(self);
@@ -1339,10 +1153,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_opt_list_prim_u_8_strict(
-    Uint8List? self,
-    SseSerializer serializer,
-  ) {
+  void sse_encode_opt_list_prim_u_8_strict(Uint8List? self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     sse_encode_bool(self != null, serializer);
@@ -1398,28 +1209,21 @@ class ShellSessionImpl extends RustOpaque implements ShellSession {
     : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
 
   static final _kStaticData = RustArcStaticData(
-    rustArcIncrementStrongCount:
-        RustLib.instance.api.rust_arc_increment_strong_count_ShellSession,
-    rustArcDecrementStrongCount:
-        RustLib.instance.api.rust_arc_decrement_strong_count_ShellSession,
+    rustArcIncrementStrongCount: RustLib.instance.api.rust_arc_increment_strong_count_ShellSession,
+    rustArcDecrementStrongCount: RustLib.instance.api.rust_arc_decrement_strong_count_ShellSession,
     rustArcDecrementStrongCountPtr:
         RustLib.instance.api.rust_arc_decrement_strong_count_ShellSessionPtr,
   );
 
-  Future<void> close() =>
-      RustLib.instance.api.crateApiSshShellSessionClose(that: this);
+  Future<void> close() => RustLib.instance.api.crateApiSshShellSessionClose(that: this);
 
-  bool isOpen() =>
-      RustLib.instance.api.crateApiSshShellSessionIsOpen(that: this);
+  bool isOpen() => RustLib.instance.api.crateApiSshShellSessionIsOpen(that: this);
 
   /// Batched terminal output; the stream ends when the channel closes.
-  Stream<Uint8List> output() =>
-      RustLib.instance.api.crateApiSshShellSessionOutput(that: this);
+  Stream<Uint8List> output() => RustLib.instance.api.crateApiSshShellSessionOutput(that: this);
 
-  Future<void> resize({required int cols, required int rows}) => RustLib
-      .instance
-      .api
-      .crateApiSshShellSessionResize(that: this, cols: cols, rows: rows);
+  Future<void> resize({required int cols, required int rows}) =>
+      RustLib.instance.api.crateApiSshShellSessionResize(that: this, cols: cols, rows: rows);
 
   Future<void> write({required List<int> data}) =>
       RustLib.instance.api.crateApiSshShellSessionWrite(that: this, data: data);
@@ -1436,45 +1240,28 @@ class SshClientImpl extends RustOpaque implements SshClient {
     : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
 
   static final _kStaticData = RustArcStaticData(
-    rustArcIncrementStrongCount:
-        RustLib.instance.api.rust_arc_increment_strong_count_SshClient,
-    rustArcDecrementStrongCount:
-        RustLib.instance.api.rust_arc_decrement_strong_count_SshClient,
+    rustArcIncrementStrongCount: RustLib.instance.api.rust_arc_increment_strong_count_SshClient,
+    rustArcDecrementStrongCount: RustLib.instance.api.rust_arc_decrement_strong_count_SshClient,
     rustArcDecrementStrongCountPtr:
         RustLib.instance.api.rust_arc_decrement_strong_count_SshClientPtr,
   );
 
   /// Why the connection ended, once it has: a server disconnect or the
   /// transport error (short, no secrets).
-  String? closeReason() =>
-      RustLib.instance.api.crateApiSshSshClientCloseReason(that: this);
+  String? closeReason() => RustLib.instance.api.crateApiSshSshClientCloseReason(that: this);
 
-  Future<void> disconnect() =>
-      RustLib.instance.api.crateApiSshSshClientDisconnect(that: this);
+  Future<void> disconnect() => RustLib.instance.api.crateApiSshSshClientDisconnect(that: this);
 
   Future<ExecResult> exec({required String command, Uint8List? stdin}) =>
-      RustLib.instance.api.crateApiSshSshClientExec(
-        that: this,
-        command: command,
-        stdin: stdin,
-      );
+      RustLib.instance.api.crateApiSshSshClientExec(that: this, command: command, stdin: stdin);
 
-  bool isClosed() =>
-      RustLib.instance.api.crateApiSshSshClientIsClosed(that: this);
+  bool isClosed() => RustLib.instance.api.crateApiSshSshClientIsClosed(that: this);
 
   Future<ShellSession> openShell({required int cols, required int rows}) =>
-      RustLib.instance.api.crateApiSshSshClientOpenShell(
-        that: this,
-        cols: cols,
-        rows: rows,
-      );
+      RustLib.instance.api.crateApiSshSshClientOpenShell(that: this, cols: cols, rows: rows);
 
-  Future<String> upload({
-    required String localPath,
-    required String remoteName,
-  }) => RustLib.instance.api.crateApiSshSshClientUpload(
-    that: this,
-    localPath: localPath,
-    remoteName: remoteName,
-  );
+  Future<String> upload({required String localPath, required String remoteName}) => RustLib
+      .instance
+      .api
+      .crateApiSshSshClientUpload(that: this, localPath: localPath, remoteName: remoteName);
 }

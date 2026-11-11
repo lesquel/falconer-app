@@ -33,6 +33,13 @@ class MemStore implements SecretStore {
   }
 }
 
+class _NoEntitlement extends MemStore {
+  _NoEntitlement(this.error);
+  final PlatformException error;
+  @override
+  Future<bool> containsKey(String key) async => throw error;
+}
+
 class CountingAuth implements UserAuthenticator {
   int calls = 0;
   bool allow = true;
@@ -177,5 +184,31 @@ void main() {
     await vault.delete('k1');
     expect(bound.values, isEmpty);
     expect(legacy.values, isEmpty);
+  });
+
+  test('macOS fallback (no keychain entitlement) requires an app-level unlock', () async {
+    final denied = PlatformException(
+      code: 'Unexpected security result code',
+      message: 'x',
+      details: -34018,
+    );
+    final local = MemStore()..values['ssh:k1'] = 'PEM';
+    final v = SecureKeyVault(
+      db,
+      SecureKeyStorage(
+        ssh: _NoEntitlement(denied),
+        legacySsh: legacy,
+        push: MemStore(),
+        macLocalSsh: local,
+        platform: TargetPlatform.macOS,
+      ),
+      const KeysBridge(),
+      auth,
+      newId: () => 'k1',
+    );
+    expect(await v.unlockPrivate('k1', reason: 'r'), 'PEM');
+    expect(auth.calls, 1);
+    auth.allow = false;
+    await expectLater(v.unlockPrivate('k1', reason: 'r'), throwsA(isA<UserCancelledFailure>()));
   });
 }

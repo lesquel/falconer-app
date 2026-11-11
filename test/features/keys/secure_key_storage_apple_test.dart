@@ -23,6 +23,20 @@ class _Mem implements SecretStore {
 }
 
 void main() {
+  test('storage names are pinned: renaming one orphans every stored key', () {
+    // Android Keystore namespaces.
+    expect(SecureKeyStorage.sshOptions.toMap()['storageNamespace'], 'openmosh_ssh_keys_v2');
+    expect(SecureKeyStorage.legacySshOptions.toMap()['storageNamespace'], 'openmosh_ssh_keys');
+    expect(SecureKeyStorage.pushOptions.toMap()['storageNamespace'], 'openmosh_push');
+    // iOS / macOS keychain services.
+    expect(SecureKeyStorage.appleSshOptions.toMap()['accountName'], 'openmosh_ssh_keys_v2');
+    expect(
+      SecureKeyStorage.appleMacLocalOptions.toMap()['accountName'],
+      'openmosh_ssh_keys_v2_local',
+    );
+    expect(SecureKeyStorage.applePushOptions.toMap()['accountName'], 'openmosh_push');
+  });
+
   test('Apple stores use distinct keychain services and stay device-only', () {
     final ssh = SecureKeyStorage.appleSshOptions.toMap();
     final push = SecureKeyStorage.applePushOptions.toMap();
@@ -124,6 +138,68 @@ void main() {
         );
         expect(e, isA<ValidationFailure>(), reason: 'OSStatus $status');
       }
+    });
+  });
+
+  group('macOS missing keychain entitlement (-34018)', () {
+    final missing = PlatformException(
+      code: 'Unexpected security result code',
+      message: 'x',
+      details: -34018,
+    );
+
+    test('falls back to the local store, stickily, and flags app-level auth', () async {
+      final ssh = _Mem()..failRead = missing;
+      final local = _Mem();
+      final storage = SecureKeyStorage(
+        ssh: ssh,
+        legacySsh: _Mem(),
+        push: _Mem(),
+        macLocalSsh: local,
+        platform: TargetPlatform.macOS,
+      );
+      expect(storage.sshFallbackActive, isFalse);
+      expect(await storage.readSshPrivate('a'), isNull);
+      expect(storage.sshFallbackActive, isTrue);
+      await storage.writeSshPrivate('a', 'secret');
+      expect(await storage.readSshPrivate('a'), 'secret');
+      expect(local.values['ssh:a'], 'secret');
+      expect(ssh.values, isEmpty);
+      await storage.deleteSshPrivate('a');
+      expect(local.values, isEmpty);
+    });
+
+    test('a release build refuses instead of storing keys unprotected', () async {
+      final ssh = _Mem()..failRead = missing;
+      final local = _Mem();
+      final storage = SecureKeyStorage(
+        ssh: ssh,
+        legacySsh: _Mem(),
+        push: _Mem(),
+        macLocalSsh: local,
+        platform: TargetPlatform.macOS,
+        allowUnprotectedFallback: false,
+      );
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+      await expectLater(storage.readSshPrivate('a'), throwsA(isA<ValidationFailure>()));
+      expect(storage.sshFallbackActive, isFalse);
+      expect(local.values, isEmpty);
+    });
+
+    test('is not used on iOS', () async {
+      final ssh = _Mem()..failRead = missing;
+      final storage = SecureKeyStorage(
+        ssh: ssh,
+        legacySsh: _Mem(),
+        push: _Mem(),
+        macLocalSsh: _Mem(),
+        platform: TargetPlatform.iOS,
+      );
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+      await expectLater(storage.readSshPrivate('a'), throwsA(isA<ValidationFailure>()));
+      expect(storage.sshFallbackActive, isFalse);
     });
   });
 }

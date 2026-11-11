@@ -8,13 +8,8 @@ import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 /// Reads the server host key fingerprint without authenticating.
-Future<String> probeHostFingerprint({
-  required String host,
-  required int port,
-}) => RustLib.instance.api.crateApiSshProbeHostFingerprint(
-  host: host,
-  port: port,
-);
+Future<String> probeHostFingerprint({required String host, required int port}) =>
+    RustLib.instance.api.crateApiSshProbeHostFingerprint(host: host, port: port);
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ShellSession>>
 abstract class ShellSession implements RustOpaqueInterface {
@@ -60,10 +55,7 @@ abstract class SshClient implements RustOpaqueInterface {
 
   Future<ShellSession> openShell({required int cols, required int rows});
 
-  Future<String> upload({
-    required String localPath,
-    required String remoteName,
-  });
+  Future<String> upload({required String localPath, required String remoteName});
 }
 
 class ExecResult {
