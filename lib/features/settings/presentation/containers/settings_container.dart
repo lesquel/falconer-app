@@ -6,6 +6,7 @@ import '../../../../app/di.dart';
 import '../../../../l10n/l10n.dart';
 import '../../../voice/presentation/containers/voice_mic_button.dart';
 import '../../domain/entities/app_settings.dart';
+import '../../../webpush/presentation/containers/webpush_settings_card.dart';
 import '../views/settings_view.dart';
 
 class SettingsContainer extends ConsumerWidget {
@@ -21,6 +22,7 @@ class SettingsContainer extends ConsumerWidget {
         onAppLockChanged: (v) => _toggleLock(context, ref, v),
         onOpenColors: () => context.push('/settings/colors'),
         onOpenVoice: () => context.push(voiceSettingsRoute),
+        webPush: const WebPushSettingsCard(),
       ),
     );
   }

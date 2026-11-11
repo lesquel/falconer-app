@@ -2708,6 +2708,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick a workspace to see its terminals.'**
   String get herdrPickWorkspace;
+
+  /// No description provided for @webPushTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Web notifications (iOS / browser)'**
+  String get webPushTitle;
+
+  /// No description provided for @webPushExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'Install the OpenMosh Notifications web app, enable notifications there and send the code here.'**
+  String get webPushExplain;
+
+  /// No description provided for @webPushStatusOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get webPushStatusOff;
+
+  /// No description provided for @webPushStatusOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Active via {service}'**
+  String webPushStatusOn(String service);
+
+  /// No description provided for @webPushPasteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste code'**
+  String get webPushPasteHint;
+
+  /// No description provided for @webPushReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review code'**
+  String get webPushReview;
+
+  /// No description provided for @webPushTurnOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off'**
+  String get webPushTurnOff;
+
+  /// No description provided for @webPushTurnedOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Web notifications turned off.'**
+  String get webPushTurnedOff;
+
+  /// No description provided for @webPushUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Use for notifications'**
+  String get webPushUse;
+
+  /// No description provided for @webPushScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Web notifications'**
+  String get webPushScreenTitle;
+
+  /// No description provided for @webPushConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your paired hosts will use this registration to notify this device through the web app.'**
+  String get webPushConfirmBody;
+
+  /// No description provided for @webPushServiceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Push service'**
+  String get webPushServiceLabel;
+
+  /// No description provided for @webPushSending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending to your hosts…'**
+  String get webPushSending;
+
+  /// No description provided for @webPushNoHosts.
+  ///
+  /// In en, this message translates to:
+  /// **'No paired hosts yet. Pair a host and it will receive this automatically.'**
+  String get webPushNoHosts;
+
+  /// No description provided for @webPushHostDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'{host}: delivered'**
+  String webPushHostDelivered(String host);
+
+  /// No description provided for @webPushHostPending.
+  ///
+  /// In en, this message translates to:
+  /// **'{host}: pending, will be sent when the host connects'**
+  String webPushHostPending(String host);
+
+  /// No description provided for @webPushHostTooOld.
+  ///
+  /// In en, this message translates to:
+  /// **'{host}: update openmosh-hook (hook too old)'**
+  String webPushHostTooOld(String host);
+
+  /// No description provided for @webPushDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get webPushDone;
+
+  /// No description provided for @errWebPushCode.
+  ///
+  /// In en, this message translates to:
+  /// **'This is not a valid web notifications code.'**
+  String get errWebPushCode;
+
+  /// No description provided for @errWebPushVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'This web notifications code is from another OpenMosh version. Update the app.'**
+  String get errWebPushVersion;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

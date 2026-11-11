@@ -1170,5 +1170,53 @@
     }
   },
   "herdrWorkspaceGone": "This workspace is no longer open.",
-  "herdrPickWorkspace": "Pick a workspace to see its terminals."
+  "herdrPickWorkspace": "Pick a workspace to see its terminals.",
+  "webPushTitle": "Web notifications (iOS / browser)",
+  "webPushExplain": "Install the OpenMosh Notifications web app, enable notifications there and send the code here.",
+  "webPushStatusOff": "Not set",
+  "webPushStatusOn": "Active via {service}",
+  "@webPushStatusOn": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "webPushPasteHint": "Paste code",
+  "webPushReview": "Review code",
+  "webPushTurnOff": "Turn off",
+  "webPushTurnedOff": "Web notifications turned off.",
+  "webPushUse": "Use for notifications",
+  "webPushScreenTitle": "Web notifications",
+  "webPushConfirmBody": "Your paired hosts will use this registration to notify this device through the web app.",
+  "webPushServiceLabel": "Push service",
+  "webPushSending": "Sending to your hosts…",
+  "webPushNoHosts": "No paired hosts yet. Pair a host and it will receive this automatically.",
+  "webPushHostDelivered": "{host}: delivered",
+  "@webPushHostDelivered": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "webPushHostPending": "{host}: pending, will be sent when the host connects",
+  "@webPushHostPending": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "webPushHostTooOld": "{host}: update openmosh-hook (hook too old)",
+  "@webPushHostTooOld": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "webPushDone": "Done",
+  "errWebPushCode": "This is not a valid web notifications code.",
+  "errWebPushVersion": "This web notifications code is from another OpenMosh version. Update the app."
 }

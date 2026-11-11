@@ -1525,4 +1525,76 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get herdrPickWorkspace => 'Elige un workspace para ver sus terminales.';
+
+  @override
+  String get webPushTitle => 'Notificaciones web (iOS / navegador)';
+
+  @override
+  String get webPushExplain =>
+      'Instala la web app OpenMosh Notifications, activa las notificaciones allí y envía el código aquí.';
+
+  @override
+  String get webPushStatusOff => 'Sin configurar';
+
+  @override
+  String webPushStatusOn(String service) {
+    return 'Activas mediante $service';
+  }
+
+  @override
+  String get webPushPasteHint => 'Pega el código';
+
+  @override
+  String get webPushReview => 'Revisar código';
+
+  @override
+  String get webPushTurnOff => 'Desactivar';
+
+  @override
+  String get webPushTurnedOff => 'Notificaciones web desactivadas.';
+
+  @override
+  String get webPushUse => 'Usar para notificaciones';
+
+  @override
+  String get webPushScreenTitle => 'Notificaciones web';
+
+  @override
+  String get webPushConfirmBody =>
+      'Tus equipos vinculados usarán este registro para notificar a este dispositivo mediante la web app.';
+
+  @override
+  String get webPushServiceLabel => 'Servicio push';
+
+  @override
+  String get webPushSending => 'Enviando a tus equipos…';
+
+  @override
+  String get webPushNoHosts =>
+      'Aún no hay equipos vinculados. Vincula uno y lo recibirá automáticamente.';
+
+  @override
+  String webPushHostDelivered(String host) {
+    return '$host: entregado';
+  }
+
+  @override
+  String webPushHostPending(String host) {
+    return '$host: pendiente, se enviará cuando el equipo se conecte';
+  }
+
+  @override
+  String webPushHostTooOld(String host) {
+    return '$host: actualiza openmosh-hook (versión demasiado antigua)';
+  }
+
+  @override
+  String get webPushDone => 'Listo';
+
+  @override
+  String get errWebPushCode => 'Este no es un código válido de notificaciones web.';
+
+  @override
+  String get errWebPushVersion =>
+      'Este código de notificaciones web es de otra versión de OpenMosh. Actualiza la app.';
 }

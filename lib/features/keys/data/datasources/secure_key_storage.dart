@@ -84,6 +84,7 @@ class SecureKeyStorage {
 
   Future<String?> readPush(String name) => _push.read(name);
   Future<void> writePush(String name, String value) => _push.write(name, value);
+  Future<void> deletePush(String name) => _push.delete(name);
 
   static Future<T> _guard<T>(Future<T> Function() op) async {
     try {

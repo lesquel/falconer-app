@@ -18,6 +18,7 @@ class SettingsView extends StatelessWidget {
     required this.onAppLockChanged,
     this.onOpenColors,
     this.onOpenVoice,
+    this.webPush,
   });
 
   final AppSettings settings;
@@ -27,6 +28,9 @@ class SettingsView extends StatelessWidget {
   final ValueChanged<bool> onAppLockChanged;
   final VoidCallback? onOpenColors;
   final VoidCallback? onOpenVoice;
+
+  /// Web notifications section (iOS / browser); first on Apple platforms.
+  final Widget? webPush;
 
   static String themeLabel(AppLocalizations l, ThemePreference p) => switch (p) {
     ThemePreference.system => l.themeSummarySystem,
@@ -152,6 +156,7 @@ class SettingsView extends StatelessWidget {
             ),
           ),
         ]),
+        ?webPush,
         card([
           SwitchListTile(
             key: const Key('previews'),

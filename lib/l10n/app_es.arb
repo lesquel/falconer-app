@@ -435,5 +435,53 @@
   "herdrAgentCount": "{count, plural, =1{1 agente} other{{count} agentes}}",
   "herdrTerminalCount": "{count, plural, =1{1 terminal} other{{count} terminales}}",
   "herdrWorkspaceGone": "Este workspace ya no está abierto.",
-  "herdrPickWorkspace": "Elige un workspace para ver sus terminales."
+  "herdrPickWorkspace": "Elige un workspace para ver sus terminales.",
+  "webPushTitle": "Notificaciones web (iOS / navegador)",
+  "webPushExplain": "Instala la web app OpenMosh Notifications, activa las notificaciones allí y envía el código aquí.",
+  "webPushStatusOff": "Sin configurar",
+  "webPushStatusOn": "Activas mediante {service}",
+  "@webPushStatusOn": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "webPushPasteHint": "Pega el código",
+  "webPushReview": "Revisar código",
+  "webPushTurnOff": "Desactivar",
+  "webPushTurnedOff": "Notificaciones web desactivadas.",
+  "webPushUse": "Usar para notificaciones",
+  "webPushScreenTitle": "Notificaciones web",
+  "webPushConfirmBody": "Tus equipos vinculados usarán este registro para notificar a este dispositivo mediante la web app.",
+  "webPushServiceLabel": "Servicio push",
+  "webPushSending": "Enviando a tus equipos…",
+  "webPushNoHosts": "Aún no hay equipos vinculados. Vincula uno y lo recibirá automáticamente.",
+  "webPushHostDelivered": "{host}: entregado",
+  "@webPushHostDelivered": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "webPushHostPending": "{host}: pendiente, se enviará cuando el equipo se conecte",
+  "@webPushHostPending": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "webPushHostTooOld": "{host}: actualiza openmosh-hook (versión demasiado antigua)",
+  "@webPushHostTooOld": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "webPushDone": "Listo",
+  "errWebPushCode": "Este no es un código válido de notificaciones web.",
+  "errWebPushVersion": "Este código de notificaciones web es de otra versión de OpenMosh. Actualiza la app."
 }

@@ -17,13 +17,22 @@ import '../features/terminal/presentation/containers/terminal_container.dart';
 import '../features/usage/presentation/containers/usage_container.dart';
 import '../features/voice/presentation/containers/voice_mic_button.dart';
 import '../features/voice/presentation/containers/voice_settings_container.dart';
+import '../features/webpush/presentation/containers/webpush_container.dart';
 import '../l10n/l10n.dart';
 import '../shared/hook/domain/hook_command.dart';
 import 'home_shell.dart';
 
 final _id = RegExp(r'^[A-Za-z0-9_-]{1,128}$');
 
+/// `openmosh://pair?...` (host `pair`) opened by the OS goes to the pair
+/// screen; the code itself is scanned or pasted there. `openmosh:///webpush`
+/// and `openmosh:///inbox` have an empty host and map by path.
+String? deepLinkRedirect(Uri uri) =>
+    uri.scheme == 'openmosh' && uri.host == 'pair' ? '/pair' : null;
+
 String? _guardIds(GoRouterState s) {
+  final link = deepLinkRedirect(s.uri);
+  if (link != null) return link;
   for (final v in s.pathParameters.values) {
     if (!_id.hasMatch(v)) return '/';
   }
@@ -112,6 +121,11 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
           ],
         ),
       ],
+    ),
+    // Web Push registration from the notifications PWA (`openmosh:///webpush?d=<code>`).
+    GoRoute(
+      path: webPushRoute,
+      builder: (_, s) => WebPushContainer(code: s.uri.queryParameters['d']),
     ),
     // Full screen so the chat mic can open it on top of a terminal.
     GoRoute(path: voiceSettingsRoute, builder: (_, _) => const VoiceSettingsContainer()),
