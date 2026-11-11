@@ -1,0 +1,9 @@
+  ⬢ Read src/cart.ts
+
+ ┌────────────────────────────────────────────────────────┐
+ │ Run this command?                                      │
+ │ Not in allowlist: npm install                          │
+ │  → Run (once) (y)                                      │
+ │    Add Shell(npm) to allowlist? (tab)                  │
+ │    Skip (esc or n)                                     │
+ └────────────────────────────────────────────────────────┘

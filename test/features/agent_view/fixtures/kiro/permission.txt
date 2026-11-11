@@ -1,0 +1,15 @@
+> install the dependencies
+
+I'll install the project dependencies.
+
+🛠️  Using tool: execute_bash
+ ⋮ 
+ ● I will run the following shell command: 
+npm install
+ ⋮ 
+ ↳ Purpose: Install project dependencies
+
+
+Allow this action? Use 't' to trust (always allow) this tool for the session. [y/n/t]:
+
+> 

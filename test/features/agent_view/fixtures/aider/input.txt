@@ -1,0 +1,4 @@
+Added src/cart.py to the chat
+
+src/cart.py
+> add type hints to the cart functions

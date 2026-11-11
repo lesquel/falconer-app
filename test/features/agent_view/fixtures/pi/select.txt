@@ -1,0 +1,14 @@
+ Which database should I use?
+
+────────────────────────────────────────────────────────────────────────────────
+
+ Pick a database
+
+   SQLite
+   Postgres
+ → MySQL
+
+ ↑↓ navigate  enter select  esc cancel
+
+────────────────────────────────────────────────────────────────────────────────
+~/projects/shop (main)

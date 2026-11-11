@@ -1,0 +1,12 @@
+⏺ Here is the plan: 1. Install deps 2. Run tests
+
+  1. Install deps
+  2. Run tests
+  3. Fix the failing snapshot
+
+  Do you want me to proceed?
+
+────────────────────────────────────────────────────────────────────────────────
+> 
+────────────────────────────────────────────────────────────────────────────────
+  ? for shortcuts

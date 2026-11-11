@@ -1,0 +1,7 @@
+⏺ Done. All 42 tests pass.
+
+────────────────────────────────────────────────────────────────────────────────
+> add a README section about deployment
+  and mention the env vars
+────────────────────────────────────────────────────────────────────────────────
+  ⏵⏵ accept edits on (shift+tab to cycle)

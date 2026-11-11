@@ -1,0 +1,15 @@
+• I need to install dependencies before running the tests.
+
+• Running npm install
+
+  Would you like to run the following command?
+
+  Reason: npm install needs network access to fetch packages
+
+  $ npm install
+
+› 1. Yes, just this once (y)
+  2. Yes, and don't ask again for this command in this session (a)
+  3. No, and tell Codex what to do differently (esc)
+
+  Press enter to confirm or esc to cancel

@@ -1,0 +1,8 @@
+  ┃
+  ┃  where is the cart total computed?
+  ┃
+
+  The cart total is computed in src/cart.ts by summing item prices.
+  Quantities are ignored, which is the bug you reported.
+
+  ▣  Build · claude-sonnet-4-5 · 4.2s

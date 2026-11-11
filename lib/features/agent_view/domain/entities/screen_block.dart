@@ -1,0 +1,98 @@
+/// Structured pieces of an agent's visible screen, as produced by
+/// `parseAgentScreen`. The graphic agent view renders each block natively:
+/// text as text, a [ChoiceBlock] as buttons, an [InputBlock] as a composer.
+library;
+
+/// What answering a [ChoiceOption] means, so the UI can color it.
+enum ChoiceKind { allow, allowAlways, deny, other }
+
+/// One block of a parsed agent screen.
+sealed class ScreenBlock {
+  const ScreenBlock();
+}
+
+/// Plain content: one paragraph of the agent's output, borders removed.
+final class TextBlock extends ScreenBlock {
+  const TextBlock(this.text);
+
+  final String text;
+
+  @override
+  bool operator ==(Object other) => other is TextBlock && other.text == text;
+
+  @override
+  int get hashCode => text.hashCode;
+
+  @override
+  String toString() => 'TextBlock(${_quote(text)})';
+}
+
+/// A permission or decision menu the agent is waiting on.
+final class ChoiceBlock extends ScreenBlock {
+  const ChoiceBlock(this.question, this.options);
+
+  final String question;
+  final List<ChoiceOption> options;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ChoiceBlock && other.question == question && _listEquals(other.options, options);
+
+  @override
+  int get hashCode => Object.hash(question, Object.hashAll(options));
+
+  @override
+  String toString() => 'ChoiceBlock(${_quote(question)}, $options)';
+}
+
+/// One answer of a [ChoiceBlock]. [keys] are pane key names (the hook's
+/// `pane.keys` allowlist) that pick this option from the current screen.
+final class ChoiceOption {
+  const ChoiceOption(this.label, this.keys, this.selected, this.kind);
+
+  final String label;
+  final List<String> keys;
+  final bool selected;
+  final ChoiceKind kind;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ChoiceOption &&
+      other.label == label &&
+      other.selected == selected &&
+      other.kind == kind &&
+      _listEquals(other.keys, keys);
+
+  @override
+  int get hashCode => Object.hash(label, Object.hashAll(keys), selected, kind);
+
+  @override
+  String toString() =>
+      'ChoiceOption(${_quote(label)}, $keys, ${selected ? 'selected' : '-'}, ${kind.name})';
+}
+
+/// The agent's input line, with whatever the user already typed there.
+final class InputBlock extends ScreenBlock {
+  const InputBlock(this.draft);
+
+  final String draft;
+
+  @override
+  bool operator ==(Object other) => other is InputBlock && other.draft == draft;
+
+  @override
+  int get hashCode => draft.hashCode;
+
+  @override
+  String toString() => 'InputBlock(${_quote(draft)})';
+}
+
+bool _listEquals<T>(List<T> a, List<T> b) {
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
+}
+
+String _quote(String s) => '"${s.replaceAll('\n', r'\n')}"';

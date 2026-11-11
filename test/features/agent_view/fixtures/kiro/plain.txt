@@ -1,0 +1,4 @@
+The cart total is computed in src/cart.ts by summing item prices.
+Quantities are ignored, which is the bug you reported.
+
+ ● Completed in 0.12s
