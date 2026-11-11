@@ -505,6 +505,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get defaultDeviceName => 'Teléfono Android';
 
   @override
+  String get defaultDeviceNameIphone => 'iPhone';
+
+  @override
+  String get defaultDeviceNameIpad => 'iPad';
+
+  @override
+  String get defaultDeviceNameMac => 'Mac';
+
+  @override
   String get pairReviewNote =>
       'Esto crea una clave SSH en este teléfono, la autoriza en el equipo solo desde tu tailnet y registra notificaciones cifradas.';
 

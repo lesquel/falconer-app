@@ -383,6 +383,18 @@
   "@defaultDeviceName": {
     "description": "Default name of this phone on the host."
   },
+  "defaultDeviceNameIphone": "iPhone",
+  "@defaultDeviceNameIphone": {
+    "description": "Default name of this iPhone on the host."
+  },
+  "defaultDeviceNameIpad": "iPad",
+  "@defaultDeviceNameIpad": {
+    "description": "Default name of this iPad on the host."
+  },
+  "defaultDeviceNameMac": "Mac",
+  "@defaultDeviceNameMac": {
+    "description": "Default name of this Mac on the host."
+  },
   "pairReviewNote": "This creates an SSH key on this phone, authorizes it on the host only from your tailnet, and registers encrypted notifications.",
   "pairing": "Pairing…",
   "pair": "Pair",

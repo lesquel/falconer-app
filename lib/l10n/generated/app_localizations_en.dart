@@ -503,6 +503,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get defaultDeviceName => 'Android phone';
 
   @override
+  String get defaultDeviceNameIphone => 'iPhone';
+
+  @override
+  String get defaultDeviceNameIpad => 'iPad';
+
+  @override
+  String get defaultDeviceNameMac => 'Mac';
+
+  @override
   String get pairReviewNote =>
       'This creates an SSH key on this phone, authorizes it on the host only from your tailnet, and registers encrypted notifications.';
 

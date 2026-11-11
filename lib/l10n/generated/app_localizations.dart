@@ -909,6 +909,24 @@ abstract class AppLocalizations {
   /// **'Android phone'**
   String get defaultDeviceName;
 
+  /// Default name of this iPhone on the host.
+  ///
+  /// In en, this message translates to:
+  /// **'iPhone'**
+  String get defaultDeviceNameIphone;
+
+  /// Default name of this iPad on the host.
+  ///
+  /// In en, this message translates to:
+  /// **'iPad'**
+  String get defaultDeviceNameIpad;
+
+  /// Default name of this Mac on the host.
+  ///
+  /// In en, this message translates to:
+  /// **'Mac'**
+  String get defaultDeviceNameMac;
+
   /// No description provided for @pairReviewNote.
   ///
   /// In en, this message translates to:

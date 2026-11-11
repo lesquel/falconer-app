@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/device_name.dart';
 import '../../../../l10n/l10n.dart';
 import '../../../../shared/domain/mask.dart';
 import '../../../../shared/ui/atoms/sensitive_text.dart';
@@ -34,7 +35,7 @@ class _PairReviewViewState extends State<PairReviewView> {
     super.didChangeDependencies();
     // The default name follows the app language; it is set once.
     if (!_named) {
-      _name.text = context.l10n.defaultDeviceName;
+      _name.text = defaultDeviceName(context);
       _named = true;
     }
   }

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/di.dart';
+import '../../../../l10n/device_name.dart';
 import '../../../../l10n/l10n.dart';
 import '../../../../shared/hook/domain/hook_command.dart';
 import '../../../../shared/ui/molecules/themed_mole.dart';
@@ -172,7 +173,7 @@ class HostDetailContainer extends ConsumerWidget {
             queryParameters: {'session': s.name, 'kind': s.kind.name},
           ).toString(),
         ),
-        onEnablePush: () => ctrl.enablePush('Android phone'),
+        onEnablePush: () => ctrl.enablePush(defaultDeviceName(context)),
         onBack: () => context.canPop() ? context.pop() : context.go('/'),
         onEdit: () => context.push('/hosts/$hostId/edit'),
         onUsage: () => context.push('/hosts/$hostId/usage'),
