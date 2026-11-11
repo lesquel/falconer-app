@@ -18,6 +18,12 @@ class LocalEventNotifier implements EventNotifier {
     await _plugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
+    await _plugin
+        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(alert: true, badge: true, sound: true);
+    await _plugin
+        .resolvePlatformSpecificImplementation<MacOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(alert: true, badge: true, sound: true);
   }
 
   /// Route for the notification that launched the app, if any.
@@ -34,11 +40,20 @@ class LocalEventNotifier implements EventNotifier {
 
   static const channelId = 'agent_events';
 
+  static const _darwinSettings = DarwinInitializationSettings(
+    requestAlertPermission: false,
+    requestBadgePermission: false,
+    requestSoundPermission: false,
+  );
+
   static Future<FlutterLocalNotificationsPlugin> init({NotificationTap? onTap}) async {
     final plugin = FlutterLocalNotificationsPlugin();
     await plugin.initialize(
       settings: const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        // Permission is requested later by [requestPermission], not at init.
+        iOS: _darwinSettings,
+        macOS: _darwinSettings,
       ),
       onDidReceiveNotificationResponse: (r) => _route(r, onTap),
     );

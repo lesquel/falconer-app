@@ -8,6 +8,8 @@ analyzer:
     - build/**
     - android/**
     - third_party/**
+    - ios/**
+    - macos/**
   language:
     strict-casts: true
     strict-raw-types: true

@@ -283,7 +283,9 @@ final settingsProvider = StreamProvider<AppSettings>(
 final modelStoreProvider = Provider<ModelStore>(
   (ref) => FileModelStore(
     root: () async => Directory('${(await getApplicationSupportDirectory()).path}/voice_models'),
-    native: Platform.isAndroid ? const ChannelNativeDownloader() : null,
+    native: (Platform.isAndroid || Platform.isIOS || Platform.isMacOS)
+        ? const ChannelNativeDownloader()
+        : null,
   ),
 );
 
