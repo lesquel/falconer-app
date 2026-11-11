@@ -8,6 +8,7 @@ import 'package:openmosh/features/herdr/presentation/containers/herdr_navigator_
 import 'package:openmosh/features/hosts/domain/usecases/host_connections.dart';
 import 'package:openmosh/features/lock/domain/user_presence.dart';
 import 'package:openmosh/features/settings/domain/entities/app_settings.dart';
+import 'package:openmosh/features/uploads/domain/repositories/file_source.dart';
 import 'package:openmosh/features/terminal/presentation/containers/terminal_container.dart';
 import 'package:openmosh/features/terminal/presentation/controllers/terminal_session.dart';
 import 'package:openmosh/features/terminal/presentation/controllers/terminal_session_pool.dart';
@@ -16,6 +17,7 @@ import 'package:openmosh/l10n/l10n.dart';
 import '../features/hosts/paired_devices_test.dart' show ScriptedAuth;
 import '../features/terminal/terminal_runner_test.dart' show FakeShell, ShellConnection;
 import '../support/fakes.dart';
+import '../support/file_source_fakes.dart';
 import '../support/herdr_fakes.dart';
 
 /// The two modes (S1): the normal terminal stays as it is, and a Herdr
@@ -50,7 +52,7 @@ void main() {
     await t.pump(const Duration(seconds: 10));
   }
 
-  Future<void> open(WidgetTester t, String location) async {
+  Future<void> open(WidgetTester t, String location, {FileSource? files}) async {
     final router = GoRouter(
       routes: [
         GoRoute(
@@ -85,6 +87,7 @@ void main() {
           terminalSessionPoolProvider.overrideWithValue(pool),
           hostConnectionsProvider.overrideWithValue(connections),
           herdrRepositoryProvider.overrideWithValue(repo),
+          if (files != null) fileSourceProvider.overrideWithValue(files),
           settingsProvider.overrideWith((ref) => Stream.value(const AppSettings())),
           hostProvider.overrideWith((ref, id) => Stream.value(testHost())),
         ],
@@ -121,8 +124,11 @@ void main() {
     await t.pump();
     await t.pump();
     await t.pump(const Duration(milliseconds: 400));
-    expect(routes, [agentViewLocation('h1', 'w1:p1', session: 'default', fromTerminal: true)]);
-    expect(routes.single, '/agent/h1?pane=w1%3Ap1&session=default&from=terminal');
+    expect(routes, [
+      agentViewLocation('h1', 'w1:p1', session: 'default', workspaceId: 'w1', fromTerminal: true),
+    ]);
+    // `ws`: back from the graphic view goes to the pane's workspace.
+    expect(routes.single, '/agent/h1?pane=w1%3Ap1&session=default&ws=w1&from=terminal');
     await close(t);
   });
 
@@ -134,5 +140,20 @@ void main() {
     expect(routes, isEmpty);
     expect(find.text('home'), findsOneWidget);
     await close(t);
+  });
+
+  testWidgets('the terminal chat still attaches an uploaded file', (t) async {
+    final picker = OneFileSource();
+    await open(t, '/terminal/h1', files: picker);
+    await t.tap(find.byTooltip('Chat'));
+    await t.pump();
+    await t.tap(find.byTooltip('Attach images or files'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('File'));
+    for (var i = 0; i < 6; i++) {
+      await t.pump(const Duration(milliseconds: 50));
+    }
+    expect(find.text('notes.txt'), findsOneWidget);
+    expect(picker.discarded, 1);
   });
 }

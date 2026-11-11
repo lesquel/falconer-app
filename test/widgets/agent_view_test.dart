@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openmosh/app/di.dart';
@@ -11,9 +12,13 @@ import 'package:openmosh/features/agent_view/presentation/controllers/agent_view
 import 'package:openmosh/features/herdr/domain/entities/herdr_action.dart';
 import 'package:openmosh/features/herdr/domain/entities/herdr_snapshot.dart';
 import 'package:openmosh/features/herdr/domain/repositories/herdr_repository.dart';
+import 'package:openmosh/features/hosts/domain/usecases/host_connections.dart';
+import 'package:openmosh/features/uploads/domain/usecases/upload_file.dart';
 import 'package:openmosh/l10n/l10n.dart';
 import 'package:openmosh/shared/ui/tokens/mosh_colors.dart';
 
+import '../support/fakes.dart';
+import '../support/file_source_fakes.dart';
 import '../support/herdr_fakes.dart';
 
 List<String> fixture(String agent, String name) =>
@@ -34,7 +39,12 @@ void main() {
     routes = [];
   });
 
-  Future<void> pump(WidgetTester t, {bool fromTerminal = false}) async {
+  Future<void> pump(
+    WidgetTester t, {
+    bool fromTerminal = false,
+    String? workspaceId,
+    List<Override> overrides = const [],
+  }) async {
     final router = GoRouter(
       initialLocation: '/',
       routes: [
@@ -49,9 +59,26 @@ void main() {
                 paneId: 'w1:p1',
                 session: 'default',
                 fromTerminal: fromTerminal,
+                workspaceId: workspaceId,
                 // VoiceMicButton throws in dispose when never used (voice bug).
                 dictation: false,
               ),
+            ),
+          ],
+        ),
+        GoRoute(
+          path: '/hosts/:id/herdr',
+          builder: (_, s) {
+            routes.add(s.uri.toString());
+            return const Scaffold(body: Text('navigator'));
+          },
+          routes: [
+            GoRoute(
+              path: 'workspace',
+              builder: (_, s) {
+                routes.add(s.uri.toString());
+                return const Scaffold(body: Text('workspace'));
+              },
             ),
           ],
         ),
@@ -66,7 +93,7 @@ void main() {
     );
     await t.pumpWidget(
       ProviderScope(
-        overrides: [herdrRepositoryProvider.overrideWithValue(repo)],
+        overrides: [herdrRepositoryProvider.overrideWithValue(repo), ...overrides],
         child: MaterialApp.router(
           routerConfig: router,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -92,6 +119,22 @@ void main() {
     expect(sent['keys'], isNotEmpty);
     expect((sent['keys']! as List).every(paneKeyNames.contains), isTrue);
     expect(find.text('needs you'), findsOneWidget);
+  });
+
+  testWidgets('every key of the row presses its key in the pane', (t) async {
+    await pump(t);
+    for (final name in ['esc', 'up', 'down', 'tab', 'enter']) {
+      repo.actions.clear();
+      await t.tap(find.byKey(Key('agent-key-$name')));
+      await t.pumpAndSettle();
+      expect(repo.actions.map(actionJson), [
+        {
+          'op': 'pane.keys',
+          'pane_id': 'w1:p1',
+          'keys': [name],
+        },
+      ], reason: name);
+    }
   });
 
   testWidgets('the composer types into the agent and submits', (t) async {
@@ -184,6 +227,115 @@ void main() {
     await t.pumpAndSettle();
     expect(routes, isEmpty);
     expect(find.text('home'), findsOneWidget);
+  });
+
+  testWidgets('with something written, Enter sends it instead of an empty Enter', (t) async {
+    await pump(t);
+    await t.enterText(find.byKey(const Key('chat-input')), 'yes, go on');
+    await t.tap(find.byKey(const Key('agent-key-enter')));
+    await t.pumpAndSettle();
+    expect(repo.actions.map(actionJson), [
+      {'op': 'pane.text', 'pane_id': 'w1:p1', 'text': 'yes, go on', 'submit': true},
+    ]);
+    final input = t.widget<TextField>(find.byKey(const Key('chat-input')));
+    expect(input.controller!.text, isEmpty);
+  });
+
+  testWidgets('attached files are uploaded and their paths go with the message', (t) async {
+    final hosts = FakeHostRepository();
+    await hosts.save(testHost());
+    final connections = HostConnections(
+      hosts: hosts,
+      vault: FakeVault(),
+      connector: FakeConnector(() => FakeConnection((_, _) => ok(null))),
+    );
+    final picker = OneFileSource();
+    await pump(
+      t,
+      overrides: [
+        fileSourceProvider.overrideWithValue(picker),
+        uploadFileProvider.overrideWithValue(UploadFile(connections, prefix: () => 'u1')),
+      ],
+    );
+    await t.tap(find.byTooltip('Attach images or files'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('File'));
+    await t.pumpAndSettle();
+    expect(find.text('notes.txt'), findsOneWidget);
+    expect(picker.discarded, 1);
+    await t.enterText(find.byKey(const Key('chat-input')), 'read this');
+    await t.tap(find.byTooltip('Send'));
+    await t.pumpAndSettle();
+    final sent = repo.actions.map(actionJson).single;
+    expect(sent['op'], 'pane.text');
+    expect(sent['submit'], true);
+    final text = sent['text']! as String;
+    expect(text, startsWith('/home/me/.openmosh/uploads/'));
+    expect(text, contains('notes.txt'));
+    expect(text, contains('read this'));
+    expect(find.text('notes.txt'), findsNothing);
+  });
+
+  testWidgets('back from a pane opened in its workspace goes back to it', (t) async {
+    await pump(t, workspaceId: 'w1');
+    await t.tap(find.byTooltip('Back'));
+    await t.pumpAndSettle();
+    expect(find.text('home'), findsOneWidget);
+    expect(routes, isEmpty);
+  });
+
+  testWidgets('opened from the terminal, back goes to the pane workspace, not the terminal', (
+    t,
+  ) async {
+    await pump(t, fromTerminal: true, workspaceId: 'w1');
+    await t.tap(find.byTooltip('Back'));
+    await t.pumpAndSettle();
+    expect(routes.last, '/hosts/h1/herdr/workspace?ws=w1&session=default');
+    expect(find.text('workspace'), findsOneWidget);
+    expect(find.text('terminal'), findsNothing);
+  });
+
+  testWidgets('opened from the terminal, the system back goes to the workspace too', (t) async {
+    await pump(t, fromTerminal: true, workspaceId: 'w1');
+    await t.binding.handlePopRoute();
+    await t.pumpAndSettle();
+    expect(routes.last, '/hosts/h1/herdr/workspace?ws=w1&session=default');
+  });
+
+  testWidgets('without its workspace, back from the terminal goes to the navigator', (t) async {
+    await pump(t, fromTerminal: true);
+    await t.tap(find.byTooltip('Back'));
+    await t.pumpAndSettle();
+    expect(routes.last, '/hosts/h1/herdr?session=default');
+  });
+
+  testWidgets('history: later reads are merged, earlier lines stay on screen', (t) async {
+    repo.screen = const PaneScreen(lines: ['first answer', '', 'second answer', '', r'$ ']);
+    await pump(t);
+    expect(repo.readLines, [agentViewFirstLines, agentViewPollLines]);
+    // The next read starts later: the first answer scrolled out of it.
+    repo.changeScreen(const PaneScreen(lines: ['second answer', '', r'$ ls', 'a.txt', '', r'$ ']));
+    await t.pumpAndSettle();
+    expect(find.textContaining('first answer'), findsOneWidget);
+    expect(find.textContaining('a.txt'), findsOneWidget);
+    // Fewer lines than asked: the pane has nothing earlier to load.
+    expect(find.byKey(const Key('agent-load-earlier')), findsNothing);
+  });
+
+  testWidgets('load earlier reads a longer stretch and adds it on top', (t) async {
+    final long = [for (var i = 0; i < agentViewFirstLines; i++) 'line $i'];
+    repo.screen = PaneScreen(lines: long);
+    await pump(t);
+    repo.screen = PaneScreen(lines: ['the very beginning', '', ...long]);
+    await t.drag(find.byKey(const Key('agent-blocks')), const Offset(0, 20000));
+    await t.pumpAndSettle();
+    expect(find.byKey(const Key('agent-load-earlier')), findsOneWidget);
+    await t.tap(find.byKey(const Key('agent-load-earlier')));
+    await t.pumpAndSettle();
+    expect(repo.readLines.last, agentViewEarlierLines);
+    await t.drag(find.byKey(const Key('agent-blocks')), const Offset(0, 20000));
+    await t.pumpAndSettle();
+    expect(find.textContaining('the very beginning'), findsOneWidget);
   });
 
   test('the screen is parsed once per change of what was read', () async {

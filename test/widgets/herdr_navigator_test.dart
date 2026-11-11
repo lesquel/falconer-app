@@ -282,14 +282,14 @@ void main() {
       expect(repo.actions.map(actionJson), [
         {'op': 'pane.focus', 'id': 'w1:p1'},
       ]);
-      expect(opened, ['/agent/h1?pane=w1%3Ap1&session=default']);
+      expect(opened, ['/agent/h1?pane=w1%3Ap1&session=default&ws=w1']);
     });
 
     testWidgets('a plain terminal opens in the graphic view too', (t) async {
       await pump(t, at: at);
       await t.tap(find.text('Terminal'));
       await t.pumpAndSettle();
-      expect(opened, ['/agent/h1?pane=w1%3Ap2&session=default']);
+      expect(opened, ['/agent/h1?pane=w1%3Ap2&session=default&ws=w1']);
       expect(find.text('agent view'), findsOneWidget);
     });
 
@@ -317,7 +317,7 @@ void main() {
         ),
       );
       await t.pumpAndSettle();
-      expect(opened, ['/agent/h1?pane=w1%3Ap3&session=default']);
+      expect(opened, ['/agent/h1?pane=w1%3Ap3&session=default&ws=w1']);
     });
 
     testWidgets('closing a tab asks first; renaming sends the new label', (t) async {

@@ -2571,6 +2571,12 @@ abstract class AppLocalizations {
   /// **'Showing the last state; trying to reach Herdr again.'**
   String get herdrOutOfDate;
 
+  /// No description provided for @agentViewLoadEarlier.
+  ///
+  /// In en, this message translates to:
+  /// **'Load earlier'**
+  String get agentViewLoadEarlier;
+
   /// No description provided for @agentViewEmpty.
   ///
   /// In en, this message translates to:

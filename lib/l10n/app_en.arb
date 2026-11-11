@@ -1107,6 +1107,7 @@
   "herdrGraphicMode": "Graphic mode",
   "herdrNoFocusedPane": "No pane is focused in Herdr.",
   "herdrOutOfDate": "Showing the last state; trying to reach Herdr again.",
+  "agentViewLoadEarlier": "Load earlier",
   "agentViewEmpty": "The pane is empty.",
   "agentViewDraft": "Typed on the computer: {text}",
   "@agentViewDraft": {

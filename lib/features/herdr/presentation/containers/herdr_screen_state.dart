@@ -12,14 +12,21 @@ import '../controllers/herdr_navigator_controller.dart';
 import '../views/herdr_dialogs.dart';
 
 /// Route of the graphic view of one pane (full screen, outside the tabs).
+/// [workspaceId] is where back leads (the workspace's terminals).
 String agentViewLocation(
   String hostId,
   String paneId, {
   String? session,
+  String? workspaceId,
   bool fromTerminal = false,
 }) => Uri(
   path: '/agent/$hostId',
-  queryParameters: {'pane': paneId, 'session': ?session, if (fromTerminal) 'from': 'terminal'},
+  queryParameters: {
+    'pane': paneId,
+    'session': ?session,
+    'ws': ?workspaceId,
+    if (fromTerminal) 'from': 'terminal',
+  },
 ).toString();
 
 /// Width from which a Herdr screen shows two panels side by side.
@@ -103,7 +110,9 @@ abstract class HerdrScreenState<T extends ConsumerStatefulWidget> extends Consum
       embed(p.id);
       return;
     }
-    await pushCovering(agentViewLocation(hostId, p.id, session: session));
+    await pushCovering(
+      agentViewLocation(hostId, p.id, session: session, workspaceId: p.workspaceId),
+    );
   }
 
   /// Opens a new tab (a shell) in [w], then its pane once Herdr shows it.

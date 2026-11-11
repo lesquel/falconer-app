@@ -7,6 +7,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/di.dart';
 import '../../../../l10n/l10n.dart';
 import '../../../herdr/domain/entities/herdr_snapshot.dart';
+import '../../../herdr/presentation/containers/herdr_workspace_container.dart';
+import '../../../terminal/presentation/containers/chat_attachments_flow.dart';
+import '../../../terminal/presentation/controllers/chat_attachment.dart';
+import '../../../terminal/presentation/controllers/terminal_session.dart' show withAttachmentLines;
 import '../../../terminal/presentation/views/chat_composer.dart';
 import '../../../voice/presentation/containers/voice_mic_button.dart';
 import '../controllers/agent_view_controller.dart';
@@ -22,6 +26,14 @@ String herdrTerminalLocation(String hostId, String? session, {bool fromAgentView
   },
 ).toString();
 
+/// Where back from the graphic view of a pane leads: its workspace's
+/// terminals, or the navigator when the workspace is unknown. Never a
+/// terminal.
+String agentViewBackLocation(String hostId, {String? session, String? workspaceId}) =>
+    workspaceId != null
+    ? herdrWorkspaceLocation(hostId, workspaceId, session: session)
+    : Uri(path: '/hosts/$hostId/herdr', queryParameters: {'session': ?session}).toString();
+
 /// Graphic mode of one Herdr pane. Long-polls only while visible and in the
 /// foreground; [embedded] drops the back button (tablet split view).
 class AgentViewContainer extends ConsumerStatefulWidget {
@@ -30,6 +42,7 @@ class AgentViewContainer extends ConsumerStatefulWidget {
     required this.hostId,
     required this.paneId,
     this.session,
+    this.workspaceId,
     this.fromTerminal = false,
     this.embedded = false,
     this.dictation = true,
@@ -38,6 +51,9 @@ class AgentViewContainer extends ConsumerStatefulWidget {
   final String hostId;
   final String paneId;
   final String? session;
+
+  /// The pane's workspace: back leads to its terminals.
+  final String? workspaceId;
 
   /// Opened from the terminal: the terminal mode goes back instead of
   /// stacking a second terminal.
@@ -56,7 +72,9 @@ class _AgentViewContainerState extends ConsumerState<AgentViewContainer>
   late final AgentViewController _ctrl;
   bool _covered = false;
   bool _sending = false;
+  bool _uploading = false;
   String _draft = '';
+  final _attachments = <ChatAttachment>[];
 
   /// Rebuilds the composer with [_draft] (after a failed send).
   int _composerGen = 0;
@@ -98,20 +116,75 @@ class _AgentViewContainerState extends ConsumerState<AgentViewContainer>
         .showSnackBar(SnackBar(content: Text(context.l10n.failureText(failure))));
   }
 
+  /// Sends [text] with the attached files' paths (uploaded already), then
+  /// Enter, through `pane.text`.
   Future<void> _send(String text) async {
-    if (text.trim().isEmpty) return;
-    setState(() => _sending = true);
-    final failure = await _ctrl.sendText(text);
+    final files = [for (final a in _attachments) a.remotePath];
+    if (text.trim().isEmpty && files.isEmpty) return;
+    final sent = List.of(_attachments);
+    setState(() {
+      _sending = true;
+      _attachments.clear();
+    });
+    final message = files.isEmpty ? text : '${files.join(' ')} ${withAttachmentLines(text, files)}';
+    final failure = await _ctrl.sendText(message);
     if (!mounted) return;
     setState(() {
       _sending = false;
       // The composer cleared itself; a failed send gets its text back.
       if (failure != null) {
         _draft = text;
+        _attachments.insertAll(0, sent);
         _composerGen++;
       }
     });
     _show(failure);
+  }
+
+  /// ↵ sends what is written in the composer; with nothing written it
+  /// presses Enter in the pane.
+  Future<void> _enter() async {
+    if (_draft.trim().isNotEmpty || _attachments.isNotEmpty) {
+      final text = _draft;
+      setState(() {
+        _draft = '';
+        _composerGen++;
+      });
+      await _send(text);
+      return;
+    }
+    _show(await _ctrl.sendKeys(const ['enter']));
+  }
+
+  Future<void> _attach() async {
+    final images = await askAttachmentKind(context);
+    if (images == null || !mounted) return;
+    setState(() => _uploading = true);
+    try {
+      final files = await uploadAttachments(context, ref, widget.hostId, images: images);
+      if (mounted) setState(() => _attachments.addAll(files));
+    } finally {
+      if (mounted) setState(() => _uploading = false);
+    }
+  }
+
+  Future<void> _loadEarlier() async => _show(await _ctrl.loadEarlier());
+
+  /// Back to the workspace (or navigator) the pane belongs to. Opened from
+  /// a terminal, the terminal is not where it goes back to: the stack is
+  /// replaced by the workspace's.
+  void _back() {
+    if (!widget.fromTerminal && context.canPop()) {
+      context.pop();
+      return;
+    }
+    context.go(
+      agentViewBackLocation(
+        widget.hostId,
+        session: widget.session,
+        workspaceId: widget.workspaceId,
+      ),
+    );
   }
 
   /// Focuses the pane on the computer, then shows it in the terminal.
@@ -145,26 +218,34 @@ class _AgentViewContainerState extends ConsumerState<AgentViewContainer>
           onRetry: _ctrl.retry,
           onKeys: (keys) async => _show(await _ctrl.sendKeys(keys)),
           onTerminalMode: () => unawaited(_terminalMode()),
-          onBack: widget.embedded
-              ? null
-              : () =>
-                    context.canPop() ? context.pop() : context.go('/hosts/${widget.hostId}/herdr'),
+          onBack: widget.embedded ? null : _back,
+          onEnter: () => unawaited(_enter()),
+          onLoadEarlier: _ctrl.historyComplete ? null : () => unawaited(_loadEarlier()),
+          loadingEarlier: _ctrl.loadingEarlier,
           composer: ChatComposer(
             key: ValueKey(_composerGen),
             initialText: _draft,
-            attachments: const [],
-            busy: _sending,
+            attachments: List.unmodifiable(_attachments),
+            busy: _sending || _uploading,
             autofocus: false,
             onChanged: (t) => _draft = t,
             onSend: (t) => unawaited(_send(t)),
-            onAttach: null,
-            onRemoveAttachment: (_) {},
+            onAttach: () => unawaited(_attach()),
+            onRemoveAttachment: (i) => setState(() => _attachments.removeAt(i)),
             onClose: null,
             micBuilder: widget.dictation ? (insert) => VoiceMicButton(onTranscript: insert) : null,
           ),
         );
       },
     );
-    return widget.embedded ? view : Scaffold(body: view);
+    if (widget.embedded) return view;
+    // The system back gesture goes where the back button goes.
+    return PopScope(
+      canPop: !widget.fromTerminal,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _back();
+      },
+      child: Scaffold(body: view),
+    );
   }
 }

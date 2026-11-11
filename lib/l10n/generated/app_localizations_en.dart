@@ -1428,6 +1428,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get herdrOutOfDate => 'Showing the last state; trying to reach Herdr again.';
 
   @override
+  String get agentViewLoadEarlier => 'Load earlier';
+
+  @override
   String get agentViewEmpty => 'The pane is empty.';
 
   @override

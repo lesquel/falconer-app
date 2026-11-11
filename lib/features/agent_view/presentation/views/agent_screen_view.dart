@@ -24,6 +24,9 @@ class AgentScreenView extends StatelessWidget {
     this.status = HerdrStatus.unknown,
     this.error,
     this.onBack,
+    this.onEnter,
+    this.onLoadEarlier,
+    this.loadingEarlier = false,
   });
 
   final String title;
@@ -38,6 +41,13 @@ class AgentScreenView extends StatelessWidget {
   final VoidCallback onTerminalMode;
   final VoidCallback? onBack;
   final Widget composer;
+
+  /// The ↵ key; null presses Enter through [onKeys].
+  final VoidCallback? onEnter;
+
+  /// Reads earlier lines of the pane; null hides the action.
+  final VoidCallback? onLoadEarlier;
+  final bool loadingEarlier;
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +84,21 @@ class AgentScreenView extends StatelessWidget {
                 InputBlock() => const SizedBox.shrink(),
               },
             ),
+          // Reversed list: the last child sits at the top.
+          if (onLoadEarlier != null)
+            Center(
+              child: TextButton.icon(
+                key: const Key('agent-load-earlier'),
+                onPressed: loadingEarlier ? null : onLoadEarlier,
+                icon: loadingEarlier
+                    ? const SizedBox.square(
+                        dimension: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.history),
+                label: Text(l.agentViewLoadEarlier),
+              ),
+            ),
         ],
       );
     }
@@ -109,7 +134,7 @@ class AgentScreenView extends StatelessWidget {
           if (loaded && error != null)
             Text(l.herdrOutOfDate, style: TextStyle(color: c.muted, fontSize: 12)),
           Expanded(child: body),
-          _KeysRow(onKeys: onKeys),
+          _KeysRow(onKeys: onKeys, onEnter: onEnter),
           if (draft.isNotEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
@@ -292,13 +317,14 @@ class _ChoiceButton extends StatelessWidget {
 
 /// Keys for menus the parser left as text.
 class _KeysRow extends StatelessWidget {
-  const _KeysRow({required this.onKeys});
+  const _KeysRow({required this.onKeys, this.onEnter});
   final ValueChanged<List<String>> onKeys;
+  final VoidCallback? onEnter;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    Widget key(String name, String tooltip, Widget child) => Expanded(
+    Widget key(String name, String tooltip, Widget child, {VoidCallback? onPressed}) => Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 3),
         child: Tooltip(
@@ -309,7 +335,7 @@ class _KeysRow extends StatelessWidget {
               minimumSize: const Size.fromHeight(44),
               padding: EdgeInsets.zero,
             ),
-            onPressed: () => onKeys([name]),
+            onPressed: onPressed ?? () => onKeys([name]),
             child: child,
           ),
         ),
@@ -323,7 +349,7 @@ class _KeysRow extends StatelessWidget {
           key('up', l.herdrKeyUp, const Icon(Icons.keyboard_arrow_up)),
           key('down', l.herdrKeyDown, const Icon(Icons.keyboard_arrow_down)),
           key('tab', l.herdrKeyTab, Text(l.herdrKeyTab)),
-          key('enter', l.herdrKeyEnter, const Icon(Icons.keyboard_return)),
+          key('enter', l.herdrKeyEnter, const Icon(Icons.keyboard_return), onPressed: onEnter),
         ],
       ),
     );

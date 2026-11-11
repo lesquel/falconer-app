@@ -1435,6 +1435,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Se muestra el último estado; intentando conectar con Herdr de nuevo.';
 
   @override
+  String get agentViewLoadEarlier => 'Cargar anteriores';
+
+  @override
   String get agentViewEmpty => 'El panel está vacío.';
 
   @override

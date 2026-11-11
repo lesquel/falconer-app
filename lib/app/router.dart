@@ -138,6 +138,10 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
           hostId: s.pathParameters['id']!,
           paneId: pane,
           session: _herdrSession(s),
+          workspaceId: switch (s.uri.queryParameters['ws']) {
+            final ws? when isHerdrTargetId(ws) => ws,
+            _ => null,
+          },
           fromTerminal: s.uri.queryParameters['from'] == 'terminal',
         );
       },
