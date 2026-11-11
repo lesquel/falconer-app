@@ -150,6 +150,38 @@ downloaded at runtime.
 
 ## Development
 
+### Setup (one command)
+
+Installs and checks everything needed to build and run the app, then installs it on your phone.
+
+```sh
+# While the repository is private (needs `gh auth login`)
+bash <(gh api -H 'Accept: application/vnd.github.raw' repos/lesquel/openmosh-app/contents/scripts/install.sh)
+
+# Once it is public
+curl -fsSL https://raw.githubusercontent.com/lesquel/openmosh-app/main/scripts/install.sh | bash
+```
+
+The installer clones the repo into `~/openmosh-app` (`OPENMOSH_DIR` to change it; an existing
+clone is fast-forwarded) and runs `scripts/setup.sh`. From a clone, run `scripts/setup.sh`
+directly. It checks every item, asks one confirmation, fixes what is missing, waits for the
+device, then builds and installs.
+
+| OS | Targets | What it sets up |
+| --- | --- | --- |
+| macOS | iOS (default), macOS, Android | Xcode checks, CocoaPods, rustup (brew), Flutter (version pinned by CI) in `~/development/flutter`, Rust targets, signing team and iPad checks; Android: JDK 17, Android SDK in `~/Android/Sdk` |
+| Linux / WSL2 | Android | git/curl/unzip/zip, C compiler, rustup (official `sh.rustup.rs`), Flutter, JDK 17, Android command-line tools, platforms, build-tools, NDK, licenses |
+| Windows | use WSL2 | Git Bash only prints how to set up WSL2 (`--force` to try anyway). In WSL, USB phones need `usbipd-win` or wireless debugging (`adb pair`) |
+
+Flags: `--platforms ios,macos,android` (skip the picker), `--yes` (no confirmation), `--check`
+(only the checklist), `--no-tui` (plain text; also automatic without a terminal), `--force`.
+`install.sh` also takes `--branch <name>`. The UI uses [gum](https://github.com/charmbracelet/gum),
+offered once and installed with your package manager (or skipped). Output goes to
+`build/setup.log`. Android installs the `--release` APK for arm64; without `android/key.properties`
+Gradle signs it with the debug key. `scripts/setup-apple.sh` still works (iOS only).
+
+### Manual requirements
+
 Requirements:
 
 - Flutter stable (3.47+) — run `flutter config --no-analytics` and `dart --disable-analytics`
