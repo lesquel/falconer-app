@@ -2583,17 +2583,35 @@ abstract class AppLocalizations {
   /// **'The pane is empty.'**
   String get agentViewEmpty;
 
+  /// No description provided for @agentViewNeedsPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'{agent} needs your permission'**
+  String agentViewNeedsPermission(String agent);
+
+  /// No description provided for @agentViewIsAsking.
+  ///
+  /// In en, this message translates to:
+  /// **'{agent} is asking'**
+  String agentViewIsAsking(String agent);
+
+  /// No description provided for @agentViewCurrentOption.
+  ///
+  /// In en, this message translates to:
+  /// **'current option'**
+  String get agentViewCurrentOption;
+
+  /// No description provided for @agentViewSending.
+  ///
+  /// In en, this message translates to:
+  /// **'sending'**
+  String get agentViewSending;
+
   /// No description provided for @agentViewDraft.
   ///
   /// In en, this message translates to:
   /// **'Typed on the computer: {text}'**
   String agentViewDraft(String text);
-
-  /// No description provided for @agentViewQuestion.
-  ///
-  /// In en, this message translates to:
-  /// **'The agent is asking'**
-  String get agentViewQuestion;
 
   /// No description provided for @herdrKeyUp.
   ///

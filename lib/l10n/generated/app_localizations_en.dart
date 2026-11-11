@@ -1434,12 +1434,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get agentViewEmpty => 'The pane is empty.';
 
   @override
-  String agentViewDraft(String text) {
-    return 'Typed on the computer: $text';
+  String agentViewNeedsPermission(String agent) {
+    return '$agent needs your permission';
   }
 
   @override
-  String get agentViewQuestion => 'The agent is asking';
+  String agentViewIsAsking(String agent) {
+    return '$agent is asking';
+  }
+
+  @override
+  String get agentViewCurrentOption => 'current option';
+
+  @override
+  String get agentViewSending => 'sending';
+
+  @override
+  String agentViewDraft(String text) {
+    return 'Typed on the computer: $text';
+  }
 
   @override
   String get herdrKeyUp => 'Up';

@@ -111,6 +111,7 @@ void main() {
     expect(find.byKey(const Key('choice-block-0')), findsNothing);
     expect(find.byKey(const Key('choice-0')), findsOneWidget);
     expect(find.byKey(const Key('choice-2')), findsOneWidget);
+    await t.ensureVisible(find.byKey(const Key('choice-2')));
     await t.tap(find.byKey(const Key('choice-2')));
     await t.pumpAndSettle();
     final sent = repo.actions.map(actionJson).single;
@@ -119,6 +120,40 @@ void main() {
     expect(sent['keys'], isNotEmpty);
     expect((sent['keys']! as List).every(paneKeyNames.contains), isTrue);
     expect(find.text('needs you'), findsOneWidget);
+  });
+
+  testWidgets('a menu answer is sent once; the card waits for the next screen', (t) async {
+    await pump(t);
+    expect(find.byKey(const Key('agent-permission-card')), findsOneWidget);
+    await t.ensureVisible(find.byKey(const Key('choice-2')));
+    await t.tap(find.byKey(const Key('choice-2')));
+    await t.pump();
+    await t.tap(find.byKey(const Key('choice-0')), warnIfMissed: false);
+    await t.pump();
+    expect(repo.actions.map(actionJson), [
+      {
+        'op': 'pane.keys',
+        'pane_id': 'w1:p1',
+        'keys': ['3'],
+      },
+    ]);
+    final button = find.byKey(const Key('choice-0'));
+    expect((t.widget(button) as ButtonStyleButton).enabled, isFalse);
+
+    // The same menu again, with the cursor moved: a new screen enables it.
+    repo.changeScreen(
+      PaneScreen(agent: 'claude', lines: fixture('claude', 'permission_edit_boxed')),
+    );
+    await t.pumpAndSettle();
+    expect((t.widget(button) as ButtonStyleButton).enabled, isTrue);
+    await t.ensureVisible(button);
+    await t.tap(button);
+    await t.pump();
+    expect(repo.actions, hasLength(2));
+
+    repo.changeScreen(PaneScreen(agent: 'claude', lines: fixture('claude', 'plain')));
+    await t.pumpAndSettle();
+    expect(find.byKey(const Key('agent-permission-card')), findsNothing);
   });
 
   testWidgets('every key of the row presses its key in the pane', (t) async {

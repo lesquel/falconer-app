@@ -1109,6 +1109,24 @@
   "herdrOutOfDate": "Showing the last state; trying to reach Herdr again.",
   "agentViewLoadEarlier": "Load earlier",
   "agentViewEmpty": "The pane is empty.",
+  "agentViewNeedsPermission": "{agent} needs your permission",
+  "@agentViewNeedsPermission": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentViewIsAsking": "{agent} is asking",
+  "@agentViewIsAsking": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentViewCurrentOption": "current option",
+  "agentViewSending": "sending",
   "agentViewDraft": "Typed on the computer: {text}",
   "@agentViewDraft": {
     "placeholders": {
@@ -1117,7 +1135,6 @@
       }
     }
   },
-  "agentViewQuestion": "The agent is asking",
   "herdrKeyUp": "Up",
   "herdrKeyDown": "Down",
   "herdrKeyEsc": "Esc",

@@ -217,6 +217,11 @@ class _AgentViewContainerState extends ConsumerState<AgentViewContainer>
           error: _ctrl.error,
           onRetry: _ctrl.retry,
           onKeys: (keys) async => _show(await _ctrl.sendKeys(keys)),
+          onChoice: (keys) async {
+            final failure = await _ctrl.sendKeys(keys);
+            _show(failure);
+            return failure;
+          },
           onTerminalMode: () => unawaited(_terminalMode()),
           onBack: widget.embedded ? null : _back,
           onEnter: () => unawaited(_enter()),
