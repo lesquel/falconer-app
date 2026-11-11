@@ -340,7 +340,22 @@ chk_plist()    {
   [ -f "$PLIST" ] || return 1
   for k in $USAGE_KEYS; do /usr/libexec/PlistBuddy -c "Print :$k" "$PLIST" >/dev/null 2>&1 || return 1; done
 }
-chk_signing()  { grep -q "DEVELOPMENT_TEAM = [A-Z0-9]" "$APP_DIR/ios/Runner.xcodeproj/project.pbxproj" 2>/dev/null; }
+SIGNING_FILE="$APP_DIR/apple/Signing.local.xcconfig"
+chk_signing()  {
+  grep -Eq '^DEVELOPMENT_TEAM *= *[A-Z0-9]{10}' "$SIGNING_FILE" 2>/dev/null \
+    && ! grep -q 'DEVELOPMENT_TEAM *= *YOURTEAMID' "$SIGNING_FILE"
+}
+# "TEAMID<TAB>certificate name" per Apple Development identity (one per team).
+signing_teams() {
+  security find-identity -v -p codesigning 2>/dev/null \
+    | sed -n 's/^ *[0-9]*) [0-9A-F]* "\(Apple Development: .*\)"$/\1/p' | sort -u \
+    | while IFS= read -r name; do
+        team="$(security find-certificate -c "$name" -p 2>/dev/null | openssl x509 -noout -subject 2>/dev/null \
+          | sed -n 's/.*OU *= *\([A-Z0-9]\{10\}\).*/\1/p' | head -1)"
+        [ -n "$team" ] && printf '%s\t%s\n' "$team" "$name"
+      done | sort -u -t "$(printf '\t')" -k1,1
+}
+chk_identity() { [ -n "$(signing_teams)" ]; }
 chk_jdk()      { [ -n "$(jdk_home)" ]; }
 chk_cmdtools() { [ -x "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; }
 chk_licenses() { [ -f "$ANDROID_HOME/licenses/android-sdk-license" ]; }
@@ -582,8 +597,10 @@ build_steps() {
   step project "Platform projects" chk_project fix_project
   if [ "$WANT_IOS" = 1 ]; then
     step plist "Privacy permissions (Info.plist)" chk_plist fix_plist
-    step signing "Code signing team" chk_signing ""
     step device_ios "iPad/iPhone connected" chk_device_ios ""
+  fi
+  if [ "$WANT_IOS" = 1 ] || [ "$WANT_MACOS" = 1 ]; then
+    step signing "Code signing team (apple/Signing.local.xcconfig)" chk_signing ""
   fi
   [ "$WANT_ANDROID" = 1 ] && step device_android "Android phone connected" chk_device_android ""
   return 0
@@ -725,17 +742,65 @@ note() { SUMMARY="$SUMMARY$1
 cd "$APP_DIR" || exit 1
 task "Dart packages" flutter pub get
 
-if [ "$WANT_IOS" = 1 ]; then
+# Signing: one local, gitignored xcconfig shared by the iOS and macOS projects.
+pick_team() {
+  list="$1"
+  n="$(printf '%s\n' "$list" | wc -l | tr -d ' ')"
+  if [ "$n" = 1 ] || [ "$ASSUME_YES" = 1 ]; then
+    printf '%s\n' "$list" | head -1; return
+  fi
+  labels="$(printf '%s\n' "$list" | awk -F'\t' '{printf "%s  (%s)\n", $1, $2}')"
+  if [ "$USE_GUM" = 1 ]; then
+    chosen="$(printf '%s\n' "$labels" | gum choose --header "Signing team")"
+  else
+    i=1
+    while IFS= read -r l; do printf '  %s) %s\n' "$i" "$l" >&2; i=$((i + 1)); done <<EOT
+$labels
+EOT
+    printf '  Team number [1]: ' >&2
+    read -r k </dev/tty
+    chosen="$(printf '%s\n' "$labels" | sed -n "${k:-1}p")"
+  fi
+  [ -n "$chosen" ] || chosen="$(printf '%s\n' "$labels" | head -1)"
+  printf '%s\n' "$list" | grep "^${chosen%% *}" | head -1
+}
+
+write_signing() {
+  mkdir -p "$APP_DIR/apple"
+  {
+    echo "// Written by scripts/setup.sh. Local to this machine; gitignored."
+    echo "DEVELOPMENT_TEAM = $1"
+    echo "// macOS: add keychain-access-groups (protected SSH-key storage)."
+    echo "OPENMOSH_ENTITLEMENTS_SUFFIX = Keychain"
+    echo "CODE_SIGN_IDENTITY[sdk=macosx*] = Apple Development"
+    echo "// Free accounts may need a unique bundle id:"
+    echo "// PRODUCT_BUNDLE_IDENTIFIER = dev.yourname.openmosh"
+  } >"$SIGNING_FILE"
+}
+
+if [ "$WANT_IOS" = 1 ] || [ "$WANT_MACOS" = 1 ]; then
   if ! chk_signing; then
     header "Code signing"
-    echo "  Xcode is opening. Sign in and pick a Team:"
-    echo "  1. Xcode → Settings → Accounts → + → your Apple ID"
-    echo "  2. Runner → target Runner → Signing & Capabilities → pick your Team"
-    echo "  3. If the bundle ID is taken, change it (e.g. dev.<you>.openmosh)"
-    open "$APP_DIR/ios/Runner.xcworkspace"
-    wait_for "Waiting for a Team to be selected in Xcode…" chk_signing
-    line_ok "Code signing team"
+    if ! chk_identity && [ "$WANT_IOS" = 1 ]; then
+      echo "  No Apple Development certificate found. In Xcode:"
+      echo "  1. Xcode → Settings → Accounts → + → your Apple ID"
+      echo "  2. Manage Certificates… → + → Apple Development"
+      echo "  3. If the bundle ID is taken, set PRODUCT_BUNDLE_IDENTIFIER in apple/Signing.local.xcconfig"
+      open -a Xcode 2>/dev/null || true
+      wait_for "Waiting for an Apple Development certificate…" chk_identity
+    fi
+    TEAMS="$(signing_teams)"
+    if [ -n "$TEAMS" ]; then
+      PICK="$(pick_team "$TEAMS")"
+      write_signing "$(printf '%s' "$PICK" | cut -f1)"
+      line_ok "Code signing team" "$(printf '%s' "$PICK" | cut -f1) → apple/Signing.local.xcconfig"
+    else
+      note "macOS: no Apple Development certificate; building unsigned (SSH keys fall back to the legacy keychain). Copy apple/Signing.local.xcconfig.example to apple/Signing.local.xcconfig to sign."
+    fi
   fi
+fi
+
+if [ "$WANT_IOS" = 1 ]; then
   if ! chk_device_ios; then
     header "iOS device"
     echo "  Connect the iPad by cable, unlock it and tap 'Trust This Computer'."
@@ -755,6 +820,10 @@ fi
 
 if [ "$WANT_MACOS" = 1 ]; then
   header "Build macOS"
+  if chk_signing; then
+    # flutter build does not pass -allowProvisioningUpdates; let Xcode create the profile once.
+    task "Provision macOS signing profile" xcodebuild -workspace "$APP_DIR/macos/Runner.xcworkspace" -scheme Runner -configuration Release -allowProvisioningUpdates build
+  fi
   task "Build macOS release" flutter build macos --release
   note "macOS: app at build/macos/Build/Products/Release/ (not installed; copy it to /Applications)."
 fi
