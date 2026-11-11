@@ -1,0 +1,3 @@
+Pick the deployment target?
+❯ 1. Staging
+  2. Production

@@ -1,0 +1,9 @@
+● Plan: 1. Install deps 2. Run tests
+  1. Install deps
+  2. Run tests
+  Do you want me to start?
+
+╭──────────────────────────────────────────────────────────────────────────╮
+│ >  Enter @ to mention files or / for commands                            │
+╰──────────────────────────────────────────────────────────────────────────╯
+ ~/shop [main]                                         claude-sonnet-4.5 (1x)

@@ -1,0 +1,17 @@
+╭───────────────────────────────────────────────────╮
+│ ✻ Welcome to Claude Code!                         │
+│                                                   │
+│   /help for help, /status for your current setup  │
+│                                                   │
+│   cwd: /home/dev/projects/shop                    │
+╰───────────────────────────────────────────────────╯
+
+> what does this repo do?
+
+⏺ This repository is a small online shop built with Express.
+  The main entry point is src/server.ts and routes live in
+  src/routes/.
+
+✻ Thinking… (4s · esc to interrupt)
+
+  Showing detailed transcript · ctrl+o to toggle

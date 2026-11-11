@@ -1,0 +1,5 @@
+To install the dependencies run:
+
+npm install
+
+Run shell command? (Y)es/(N)o/(D)on't ask again [Yes]: 

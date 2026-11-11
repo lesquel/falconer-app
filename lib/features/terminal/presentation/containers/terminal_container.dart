@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,6 +12,8 @@ import '../../../../shared/domain/failure.dart';
 import '../../../../shared/ui/atoms/circle_icon_button.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
 import '../../../../shared/ui/organisms/failure_panel.dart';
+import '../../../../shared/hook/domain/hook_command.dart';
+import '../../../herdr/presentation/containers/herdr_navigator_container.dart';
 import '../../../hosts/domain/usecases/host_connections.dart';
 import '../../../keyboard/domain/entities/key_presets.dart';
 import '../../../keyboard/presentation/views/extra_keys_bar.dart';
@@ -20,27 +21,33 @@ import '../../../settings/domain/entities/app_settings.dart';
 import '../../../voice/presentation/containers/voice_mic_button.dart';
 import '../../data/datasources/connectivity_signals.dart';
 import '../../domain/usecases/terminal_runner.dart';
-import '../controllers/chat_attachment.dart';
 import '../controllers/terminal_session.dart';
 import '../controllers/terminal_session_pool.dart';
 import '../views/shortcut_dialog.dart';
 import '../views/chat_composer.dart';
+import 'chat_attachments_flow.dart';
 import '../views/session_ended_panel.dart';
 import '../views/terminal_palette.dart';
 import '../views/terminal_screen_view.dart';
 
 class TerminalContainer extends ConsumerStatefulWidget {
-  const TerminalContainer({super.key, required this.hostId, this.session, this.kind});
+  const TerminalContainer({
+    super.key,
+    required this.hostId,
+    this.session,
+    this.kind,
+    this.fromAgentView = false,
+  });
   final String hostId;
   final String? session;
   final String? kind;
 
+  /// Opened from the graphic agent view: switching back pops to it.
+  final bool fromAgentView;
+
   @override
   ConsumerState<TerminalContainer> createState() => _TerminalContainerState();
 }
-
-/// Thumbnails are read from the picked copy; skip huge originals.
-const _maxPreviewBytes = 12 * 1024 * 1024;
 
 class _TerminalContainerState extends ConsumerState<TerminalContainer> with WidgetsBindingObserver {
   late final String _key;
@@ -69,6 +76,21 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
 
   TerminalRunner get _runner => _session.runner;
 
+  /// A Herdr session on a hook with the navigator: offers the graphic mode.
+  bool _graphicMode = false;
+
+  bool _graphicChecked = false;
+
+  bool get _isHerdr => widget.kind == 'herdr' && widget.session != null;
+
+  /// Once the shell is connected (so the check reuses its connection and
+  /// never prompts on its own), asks the hook about the graphic mode.
+  void _maybeCheckGraphicMode() {
+    if (!_isHerdr || _graphicChecked || _phase != TerminalPhase.connected) return;
+    _graphicChecked = true;
+    unawaited(_checkGraphicMode());
+  }
+
   @override
   void initState() {
     super.initState();
@@ -89,7 +111,11 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
     // On screen: the pool never evicts it while this screen is open.
     _pool.attach(_key);
     _phase = _runner.phase;
-    _phaseSub = _runner.phases.listen((p) => setState(() => _phase = p));
+    _phaseSub = _runner.phases.listen((p) {
+      setState(() => _phase = p);
+      _maybeCheckGraphicMode();
+    });
+    _maybeCheckGraphicMode();
     _net = networkRegained().listen((_) => _runner.wake());
     final reused = !fresh || _connections.isConnected(widget.hostId);
     if (reused) {
@@ -97,6 +123,51 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
       WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_verifyThenShow(fresh)));
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_runner.start()));
+    }
+  }
+
+  /// Any failure keeps the graphic mode hidden.
+  Future<void> _checkGraphicMode() async {
+    try {
+      final ok = await ref.read(herdrRepositoryProvider).supportsHerdr(widget.hostId);
+      if (mounted && ok) setState(() => _graphicMode = true);
+    } catch (_) {
+      // Stays the terminal only.
+    }
+  }
+
+  /// Opens the graphic view of the pane Herdr shows (S1: the other mode).
+  Future<void> _openGraphicMode() async {
+    if (widget.fromAgentView) {
+      context.pop();
+      return;
+    }
+    final l = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final session = isHerdrSessionName(widget.session!) ? widget.session : null;
+    try {
+      final snap = await ref
+          .read(herdrRepositoryProvider)
+          .snapshot(widget.hostId, session: session);
+      final pane = snap.body?.focusedPane;
+      if (!mounted) return;
+      if (pane == null) {
+        messenger.showSnackBar(SnackBar(content: Text(l.herdrNoFocusedPane)));
+        return;
+      }
+      unawaited(
+        context.push(
+          agentViewLocation(
+            widget.hostId,
+            pane.id,
+            session: session,
+            workspaceId: pane.workspaceId,
+            fromTerminal: true,
+          ),
+        ),
+      );
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(l.failureText(e))));
     }
   }
 
@@ -271,65 +342,16 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
 
   void _leave() => context.canPop() ? context.pop() : context.go('/hosts/${widget.hostId}');
 
-  /// Uploads picked files; returns them with a thumbnail for images.
-  Future<List<ChatAttachment>> _uploadFiles(bool images) async {
-    final source = ref.read(fileSourceProvider);
-    final messenger = ScaffoldMessenger.of(context);
-    final l = context.l10n;
+  Future<void> _attachToChat() async {
+    final images = await askAttachmentKind(context);
+    if (images == null || !mounted) return;
     setState(() => _uploading = true);
     try {
-      final files = images ? await source.pickImages() : [?(await source.pick(imagesOnly: false))];
-      final done = <ChatAttachment>[];
-      try {
-        for (final file in files) {
-          final remote = await ref.read(uploadFileProvider)(widget.hostId, file);
-          final preview = images && file.size <= _maxPreviewBytes
-              ? await File(file.path).readAsBytes()
-              : null;
-          done.add(ChatAttachment(remotePath: remote, name: file.name, preview: preview));
-        }
-      } finally {
-        for (final file in files) {
-          await source.discard(file);
-        }
-      }
-      return done;
-    } on AppFailure catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text(l.failureMessage(e.message))));
-      return const [];
-    } on FileSystemException {
-      return const [];
+      final files = await uploadAttachments(context, ref, widget.hostId, images: images);
+      if (mounted) setState(() => _session.attachments.addAll(files));
     } finally {
       if (mounted) setState(() => _uploading = false);
     }
-  }
-
-  Future<void> _attachToChat() async {
-    final l = context.l10n;
-    final images = await showModalBottomSheet<bool>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheet) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
-              title: Text(l.attachPhotos),
-              onTap: () => Navigator.of(sheet).pop(true),
-            ),
-            ListTile(
-              leading: const Icon(Icons.attach_file),
-              title: Text(l.attachFile),
-              onTap: () => Navigator.of(sheet).pop(false),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (images == null) return;
-    final files = await _uploadFiles(images);
-    if (mounted) setState(() => _session.attachments.addAll(files));
   }
 
   void _toggleChat() {
@@ -416,6 +438,13 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
                               queryParameters: {'session': 'default', 'kind': 'herdr'},
                             ).toString(),
                           ),
+                        ),
+                      if (_isHerdr && _graphicMode)
+                        IconButton(
+                          key: const Key('switch_to_graphic'),
+                          tooltip: l.herdrGraphicMode,
+                          icon: const Icon(Icons.account_tree_outlined),
+                          onPressed: () => unawaited(_openGraphicMode()),
                         ),
                       IconButton(
                         tooltip: l.fullScreen,

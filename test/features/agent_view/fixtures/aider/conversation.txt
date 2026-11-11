@@ -1,0 +1,6 @@
+> add type hints to the cart functions
+
+Applied edit to src/cart.py
+Commit 1a2b3c4 feat: add type hints
+
+> 

@@ -1,0 +1,14 @@
+✦ I will install the dependencies.
+
+╭──────────────────────────────────────────────────────────────────────────╮
+│ ?  Shell npm install [current working directory /home/dev/shop]          │
+│                                                                          │
+│ npm install                                                              │
+│                                                                          │
+│ Allow execution of: 'npm'?                                               │
+│                                                                          │
+│ ● 1. Yes, allow once                                                     │
+│   2. Yes, allow always ...                                               │
+│   3. No, suggest changes (esc)                                           │
+│                                                                          │
+╰──────────────────────────────────────────────────────────────────────────╯

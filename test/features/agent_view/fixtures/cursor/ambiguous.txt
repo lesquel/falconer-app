@@ -1,0 +1,12 @@
+  Plan: 1. Install deps 2. Run tests
+  1. Install deps
+  2. Run tests
+
+  → Option A: keep the old API
+    Option B: break the API
+  Which one do you prefer?
+
+ ┌────────────────────────────────────────────────────────┐
+ │ → Plan, search, build anything                         │
+ └────────────────────────────────────────────────────────┘
+   Claude 4.5 Sonnet · 12.4% · / for commands · @ for files

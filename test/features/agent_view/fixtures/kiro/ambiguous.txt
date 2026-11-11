@@ -1,0 +1,6 @@
+Plan: 1. Install deps 2. Run tests
+1. Install deps
+2. Run tests
+Shall I proceed? (yes/no)
+
+> 

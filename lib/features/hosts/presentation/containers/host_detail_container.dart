@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/di.dart';
 import '../../../../l10n/l10n.dart';
+import '../../../../shared/hook/domain/hook_command.dart';
 import '../../../../shared/ui/molecules/themed_mole.dart';
 import '../../../../shared/ui/organisms/failure_panel.dart';
 import '../../../settings/domain/entities/app_settings.dart';
@@ -77,6 +78,37 @@ class HostDetailContainer extends ConsumerWidget {
     if (msg != null) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
+  /// The listed Herdr session the hook can address, else Herdr's default.
+  static String _herdrSession(List<RemoteSession> sessions) =>
+      sessions
+          .where((s) => s.kind == SessionKind.herdr && isHerdrSessionName(s.name))
+          .firstOrNull
+          ?.name ??
+      'default';
+
+  Future<void> _openNavigator(
+    BuildContext context,
+    HostDetailController ctrl,
+    HostDetailState state,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final outdated = context.l10n.errHerdrHookOutdated;
+    final router = GoRouter.of(context);
+    if (!await ctrl.checkHerdr()) {
+      messenger.showSnackBar(SnackBar(content: Text(outdated)));
+      return;
+    }
+    final sessions = state.sessions;
+    unawaited(
+      router.push(
+        Uri(
+          path: '/hosts/$hostId/herdr',
+          queryParameters: {'session': sessions == null ? 'default' : _herdrSession(sessions)},
+        ).toString(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final host = ref.watch(hostProvider(hostId)).value;
@@ -131,6 +163,9 @@ class HostDetailContainer extends ConsumerWidget {
                   },
                 ).toString(),
               ),
+        // Shown from the start, next to Open Herdr; the tap checks that the
+        // hook speaks `herdr` (connecting if needed) before opening it.
+        onHerdrNavigator: () => _openNavigator(context, ctrl, state),
         onAttach: (s) => context.push(
           Uri(
             path: '/terminal/$hostId',

@@ -1058,5 +1058,117 @@
   "voiceStop": "Stop and transcribe",
   "voiceTranscribing": "Transcribing…",
   "voiceMicDenied": "Dictation needs the microphone permission.",
-  "voiceFailed": "Could not transcribe. Try again."
+  "voiceFailed": "Could not transcribe. Try again.",
+  "herdrNavigator": "Agents & workspaces",
+  "@herdrNavigator": {
+    "description": "Host action and screen title: structured view of the Herdr session."
+  },
+  "herdrNavigatorHint": "Browse Herdr workspaces, tabs and agents and answer agents with buttons.",
+  "herdrStatusBlocked": "needs you",
+  "@herdrStatusBlocked": {
+    "description": "Herdr agent status: blocked waiting for the user."
+  },
+  "herdrFocused": "on screen",
+  "@herdrFocused": {
+    "description": "Marker of the workspace/tab/pane the computer shows."
+  },
+  "herdrShellPane": "Terminal",
+  "herdrNewWorkspace": "New workspace",
+  "herdrNewTab": "New tab",
+  "herdrRename": "Rename",
+  "herdrCreate": "Create",
+  "herdrStartAgent": "Start an agent",
+  "herdrStartAgentIn": "Start an agent in this pane",
+  "herdrCloseWorkspaceTitle": "Close workspace {name}?",
+  "@herdrCloseWorkspaceTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "herdrCloseTabTitle": "Close tab {name}?",
+  "@herdrCloseTabTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "herdrCloseBody": "Everything running in it on the computer stops.",
+  "herdrName": "Name",
+  "herdrNameOptional": "Name (optional)",
+  "herdrEmpty": "This Herdr session has no workspaces.",
+  "herdrNoTabs": "No tabs",
+  "herdrLoading": "Reading Herdr…",
+  "herdrMoreActions": "More actions",
+  "herdrPickPane": "Pick an agent to see it here.",
+  "herdrTerminalMode": "Terminal mode",
+  "herdrGraphicMode": "Graphic mode",
+  "herdrNoFocusedPane": "No pane is focused in Herdr.",
+  "herdrOutOfDate": "Showing the last state; trying to reach Herdr again.",
+  "agentViewLoadEarlier": "Load earlier",
+  "agentViewEmpty": "The pane is empty.",
+  "agentViewNeedsPermission": "{agent} needs your permission",
+  "@agentViewNeedsPermission": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentViewIsAsking": "{agent} is asking",
+  "@agentViewIsAsking": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentViewCurrentOption": "current option",
+  "agentViewSending": "sending",
+  "agentViewDraft": "Typed on the computer: {text}",
+  "@agentViewDraft": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "herdrKeyUp": "Up",
+  "herdrKeyDown": "Down",
+  "herdrKeyEsc": "Esc",
+  "herdrKeyEnter": "Enter",
+  "herdrKeyTab": "Tab",
+  "errHerdrInvalid": "Herdr no longer has that item. The list was refreshed.",
+  "errHerdrNotRunning": "Herdr is not running on this computer.",
+  "errHerdrRefused": "Herdr refused the request.",
+  "errHerdrHookOutdated": "Update openmosh-hook on this computer to use the Herdr navigator.",
+  "errMessageTooLong4000": "Message is longer than 4000 characters.",
+  "herdrViewAsAgents": "View as agents",
+  "@herdrViewAsAgents": {
+    "description": "Host screen button next to Open Herdr and Shell: opens the graphic Herdr navigator."
+  },
+  "herdrNewTerminal": "New terminal",
+  "@herdrNewTerminal": {
+    "description": "Workspace screen action: opens a new Herdr tab (a shell) in this workspace."
+  },
+  "herdrAgentCount": "{count, plural, =1{1 agent} other{{count} agents}}",
+  "@herdrAgentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "herdrTerminalCount": "{count, plural, =1{1 terminal} other{{count} terminals}}",
+  "@herdrTerminalCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "herdrWorkspaceGone": "This workspace is no longer open.",
+  "herdrPickWorkspace": "Pick a workspace to see its terminals."
 }

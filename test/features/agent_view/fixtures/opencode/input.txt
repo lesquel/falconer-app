@@ -1,0 +1,8 @@
+  The cart total is computed in src/cart.ts.
+
+  ┃
+  ┃  explain the checkout flow
+  ┃
+  ┃  Build  Claude Sonnet 4.5 Anthropic
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+                                                   tab agents  ctrl+p commands

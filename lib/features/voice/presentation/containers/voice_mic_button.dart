@@ -23,7 +23,14 @@ class VoiceMicButton extends ConsumerStatefulWidget {
 
 class _VoiceMicButtonState extends ConsumerState<VoiceMicButton> {
   Timer? _limit;
-  late final DictationController _controller = ref.read(dictationControllerProvider.notifier);
+  // Read in initState: `ref` is unusable once dispose() starts.
+  late final DictationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = ref.read(dictationControllerProvider.notifier);
+  }
 
   @override
   void dispose() {

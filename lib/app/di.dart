@@ -10,6 +10,8 @@ import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../features/herdr/data/repositories/hook_herdr_repository.dart';
+import '../features/herdr/domain/repositories/herdr_repository.dart';
 import '../features/hosts/data/repositories/drift_host_repository.dart';
 import '../features/hosts/domain/entities/host.dart';
 import '../features/hosts/domain/repositories/host_repository.dart';
@@ -223,6 +225,11 @@ final sessionCatalogProvider = Provider<SessionCatalog>(
 
 final loadAgentUsageProvider = Provider<LoadAgentUsage>(
   (ref) => LoadAgentUsage(ref.watch(hostConnectionsProvider)),
+);
+
+/// Herdr navigator over the hook; one instance caches each host's capability.
+final herdrRepositoryProvider = Provider<HerdrRepository>(
+  (ref) => HookHerdrRepository(ref.watch(hostConnectionsProvider)),
 );
 
 final uploadFileProvider = Provider<UploadFile>(

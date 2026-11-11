@@ -1,0 +1,9 @@
+✦ Plan: 1. Install deps 2. Run tests
+  1. Install deps
+  2. Run tests
+  Shall I start?
+
+╭──────────────────────────────────────────────────────────────────────────╮
+│ >   Type your message or @path/to/file                                   │
+╰──────────────────────────────────────────────────────────────────────────╯
+~/shop (main*)            no sandbox (see /docs)       gemini-2.5-pro (98% context left)

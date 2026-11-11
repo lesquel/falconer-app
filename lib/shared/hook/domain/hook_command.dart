@@ -12,6 +12,27 @@ enum RespondAction { allow, deny, text }
 
 const maxRespondTextBytes = 4096;
 
+/// Longest long-poll the hook accepts; it stays under the 30 s exec timeout.
+const maxHerdrWaitMs = 20000;
+
+final _herdrTarget = RegExp(r'^[A-Za-z0-9:_-]{1,64}$');
+final _herdrPane = RegExp(r'^[A-Za-z0-9:%._@$-]{1,64}$');
+final _herdrSession = RegExp(r'^[A-Za-z0-9._-]{1,64}$');
+final _herdrRev = RegExp(r'^[0-9a-f]{16}$');
+
+/// Herdr workspace and tab ids, as the hook validates them.
+bool isHerdrTargetId(String id) => _herdrTarget.hasMatch(id);
+
+/// Herdr pane ids (`w1:p2`), as the hook validates them.
+bool isHerdrPaneId(String id) => !id.startsWith('-') && _herdrPane.hasMatch(id);
+
+/// Herdr session names the hook accepts for `--session`.
+bool isHerdrSessionName(String s) =>
+    !s.startsWith('-') && s != '.' && s != '..' && _herdrSession.hasMatch(s);
+
+/// A long-poll revision: 16 lowercase hex digits.
+bool isHerdrRev(String s) => _herdrRev.hasMatch(s);
+
 final class HookCommand {
   const HookCommand._(this.argv);
 
@@ -66,6 +87,57 @@ final class HookCommand {
   factory HookCommand.usage({int days = 7}) {
     if (days < 1 || days > 31) throw const ValidationFailure('The period must be 1–31 days.');
     return HookCommand._(['usage', '--days', '$days', '--json']);
+  }
+
+  /// The hook's version and wire protocols (`protocol.herdr` gates the
+  /// Herdr navigator).
+  factory HookCommand.version() => const HookCommand._(['version', '--json']);
+
+  /// Herdr workspaces, tabs and panes. With [since], the hook answers when the
+  /// state's `rev` differs from it or after [waitMs] (a long-poll).
+  factory HookCommand.herdrSnapshot({String? session, String? since, int waitMs = 0}) =>
+      HookCommand._(['herdr', 'snapshot', ..._herdrPoll(session, since, waitMs), '--json']);
+
+  /// One pane's visible text; long-polls like [HookCommand.herdrSnapshot].
+  factory HookCommand.herdrRead(
+    String paneId, {
+    String? session,
+    String? since,
+    int waitMs = 0,
+    int? lines,
+  }) {
+    if (!isHerdrPaneId(paneId)) throw const ValidationFailure('Invalid identifier.');
+    if (lines != null && (lines < 1 || lines > 2000)) {
+      throw const ValidationFailure('Invalid identifier.');
+    }
+    return HookCommand._([
+      'herdr',
+      'read',
+      '--pane',
+      paneId,
+      ..._herdrPoll(session, since, waitMs),
+      if (lines != null) ...['--lines', '$lines'],
+      '--json',
+    ]);
+  }
+
+  /// One allowlisted Herdr action; its `{"op":…}` body goes on stdin.
+  factory HookCommand.herdrAction({String? session}) =>
+      HookCommand._(['herdr', 'action', ..._herdrPoll(session, null, 0), '--json']);
+
+  static List<String> _herdrPoll(String? session, String? since, int waitMs) {
+    if (session != null && !isHerdrSessionName(session)) {
+      throw const ValidationFailure('Invalid identifier.');
+    }
+    if (since != null && !isHerdrRev(since)) throw const ValidationFailure('Invalid identifier.');
+    if (waitMs < 0 || waitMs > maxHerdrWaitMs) {
+      throw const ValidationFailure('Invalid identifier.');
+    }
+    return [
+      if (session != null) ...['--session', session],
+      if (since != null) ...['--since', since],
+      if (since != null && waitMs > 0) ...['--wait-ms', '$waitMs'],
+    ];
   }
 
   String toShell(String hookPath) => shJoin([hookPath, ...argv]);

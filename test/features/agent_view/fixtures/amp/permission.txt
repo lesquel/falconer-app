@@ -1,0 +1,11 @@
+  I'll install the dependencies.
+
+╭──────────────────────────────────────────────────────────╮
+│ Allow running this command?                              │
+│                                                          │
+│   $ npm install                                          │
+│                                                          │
+│ ▸ Allow                                                  │
+│   Allow all for this session                             │
+│   Deny                                                   │
+╰──────────────────────────────────────────────────────────╯

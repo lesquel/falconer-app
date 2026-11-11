@@ -1346,4 +1346,176 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voiceFailed => 'Could not transcribe. Try again.';
+
+  @override
+  String get herdrNavigator => 'Agents & workspaces';
+
+  @override
+  String get herdrNavigatorHint =>
+      'Browse Herdr workspaces, tabs and agents and answer agents with buttons.';
+
+  @override
+  String get herdrStatusBlocked => 'needs you';
+
+  @override
+  String get herdrFocused => 'on screen';
+
+  @override
+  String get herdrShellPane => 'Terminal';
+
+  @override
+  String get herdrNewWorkspace => 'New workspace';
+
+  @override
+  String get herdrNewTab => 'New tab';
+
+  @override
+  String get herdrRename => 'Rename';
+
+  @override
+  String get herdrCreate => 'Create';
+
+  @override
+  String get herdrStartAgent => 'Start an agent';
+
+  @override
+  String get herdrStartAgentIn => 'Start an agent in this pane';
+
+  @override
+  String herdrCloseWorkspaceTitle(String name) {
+    return 'Close workspace $name?';
+  }
+
+  @override
+  String herdrCloseTabTitle(String name) {
+    return 'Close tab $name?';
+  }
+
+  @override
+  String get herdrCloseBody => 'Everything running in it on the computer stops.';
+
+  @override
+  String get herdrName => 'Name';
+
+  @override
+  String get herdrNameOptional => 'Name (optional)';
+
+  @override
+  String get herdrEmpty => 'This Herdr session has no workspaces.';
+
+  @override
+  String get herdrNoTabs => 'No tabs';
+
+  @override
+  String get herdrLoading => 'Reading Herdr…';
+
+  @override
+  String get herdrMoreActions => 'More actions';
+
+  @override
+  String get herdrPickPane => 'Pick an agent to see it here.';
+
+  @override
+  String get herdrTerminalMode => 'Terminal mode';
+
+  @override
+  String get herdrGraphicMode => 'Graphic mode';
+
+  @override
+  String get herdrNoFocusedPane => 'No pane is focused in Herdr.';
+
+  @override
+  String get herdrOutOfDate => 'Showing the last state; trying to reach Herdr again.';
+
+  @override
+  String get agentViewLoadEarlier => 'Load earlier';
+
+  @override
+  String get agentViewEmpty => 'The pane is empty.';
+
+  @override
+  String agentViewNeedsPermission(String agent) {
+    return '$agent needs your permission';
+  }
+
+  @override
+  String agentViewIsAsking(String agent) {
+    return '$agent is asking';
+  }
+
+  @override
+  String get agentViewCurrentOption => 'current option';
+
+  @override
+  String get agentViewSending => 'sending';
+
+  @override
+  String agentViewDraft(String text) {
+    return 'Typed on the computer: $text';
+  }
+
+  @override
+  String get herdrKeyUp => 'Up';
+
+  @override
+  String get herdrKeyDown => 'Down';
+
+  @override
+  String get herdrKeyEsc => 'Esc';
+
+  @override
+  String get herdrKeyEnter => 'Enter';
+
+  @override
+  String get herdrKeyTab => 'Tab';
+
+  @override
+  String get errHerdrInvalid => 'Herdr no longer has that item. The list was refreshed.';
+
+  @override
+  String get errHerdrNotRunning => 'Herdr is not running on this computer.';
+
+  @override
+  String get errHerdrRefused => 'Herdr refused the request.';
+
+  @override
+  String get errHerdrHookOutdated =>
+      'Update openmosh-hook on this computer to use the Herdr navigator.';
+
+  @override
+  String get errMessageTooLong4000 => 'Message is longer than 4000 characters.';
+
+  @override
+  String get herdrViewAsAgents => 'View as agents';
+
+  @override
+  String get herdrNewTerminal => 'New terminal';
+
+  @override
+  String herdrAgentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count agents',
+      one: '1 agent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String herdrTerminalCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count terminals',
+      one: '1 terminal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get herdrWorkspaceGone => 'This workspace is no longer open.';
+
+  @override
+  String get herdrPickWorkspace => 'Pick a workspace to see its terminals.';
 }

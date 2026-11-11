@@ -123,6 +123,11 @@ extension FailureL10n on AppLocalizations {
       errLockStaysOff,
     'Could not verify you, so the lock stays on.' => errLockStaysOn,
     'This event was already answered.' => errAlreadyAnswered,
+    'Herdr no longer has that item. The list was refreshed.' => errHerdrInvalid,
+    'Herdr is not running on this computer.' => errHerdrNotRunning,
+    'Herdr refused the request.' => errHerdrRefused,
+    'Update openmosh-hook on this computer to use the Herdr navigator.' => errHerdrHookOutdated,
+    'Message is longer than 4000 characters.' => errMessageTooLong4000,
     _ => message,
   };
 }

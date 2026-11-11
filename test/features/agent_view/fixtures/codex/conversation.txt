@@ -1,0 +1,14 @@
+› why does the cart total ignore quantities?
+
+• The total sums item prices without the quantity.
+
+• Ran npm test -- cart
+  └ PASS src/cart.test.ts
+    Tests: 4 passed
+
+• Edited src/cart.ts (+1 -1)
+
+› also update the changelog
+  and the readme
+
+• Done.

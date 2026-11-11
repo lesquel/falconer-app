@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/agent_view/presentation/containers/agent_view_container.dart';
+import '../features/herdr/presentation/containers/herdr_navigator_container.dart';
+import '../features/herdr/presentation/containers/herdr_workspace_container.dart';
 import '../features/hosts/presentation/containers/host_detail_container.dart';
 import '../features/hosts/presentation/containers/host_form_container.dart';
 import '../features/hosts/presentation/containers/hosts_container.dart';
@@ -15,6 +18,7 @@ import '../features/usage/presentation/containers/usage_container.dart';
 import '../features/voice/presentation/containers/voice_mic_button.dart';
 import '../features/voice/presentation/containers/voice_settings_container.dart';
 import '../l10n/l10n.dart';
+import '../shared/hook/domain/hook_command.dart';
 import 'home_shell.dart';
 
 final _id = RegExp(r'^[A-Za-z0-9_-]{1,128}$');
@@ -24,6 +28,12 @@ String? _guardIds(GoRouterState s) {
     if (!_id.hasMatch(v)) return '/';
   }
   return null;
+}
+
+/// `?session=` when it is a name the hook accepts; else Herdr's default.
+String? _herdrSession(GoRouterState s) {
+  final v = s.uri.queryParameters['session'];
+  return v != null && isHerdrSessionName(v) ? v : null;
 }
 
 GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
@@ -55,6 +65,30 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
                     GoRoute(
                       path: 'usage',
                       builder: (_, s) => UsageContainer(hostId: s.pathParameters['id']!),
+                    ),
+                    GoRoute(
+                      path: 'herdr',
+                      builder: (_, s) => HerdrNavigatorContainer(
+                        hostId: s.pathParameters['id']!,
+                        session: _herdrSession(s),
+                      ),
+                      routes: [
+                        // One workspace's terminals; its id is `?ws=`.
+                        GoRoute(
+                          path: 'workspace',
+                          builder: (context, s) {
+                            final ws = s.uri.queryParameters['ws'];
+                            if (ws == null || !isHerdrTargetId(ws)) {
+                              return Scaffold(body: Center(child: Text(context.l10n.notFound)));
+                            }
+                            return HerdrWorkspaceContainer(
+                              hostId: s.pathParameters['id']!,
+                              workspaceId: ws,
+                              session: _herdrSession(s),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -88,7 +122,29 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
         hostId: s.pathParameters['id']!,
         session: s.uri.queryParameters['session'],
         kind: s.uri.queryParameters['kind'],
+        fromAgentView: s.uri.queryParameters['from'] == 'agent',
       ),
+    ),
+    // Graphic mode of one Herdr pane; full screen like the terminal it
+    // switches with. The pane id (`w1:p2`) is a query parameter.
+    GoRoute(
+      path: '/agent/:id',
+      builder: (context, s) {
+        final pane = s.uri.queryParameters['pane'];
+        if (pane == null || !isHerdrPaneId(pane)) {
+          return Scaffold(body: Center(child: Text(context.l10n.notFound)));
+        }
+        return AgentViewContainer(
+          hostId: s.pathParameters['id']!,
+          paneId: pane,
+          session: _herdrSession(s),
+          workspaceId: switch (s.uri.queryParameters['ws']) {
+            final ws? when isHerdrTargetId(ws) => ws,
+            _ => null,
+          },
+          fromTerminal: s.uri.queryParameters['from'] == 'terminal',
+        );
+      },
     ),
     GoRoute(
       path: '/inbox/:host/:event',

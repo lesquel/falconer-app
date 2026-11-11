@@ -1,0 +1,6 @@
+• All tests passed.
+
+› refactor the cart module to use a reducer
+  and keep the public API
+
+  100% context left · ? for shortcuts

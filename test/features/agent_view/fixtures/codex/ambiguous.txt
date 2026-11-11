@@ -1,0 +1,10 @@
+• Plan: 1. Install deps 2. Run tests
+
+  1. Install deps
+  2. Run tests
+
+  Should I go ahead?
+
+› Ask Codex to do anything
+
+  98% context left · ? for shortcuts

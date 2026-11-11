@@ -30,6 +30,7 @@ class HostDetailView extends StatelessWidget {
     this.onUsage,
     this.notificationHours,
     this.onHerdr,
+    this.onHerdrNavigator,
   });
 
   final Host host;
@@ -53,6 +54,9 @@ class HostDetailView extends StatelessWidget {
 
   /// Opens the Herdr session with mirroring.
   final VoidCallback? onHerdr;
+
+  /// Opens the Herdr navigator (workspaces, tabs, agents); null hides it.
+  final VoidCallback? onHerdrNavigator;
 
   /// This host's notification hours row.
   final Widget? notificationHours;
@@ -135,38 +139,71 @@ class HostDetailView extends StatelessWidget {
           ),
           const SizedBox(height: 10),
         ],
-        if (onHerdr != null) ...[
-          Tooltip(
-            message: l.openHerdrHint,
-            child: SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                key: const Key('open_herdr'),
-                style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(56)),
-                onPressed: onHerdr,
-                icon: const Icon(Icons.dashboard_outlined),
-                label: Text(l.openHerdr),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-        ],
-        Row(
+        // The ways to open the computer, together and equally prominent:
+        // Herdr, its graphic view, and a plain shell.
+        Column(
+          key: const Key('host-open-group'),
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
-              child: FilledButton.tonalIcon(
-                onPressed: onShell,
-                icon: const Icon(Icons.terminal),
-                label: Text(l.shell),
+            if (onHerdr != null || onHerdrNavigator != null) ...[
+              Row(
+                children: [
+                  if (onHerdr != null)
+                    Expanded(
+                      child: Tooltip(
+                        message: l.openHerdrHint,
+                        child: FilledButton.icon(
+                          key: const Key('open_herdr'),
+                          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(56)),
+                          onPressed: onHerdr,
+                          icon: const Icon(Icons.dashboard_outlined),
+                          label: Text(l.openHerdr, maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ),
+                      ),
+                    ),
+                  if (onHerdr != null && onHerdrNavigator != null) const SizedBox(width: 8),
+                  if (onHerdrNavigator != null)
+                    Expanded(
+                      child: Tooltip(
+                        message: l.herdrNavigatorHint,
+                        child: FilledButton.icon(
+                          key: const Key('open_herdr_navigator'),
+                          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(56)),
+                          onPressed: onHerdrNavigator,
+                          icon: const Icon(Icons.forum_outlined),
+                          label: Text(
+                            l.herdrViewAsAgents,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: loading ? null : onLoad,
-                icon: const Icon(Icons.refresh),
-                label: Text(sessions == null ? l.loadSessions : l.refresh),
-              ),
+              const SizedBox(height: 8),
+            ],
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.tonalIcon(
+                    key: const Key('open_shell'),
+                    style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                    onPressed: onShell,
+                    icon: const Icon(Icons.terminal),
+                    label: Text(l.shell),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                    onPressed: loading ? null : onLoad,
+                    icon: const Icon(Icons.refresh),
+                    label: Text(sessions == null ? l.loadSessions : l.refresh),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
