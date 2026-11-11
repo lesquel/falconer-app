@@ -12,6 +12,7 @@ import 'package:openmosh/features/herdr/domain/entities/herdr_action.dart';
 import 'package:openmosh/features/herdr/domain/entities/herdr_snapshot.dart';
 import 'package:openmosh/features/herdr/domain/repositories/herdr_repository.dart';
 import 'package:openmosh/l10n/l10n.dart';
+import 'package:openmosh/shared/ui/tokens/mosh_colors.dart';
 
 import '../support/herdr_fakes.dart';
 
@@ -111,6 +112,51 @@ void main() {
     await pump(t);
     expect(find.byKey(const Key('choice-0')), findsNothing);
     expect(find.textContaining('Continue? maybe'), findsOneWidget);
+  });
+
+  testWidgets('user prompts are right-aligned accent bubbles; agent and tool are cards', (t) async {
+    repo.screen = PaneScreen(agent: 'claude', lines: fixture('claude', 'conversation'));
+    await pump(t);
+    final user = find.byKey(const Key('text-user-0'));
+    expect(user, findsOneWidget);
+    expect(
+      find.descendant(of: user, matching: find.text('why does the cart total ignore quantities?')),
+      findsOneWidget,
+    );
+    final align = t.widget<Align>(find.descendant(of: user, matching: find.byType(Align)).first);
+    expect(align.alignment, Alignment.centerRight);
+    final bubble = t.widget<Material>(
+      find.descendant(of: user, matching: find.byType(Material)).first,
+    );
+    expect(bubble.color, MoshColors.of(t.element(user)).accent);
+
+    final agent = find.byKey(const Key('text-agent-1'));
+    expect(agent, findsOneWidget);
+    final agentAlign = t.widget<Align>(
+      find.descendant(of: agent, matching: find.byType(Align)).first,
+    );
+    expect(agentAlign.alignment, Alignment.centerLeft);
+
+    final tool = find.byKey(const Key('text-tool-3'));
+    expect(tool, findsOneWidget);
+    final code = t.widget<SelectableText>(
+      find.descendant(of: tool, matching: find.byType(SelectableText)),
+    );
+    expect(code.style?.fontFamily, 'monospace');
+  });
+
+  testWidgets('a plain terminal opens graphic too, titled Terminal', (t) async {
+    repo.screen = PaneScreen(lines: fixture('shell', 'conversation'));
+    await pump(t);
+    expect(find.text('Terminal'), findsOneWidget);
+    expect(find.byKey(const Key('text-user-0')), findsOneWidget);
+    expect(find.byKey(const Key('text-tool-1')), findsOneWidget);
+    await t.enterText(find.byKey(const Key('chat-input')), 'ls -la');
+    await t.tap(find.byTooltip('Send'));
+    await t.pumpAndSettle();
+    expect(repo.actions.map(actionJson), [
+      {'op': 'pane.text', 'pane_id': 'w1:p1', 'text': 'ls -la', 'submit': true},
+    ]);
   });
 
   testWidgets('new screens arrive by long-poll', (t) async {

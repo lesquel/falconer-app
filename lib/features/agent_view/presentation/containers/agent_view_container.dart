@@ -136,7 +136,8 @@ class _AgentViewContainerState extends ConsumerState<AgentViewContainer>
       builder: (context, _) {
         final screen = _ctrl.screen;
         return AgentScreenView(
-          title: screen?.agent ?? widget.paneId,
+          // A pane without an agent is a plain terminal.
+          title: screen == null ? widget.paneId : screen.agent ?? context.l10n.herdrShellPane,
           status: screen?.status ?? HerdrStatus.unknown,
           blocks: _ctrl.blocks,
           loaded: screen != null,

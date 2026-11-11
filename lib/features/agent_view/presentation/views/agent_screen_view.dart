@@ -65,7 +65,11 @@ class AgentScreenView extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: switch (b) {
-                TextBlock(:final text) => _TextCard(text),
+                TextBlock(:final text, :final role) => _TextCard(
+                  text,
+                  role: role,
+                  key: Key('text-${role.name}-$i'),
+                ),
                 ChoiceBlock() => _ChoiceCard(block: b, index: i, onKeys: onKeys),
                 InputBlock() => const SizedBox.shrink(),
               },
@@ -138,27 +142,51 @@ bool looksLikeCode(String text) {
   );
 }
 
+/// A paragraph by who wrote it: the user's prompt as a right-aligned accent
+/// bubble, the agent's reply as a left card, a tool run as a monospace card.
 class _TextCard extends StatelessWidget {
-  const _TextCard(this.text);
+  const _TextCard(this.text, {super.key, required this.role});
   final String text;
+  final TextRole role;
 
   @override
   Widget build(BuildContext context) {
     final c = MoshColors.of(context);
-    final code = looksLikeCode(text);
-    return Material(
-      color: code ? c.surfaceHigh : c.surface,
-      borderRadius: BorderRadius.circular(MoshRadii.key),
+    const mono = TextStyle(fontFamily: 'monospace', fontSize: 13, height: 1.3);
+    const prose = TextStyle(fontSize: 15, height: 1.35);
+    Widget card(Color color, TextStyle style, BorderRadius radius) => Material(
+      color: color,
+      borderRadius: radius,
       child: Padding(
         padding: const EdgeInsets.all(12),
-        child: SelectableText(
-          text,
-          style: code
-              ? const TextStyle(fontFamily: 'monospace', fontSize: 13, height: 1.3)
-              : const TextStyle(fontSize: 15, height: 1.35),
-        ),
+        child: SelectableText(text, style: style),
       ),
     );
+    final radius = BorderRadius.circular(MoshRadii.key);
+    const tail = Radius.circular(4);
+    return switch (role) {
+      TextRole.user => Padding(
+        padding: const EdgeInsets.only(left: 48),
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: card(
+            c.accent,
+            prose.copyWith(color: c.onAccent),
+            radius.copyWith(bottomRight: tail),
+          ),
+        ),
+      ),
+      TextRole.agent => Padding(
+        padding: const EdgeInsets.only(right: 24),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: looksLikeCode(text)
+              ? card(c.surfaceHigh, mono, radius)
+              : card(c.surface, prose, radius.copyWith(bottomLeft: tail)),
+        ),
+      ),
+      TextRole.tool => card(c.surfaceHigh, mono, radius),
+    };
   }
 }
 
