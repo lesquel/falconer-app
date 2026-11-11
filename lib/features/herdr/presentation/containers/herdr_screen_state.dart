@@ -101,11 +101,10 @@ abstract class HerdrScreenState<T extends ConsumerStatefulWidget> extends Consum
     show(await ctrl.act(action));
   }
 
-  /// Focuses the pane on the computer, then shows it: in [embed] when the
-  /// screen has room for it, else full screen.
+  /// Shows the pane: in [embed] when the screen has room for it, else full
+  /// screen. No pane.focus here: it would move what the computer shows; the
+  /// graphic view reads and writes by pane id, and only terminal mode focuses.
   Future<void> openPane(HerdrPane p, {ValueChanged<String>? embed}) async {
-    show(await ctrl.act(HerdrAction.paneFocus(p.id)));
-    if (!mounted) return;
     if (embed != null) {
       embed(p.id);
       return;

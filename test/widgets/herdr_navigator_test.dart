@@ -275,13 +275,12 @@ void main() {
       expect((plain.shape! as RoundedRectangleBorder).side, BorderSide.none);
     });
 
-    testWidgets('an agent pane focuses it, then opens its graphic view', (t) async {
+    testWidgets('an agent pane opens its graphic view without moving the computer', (t) async {
       await pump(t, at: at);
       await t.tap(find.text('claude'));
       await t.pumpAndSettle();
-      expect(repo.actions.map(actionJson), [
-        {'op': 'pane.focus', 'id': 'w1:p1'},
-      ]);
+      // No pane.focus: focusing moves what the computer shows.
+      expect(repo.actions, isEmpty);
       expect(opened, ['/agent/h1?pane=w1%3Ap1&session=default&ws=w1']);
     });
 
