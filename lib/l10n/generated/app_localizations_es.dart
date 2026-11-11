@@ -1509,7 +1509,4 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get herdrPickWorkspace => 'Elige un workspace para ver sus terminales.';
-
-  @override
-  String get herdrOpeningTerminal => 'Abriendo la nueva terminal…';
 }

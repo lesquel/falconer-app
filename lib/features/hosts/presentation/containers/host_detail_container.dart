@@ -86,6 +86,29 @@ class HostDetailContainer extends ConsumerWidget {
           ?.name ??
       'default';
 
+  Future<void> _openNavigator(
+    BuildContext context,
+    HostDetailController ctrl,
+    HostDetailState state,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final outdated = context.l10n.errHerdrHookOutdated;
+    final router = GoRouter.of(context);
+    if (!await ctrl.checkHerdr()) {
+      messenger.showSnackBar(SnackBar(content: Text(outdated)));
+      return;
+    }
+    final sessions = state.sessions;
+    unawaited(
+      router.push(
+        Uri(
+          path: '/hosts/$hostId/herdr',
+          queryParameters: {'session': sessions == null ? 'default' : _herdrSession(sessions)},
+        ).toString(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final host = ref.watch(hostProvider(hostId)).value;
@@ -140,15 +163,9 @@ class HostDetailContainer extends ConsumerWidget {
                   },
                 ).toString(),
               ),
-        // Only once the sessions are loaded and the hook speaks `herdr`.
-        onHerdrNavigator: !state.herdr || state.sessions == null
-            ? null
-            : () => context.push(
-                Uri(
-                  path: '/hosts/$hostId/herdr',
-                  queryParameters: {'session': _herdrSession(state.sessions!)},
-                ).toString(),
-              ),
+        // Shown from the start, next to Open Herdr; the tap checks that the
+        // hook speaks `herdr` (connecting if needed) before opening it.
+        onHerdrNavigator: () => _openNavigator(context, ctrl, state),
         onAttach: (s) => context.push(
           Uri(
             path: '/terminal/$hostId',

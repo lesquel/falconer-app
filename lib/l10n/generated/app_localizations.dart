@@ -2684,12 +2684,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick a workspace to see its terminals.'**
   String get herdrPickWorkspace;
-
-  /// No description provided for @herdrOpeningTerminal.
-  ///
-  /// In en, this message translates to:
-  /// **'Opening the new terminal…'**
-  String get herdrOpeningTerminal;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

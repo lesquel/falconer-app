@@ -56,6 +56,23 @@ class HostDetailController extends Notifier<HostDetailState> {
     }
   }
 
+  /// Asks the hook whether it speaks the navigator protocol, without loading
+  /// the sessions first (the "View as agents" button is shown from the start).
+  Future<bool> checkHerdr() async {
+    if (state.herdr) return true;
+    final ok = await _supportsHerdr();
+    if (ok) {
+      state = HostDetailState(
+        sessions: state.sessions,
+        agents: state.agents,
+        loading: state.loading,
+        error: state.error,
+        herdr: true,
+      );
+    }
+    return ok;
+  }
+
   /// Without the navigator protocol the entry is hidden; a failed check is a no.
   Future<bool> _supportsHerdr() async {
     try {
