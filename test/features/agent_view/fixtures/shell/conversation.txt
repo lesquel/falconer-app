@@ -1,0 +1,9 @@
+dev@laptop:~/shop$ ls
+package.json  src  test
+dev@laptop:~/shop$ npm test
+
+> shop@1.0.0 test
+> node --test
+
+ok 4 tests
+dev@laptop:~/shop$

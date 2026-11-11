@@ -34,9 +34,12 @@ ScreenRegion? _firstMatch(List<Object> scanners, List<ScreenLine> screen) {
 List<ScreenBlock> _assemble(List<ScreenLine> screen, ScreenRegion? region, AgentDetector detector) {
   final blocks = <ScreenBlock>[];
   final paragraph = <ScreenLine>[];
+  var role = TextRole.agent;
+  // Role of paragraphs without a speaker mark (a shell's output after a command).
+  var unmarked = TextRole.agent;
   void flush() {
     if (paragraph.isEmpty) return;
-    blocks.add(TextBlock(_paragraphText(paragraph)));
+    blocks.add(TextBlock(_paragraphText(paragraph), role: role));
     paragraph.clear();
   }
 
@@ -53,6 +56,18 @@ List<ScreenBlock> _assemble(List<ScreenLine> screen, ScreenRegion? region, Agent
       flush();
       continue;
     }
+    final start = detector.roleStart(line, paragraph.isEmpty ? null : role);
+    if (start != null) {
+      flush();
+      role = start.role;
+      paragraph.add(start.line);
+      if (role == TextRole.user) {
+        unmarked = detector.afterUser;
+        if (detector.userIsOneLine) flush();
+      }
+      continue;
+    }
+    if (paragraph.isEmpty) role = unmarked;
     paragraph.add(line);
   }
   flush();

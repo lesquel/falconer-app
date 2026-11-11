@@ -1,0 +1,5 @@
+  ┃
+  ┃  why does the cart total ignore quantities?
+  ┃
+
+  The total sums item prices without the quantity.

@@ -6,25 +6,34 @@ library;
 /// What answering a [ChoiceOption] means, so the UI can color it.
 enum ChoiceKind { allow, allowAlways, deny, other }
 
+/// Who a [TextBlock] comes from: the agent's reply, the user's own prompt
+/// (or a shell command), or a tool/command run and its output.
+enum TextRole { agent, user, tool }
+
 /// One block of a parsed agent screen.
 sealed class ScreenBlock {
   const ScreenBlock();
 }
 
-/// Plain content: one paragraph of the agent's output, borders removed.
+/// Plain content: one paragraph of the screen, borders removed. [role] is
+/// [TextRole.agent] unless the detector is sure; a user prompt's text comes
+/// without its prompt glyph.
 final class TextBlock extends ScreenBlock {
-  const TextBlock(this.text);
+  const TextBlock(this.text, {this.role = TextRole.agent});
 
   final String text;
+  final TextRole role;
 
   @override
-  bool operator ==(Object other) => other is TextBlock && other.text == text;
+  bool operator ==(Object other) => other is TextBlock && other.text == text && other.role == role;
 
   @override
-  int get hashCode => text.hashCode;
+  int get hashCode => Object.hash(text, role);
 
   @override
-  String toString() => 'TextBlock(${_quote(text)})';
+  String toString() => role == TextRole.agent
+      ? 'TextBlock(${_quote(text)})'
+      : 'TextBlock(${role.name}: ${_quote(text)})';
 }
 
 /// A permission or decision menu the agent is waiting on.

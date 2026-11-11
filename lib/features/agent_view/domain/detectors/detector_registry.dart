@@ -10,6 +10,7 @@ import 'generic_detector.dart';
 import 'kiro_detector.dart';
 import 'opencode_detector.dart';
 import 'pi_detector.dart';
+import 'shell_detector.dart';
 
 const _detectors = <String, AgentDetector>{
   'claude': ClaudeDetector(),
@@ -32,10 +33,10 @@ const _aliases = {
   'copilot-cli': 'copilot',
 };
 
-/// The detector for a Herdr/hook agent id; unknown or null ids get the
-/// conservative generic detector.
+/// The detector for a Herdr/hook agent id: null is a plain shell; unknown
+/// ids get the conservative generic detector.
 AgentDetector detectorFor(String? agent) {
   final id = agent?.trim().toLowerCase();
-  if (id == null) return const GenericDetector();
+  if (id == null) return const ShellDetector();
   return _detectors[_aliases[id] ?? id] ?? const GenericDetector();
 }

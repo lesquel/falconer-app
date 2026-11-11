@@ -5,7 +5,7 @@ import 'agent_detector.dart';
 
 /// Unknown agents: only menus with a cursor, a question above and a key
 /// hint below, and only a `>` input framed by rules.
-final class GenericDetector extends AgentDetector {
+class GenericDetector extends AgentDetector {
   const GenericDetector();
 
   @override

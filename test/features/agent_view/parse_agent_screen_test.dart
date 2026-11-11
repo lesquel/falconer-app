@@ -39,7 +39,7 @@ void main() {
     test('permission menu becomes a ChoiceBlock with digit keys', () {
       expect(parseFixture('claude', 'permission'), const [
         TextBlock("⏺ I'll install the dependencies first."),
-        TextBlock('⏺ Bash(npm install)\n  ⎿  Running…'),
+        TextBlock('⏺ Bash(npm install)\n  ⎿  Running…', role: TextRole.tool),
         TextBlock('Bash command'),
         TextBlock('npm install\nInstall project dependencies'),
         ChoiceBlock('Do you want to proceed?', [
@@ -57,7 +57,7 @@ void main() {
 
     test('boxed edit prompt keeps the moved cursor and strips nested borders', () {
       expect(parseFixture('claude', 'permission_edit_boxed'), const [
-        TextBlock('⏺ Update(src/cart.ts)'),
+        TextBlock('⏺ Update(src/cart.ts)', role: TextRole.tool),
         TextBlock('Edit file'),
         TextBlock('src/cart.ts'),
         TextBlock(
@@ -77,7 +77,7 @@ void main() {
         TextBlock('✻ Welcome to Claude Code!'),
         TextBlock('/help for help, /status for your current setup'),
         TextBlock('cwd: /home/dev/projects/shop'),
-        TextBlock('> what does this repo do?'),
+        TextBlock('what does this repo do?', role: TextRole.user),
         TextBlock(
           '⏺ This repository is a small online shop built with Express.\n'
           '  The main entry point is src/server.ts and routes live in\n'
@@ -105,7 +105,7 @@ void main() {
     test('approval prompt becomes a ChoiceBlock', () {
       expect(parseFixture('codex', 'permission'), const [
         TextBlock('• I need to install dependencies before running the tests.'),
-        TextBlock('• Running npm install'),
+        TextBlock('• Running npm install', role: TextRole.tool),
         TextBlock('Reason: npm install needs network access to fetch packages'),
         TextBlock(r'$ npm install'),
         ChoiceBlock('Would you like to run the following command?', [
@@ -166,7 +166,7 @@ void main() {
 
     test('plain output is only text', () {
       expect(parseFixture('pi', 'plain'), const [
-        TextBlock('read src/cart.ts'),
+        TextBlock('read src/cart.ts', role: TextRole.tool),
         TextBlock(
           'The cart total is computed in src/cart.ts by summing item prices.\n'
           'Quantities are ignored, which is the bug you reported.',
@@ -260,7 +260,7 @@ void main() {
   group('opencode', () {
     test('permission dialog becomes a ChoiceBlock', () {
       expect(parseFixture('opencode', 'permission'), const [
-        TextBlock('install the dependencies'),
+        TextBlock('install the dependencies', role: TextRole.user),
         TextBlock("I'll install the project dependencies."),
         TextBlock(r'$ Install project dependencies'),
         TextBlock('npm install'),

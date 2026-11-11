@@ -1,0 +1,15 @@
+❯ why does the cart total ignore quantities?
+
+● The total sums item prices without multiplying by the quantity.
+  I will fix src/cart.ts.
+
+  > note: quantities default to 1
+
+● Bash(npm test -- cart)
+  ⎿  PASS src/cart.test.ts
+     Tests: 4 passed
+
+> also update the changelog
+  and the readme
+
+● Done. The changelog has a new entry.
