@@ -746,7 +746,9 @@ if [ "$WANT_IOS" = 1 ]; then
   line_ok "iOS device" "$(printf '%s' "$DEV" | cut -f2)"
   header "Build iOS"
   task "Build iOS release (Rust compiles on the first run)" flutter build ios --release
-  task "Install on $(printf '%s' "$DEV" | cut -f2)" flutter install --release -d "$(printf '%s' "$DEV" | cut -f1)"
+  # Install over the existing app: `flutter install` uninstalls first, which
+  # wipes paired hosts and keys on every 7-day free-signing reinstall.
+  task "Install on $(printf '%s' "$DEV" | cut -f2)" xcrun devicectl device install app --device "$(printf '%s' "$DEV" | cut -f1)" "$APP_DIR/build/ios/iphoneos/Runner.app"
   note "iOS: installed on $(printf '%s' "$DEV" | cut -f2)."
   note "iOS free Apple ID: signing expires after 7 days (re-run to reinstall); if iOS blocks the app, trust your profile in Settings → General → VPN & Device Management."
 fi
@@ -770,7 +772,9 @@ if [ "$WANT_ANDROID" = 1 ]; then
   header "Build Android"
   # arm64 only: what phones run; the CI release build splits per ABI.
   task "Build Android release APK (Rust compiles on the first run)" flutter build apk --release --target-platform android-arm64
-  task "Install on $(printf '%s' "$DEV" | cut -f2)" flutter install --release -d "$(printf '%s' "$DEV" | cut -f1)"
+  # `adb install -r` replaces the app and keeps its data (`flutter install`
+  # uninstalls first and wipes paired hosts and keys).
+  task "Install on $(printf '%s' "$DEV" | cut -f2)" adb -s "$(printf '%s' "$DEV" | cut -f1)" install -r "$APP_DIR/build/app/outputs/flutter-apk/app-release.apk"
   note "Android: installed on $(printf '%s' "$DEV" | cut -f2) (arm64 release build)."
   if [ ! -f "$APP_DIR/android/key.properties" ] && [ -z "${OPENMOSH_KEYSTORE_PATH:-}" ]; then
     note "Android signing: no android/key.properties, so Gradle signed the release APK with the debug key (see android/app/build.gradle.kts). Fine for personal installs; it will not update over an official release APK (uninstall that first)."
