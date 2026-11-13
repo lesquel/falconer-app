@@ -74,6 +74,20 @@ final class HookCommand {
     return HookCommand._(['devices', 'set-endpoint', deviceId, url, '--json']);
   }
 
+  /// Web Push registration JSON goes on stdin (reply `{"ok":true,"data":{}}`;
+  /// errors `webpush_invalid`).
+  factory HookCommand.setWebPush(String deviceId) {
+    _checkId(deviceId);
+    return HookCommand._(['devices', 'set-webpush', deviceId, '--json']);
+  }
+
+  /// Reply `{"ok":true,"data":{}}` (also when nothing was set), or error
+  /// `not_found` when the device id is unknown.
+  factory HookCommand.clearWebPush(String deviceId) {
+    _checkId(deviceId);
+    return HookCommand._(['devices', 'clear-webpush', deviceId, '--json']);
+  }
+
   factory HookCommand.devicesList() => const HookCommand._(['devices', 'list', '--json']);
 
   /// Removes the device's `authorized_keys` line and its push key (SEC-11).

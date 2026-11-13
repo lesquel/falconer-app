@@ -3,6 +3,7 @@
 library;
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:unifiedpush_platform_interface/unifiedpush_platform_interface.dart';
 
@@ -23,8 +24,12 @@ class UnifiedPushDatasource implements PushEndpointSource {
 
   UnifiedPushPlatform get _up => UnifiedPushPlatform.instance;
 
+  /// UnifiedPush only has an Android implementation; iOS/macOS need APNs.
+  static bool get supported => Platform.isAndroid;
+
   Future<void> initialize({required MessageHandler onMessage}) async {
     _onMessage = onMessage;
+    if (!supported) return;
     await _up.initializeCallback(
       onNewEndpoint: (e, _) async {
         await _store.write(e.url);
@@ -56,6 +61,9 @@ class UnifiedPushDatasource implements PushEndpointSource {
   Future<String> currentEndpoint() async {
     final known = await _store.read();
     if (known != null) return known;
+    if (!supported) {
+      throw const PushFailure('Push notifications are not available on this platform yet.');
+    }
     if (!await _up.tryUseCurrentOrDefaultDistributor()) {
       final ds = await _up.getDistributors(const []);
       if (ds.isEmpty) {

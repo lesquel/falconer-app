@@ -2,7 +2,8 @@ import 'package:flutter/services.dart';
 
 import '../../domain/repositories/voice_ports.dart';
 
-/// Android DownloadManager behind `dev.openmosh/downloads` (ModelDownloads.kt).
+/// Android DownloadManager (ModelDownloads.kt) or a background URLSession
+/// (darwin/ModelDownloads.swift) behind `dev.openmosh/downloads`.
 class ChannelNativeDownloader implements NativeDownloader {
   const ChannelNativeDownloader();
 

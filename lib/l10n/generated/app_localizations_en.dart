@@ -1518,4 +1518,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get herdrPickWorkspace => 'Pick a workspace to see its terminals.';
+
+  @override
+  String get webPushTitle => 'Web notifications (iOS / browser)';
+
+  @override
+  String get webPushExplain =>
+      'Install the OpenMosh Notifications web app, enable notifications there and send the code here.';
+
+  @override
+  String get webPushStatusOff => 'Not set';
+
+  @override
+  String webPushStatusOn(String service) {
+    return 'Active via $service';
+  }
+
+  @override
+  String get webPushPasteHint => 'Paste code';
+
+  @override
+  String get webPushReview => 'Review code';
+
+  @override
+  String get webPushTurnOff => 'Turn off';
+
+  @override
+  String get webPushTurnedOff => 'Web notifications turned off.';
+
+  @override
+  String get webPushUse => 'Use for notifications';
+
+  @override
+  String get webPushScreenTitle => 'Web notifications';
+
+  @override
+  String get webPushConfirmBody =>
+      'Your paired hosts will use this registration to notify this device through the web app.';
+
+  @override
+  String get webPushServiceLabel => 'Push service';
+
+  @override
+  String get webPushSending => 'Sending to your hosts…';
+
+  @override
+  String get webPushNoHosts =>
+      'No paired hosts yet. Pair a host and it will receive this automatically.';
+
+  @override
+  String webPushHostDelivered(String host) {
+    return '$host: delivered';
+  }
+
+  @override
+  String webPushHostPending(String host) {
+    return '$host: pending, will be sent when the host connects';
+  }
+
+  @override
+  String webPushHostTooOld(String host) {
+    return '$host: update openmosh-hook (hook too old)';
+  }
+
+  @override
+  String get webPushDone => 'Done';
+
+  @override
+  String get errWebPushCode => 'This is not a valid web notifications code.';
+
+  @override
+  String get errWebPushVersion =>
+      'This web notifications code is from another OpenMosh version. Update the app.';
 }

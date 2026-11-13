@@ -1,7 +1,7 @@
 /// Time for security windows (app lock timeout, re-verification).
 ///
-/// On Android it is `SystemClock.elapsedRealtime()`: it keeps counting while
-/// the phone sleeps and cannot be moved by changing the wall clock. A Dart
+/// On Android it is `SystemClock.elapsedRealtime()` and on iOS/macOS
+/// `CLOCK_MONOTONIC_RAW`: it keeps counting while the device sleeps and cannot be moved by changing the wall clock. A Dart
 /// [Stopwatch] stops during deep sleep, which would stretch the windows.
 library;
 
@@ -13,7 +13,7 @@ typedef Elapsed = Future<Duration> Function();
 const _channel = MethodChannel('dev.openmosh/clock');
 
 /// The boot clock, or a [Stopwatch] where the platform channel is missing
-/// (tests, desktop).
+/// (tests, Linux, Windows).
 Elapsed bootClock() {
   final w = Stopwatch()..start();
   var native = true;

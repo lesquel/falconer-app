@@ -9,7 +9,8 @@ class SecureClipboard {
 
   final MethodChannel _channel;
 
-  /// Copies [text] marked as sensitive (Android `EXTRA_IS_SENSITIVE`).
+  /// Copies [text] marked as sensitive (Android `EXTRA_IS_SENSITIVE`; iOS
+  /// local-only with a 120 s expiry; macOS `ConcealedType`).
   Future<void> copySensitive(String text) async {
     try {
       await _channel.invokeMethod<void>('setSensitive', {'text': text});
@@ -20,7 +21,7 @@ class SecureClipboard {
     }
   }
 
-  /// Removes whatever is on the clipboard (Android `clearPrimaryClip`).
+  /// Removes whatever is on the clipboard (Android `clearPrimaryClip`, iOS/macOS pasteboard clear).
   Future<void> clear() async {
     try {
       await _channel.invokeMethod<void>('clear');

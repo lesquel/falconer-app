@@ -52,6 +52,10 @@ import '../shared/data/secure_clipboard.dart';
 import '../shared/domain/monotonic.dart';
 import '../shared/data/app_database.dart';
 import '../features/usage/domain/usecases/load_agent_usage.dart';
+import '../features/webpush/data/secure_webpush_store.dart';
+import '../features/webpush/domain/repositories/webpush_store.dart';
+import '../features/webpush/domain/usecases/webpush_sync.dart';
+import '../shared/logging/redacting_logger.dart';
 import '../shared/hook/domain/hook_client.dart';
 import '../shared/ssh/data/datasources/ssh_bridge.dart';
 import '../shared/ssh/domain/ssh_ports.dart';
@@ -132,6 +136,15 @@ final settingsRepositoryProvider = Provider<SettingsRepository>(
   (ref) => DriftSettingsRepository(ref.watch(databaseProvider)),
 );
 
+final webPushStoreProvider = Provider<WebPushStore>(
+  (ref) => SecureWebPushStore(ref.watch(secureStorageProvider)),
+);
+
+final webPushSyncProvider = Provider<WebPushSync>(
+  (ref) =>
+      WebPushSync(store: ref.watch(webPushStoreProvider), hosts: ref.watch(hostRepositoryProvider)),
+);
+
 // Use cases.
 final hostConnectionsProvider = Provider<HostConnections>((ref) {
   final hosts = ref.watch(hostRepositoryProvider);
@@ -151,6 +164,14 @@ final hostConnectionsProvider = Provider<HostConnections>((ref) {
       await hosts.save(host.copyWith(hookPath: path));
     }
     final p = path;
+    // Offline hosts get the Web Push registration (or its removal) here.
+    try {
+      await ref
+          .read(webPushSyncProvider)
+          .syncHost(host, (cmd, {stdin}) => hook.call(conn, p, cmd, stdin: stdin));
+    } catch (e) {
+      Log.error('webpush', 'post-connect sync failed', e);
+    }
     await endpointSync(host, (cmd) => hook.call(conn, p, cmd));
   });
   ref.onDispose(pool.disconnectAll);
@@ -283,7 +304,9 @@ final settingsProvider = StreamProvider<AppSettings>(
 final modelStoreProvider = Provider<ModelStore>(
   (ref) => FileModelStore(
     root: () async => Directory('${(await getApplicationSupportDirectory()).path}/voice_models'),
-    native: Platform.isAndroid ? const ChannelNativeDownloader() : null,
+    native: (Platform.isAndroid || Platform.isIOS || Platform.isMacOS)
+        ? const ChannelNativeDownloader()
+        : null,
   ),
 );
 
