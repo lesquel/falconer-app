@@ -170,7 +170,7 @@ device, then builds and installs.
 | OS | Targets | What it sets up |
 | --- | --- | --- |
 | macOS | iOS (default), macOS, Android | Xcode checks, CocoaPods, rustup (brew), Flutter (version pinned by CI) in `~/development/flutter`, Rust targets, signing team and iPad checks; Android: JDK 17, Android SDK in `~/Android/Sdk` |
-| Linux / WSL2 | Android | git/curl/unzip/zip, C compiler, rustup (official `sh.rustup.rs`), Flutter, JDK 17, Android command-line tools, platforms, build-tools, NDK, licenses |
+| Linux / WSL2 | Android | git/curl/unzip/zip, C compiler, rustup (official `sh.rustup.rs`), Flutter, JDK 17, Android command-line tools (SHA-256 verified), platforms, build-tools, NDK; you read and accept the SDK licenses yourself |
 | Windows | use WSL2 | Git Bash only prints how to set up WSL2 (`--force` to try anyway). In WSL, USB phones need `usbipd-win` or wireless debugging (`adb pair`) |
 
 Flags: `--platforms ios,macos,android` (skip the picker), `--yes` (no confirmation), `--check`

@@ -62,7 +62,7 @@ ANDROID_RUST_TARGETS="${ANDROID_RUST_TARGETS:-aarch64-linux-android armv7-linux-
 APP_SDK="$(sed -n 's/^ *compileSdk *= *\([0-9][0-9]*\).*/\1/p' "$APP_DIR/android/app/build.gradle.kts" 2>/dev/null | head -1)"
 PLUGIN_SDK="$(sed -n 's/^ *compileSdkVersion *\([0-9][0-9]*\).*/\1/p' "$APP_DIR/rust_builder/android/build.gradle" 2>/dev/null | head -1)"
 SDK_PLATFORMS="${APP_SDK:-37} ${PLUGIN_SDK:-36}"
-# AGP 9.1 default build tools; Gradle fetches any other it needs (licenses accepted).
+# AGP 9.1 default build tools; Gradle fetches any other it needs (once the licenses are accepted).
 BUILD_TOOLS="${ANDROID_BUILD_TOOLS:-36.0.0}"
 # The NDK is `flutter.ndkVersion` (android/app/build.gradle.kts): defined by the pinned Flutter.
 ndk_version() {
@@ -170,6 +170,16 @@ confirm() {
   else
     printf '  %s %s[Enter = yes · Ctrl+C = cancel]%s ' "$1" "$D" "$X"
     read -r _ </dev/tty
+  fi
+}
+
+# Asks for a yes/no where the safe answer is no: only an explicit "y"/"yes" counts.
+confirm_no() {
+  if [ "$USE_GUM" = 1 ]; then gum confirm --default=false "$1"
+  else
+    printf '  %s %s[y/N]%s ' "$1" "$D" "$X"
+    read -r ans </dev/tty
+    case "$ans" in y|Y|yes|YES|Yes) return 0 ;; *) return 1 ;; esac
   fi
 }
 
@@ -399,8 +409,28 @@ fix_rustup()   {
   else curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path --profile minimal --default-toolchain none; fi
 }
 fix_rust()     {
-  rustup toolchain uninstall stable >/dev/null 2>&1
+  # Installing over an existing toolchain updates it in place; nothing is removed here.
   rustup toolchain install stable --profile minimal && rustup default stable
+}
+# A "stable" toolchain that is installed but unusable can only be repaired by removing it.
+# That deletes the user's toolchain, so it is never done without an explicit yes (default no).
+rust_repair() {
+  rustup toolchain list 2>/dev/null | grep -q '^stable' || return 0
+  chk_rust && return 0
+  if [ "$IS_TTY" = 0 ]; then
+    line_fail "Rust stable toolchain is broken" "not a terminal, so it cannot ask before removing it"
+    echo "    Repair it yourself: rustup toolchain uninstall stable   (then re-run this script)"
+    exit 1
+  fi
+  header "Rust toolchain"
+  echo "  The installed 'stable' Rust toolchain is not working."
+  echo "  Repairing it means uninstalling it (rustup toolchain uninstall stable) and installing it again."
+  if confirm_no "Uninstall the Rust 'stable' toolchain and reinstall it?"; then
+    rustup toolchain uninstall stable || { line_fail "Could not uninstall the Rust toolchain"; exit 1; }
+  else
+    line_fail "Rust stable toolchain left untouched" "repair it yourself, then re-run"
+    exit 1
+  fi
 }
 fix_flutter()  {
   if [ -d "$FLUTTER_HOME/.git" ]; then
@@ -446,21 +476,53 @@ fix_plist()    {
     add NSPhotoLibraryUsageDescription "OpenMosh lets you attach images from your library." &&
     add NSFaceIDUsageDescription "OpenMosh uses Face ID to unlock the app."
 }
-# Google publishes the command-line tools as a zip per OS; the file name carries a build number.
+# Android command-line tools: pinned build, verified against the SHA-256 that Google publishes at
+# https://developer.android.com/studio#command-line-tools-only before anything is extracted.
+# To bump: copy the new build number and checksums from that page (never from the download itself).
+CMDTOOLS_BUILD="${ANDROID_CMDTOOLS_BUILD:-15859902}"
+cmdtools_pin() {
+  case "$OS:$ARCH" in
+    macos:arm64)   CMDTOOLS_FILE="commandlinetools-mac_arm64-${CMDTOOLS_BUILD}_latest.zip"
+                   CMDTOOLS_SHA256=835b62a26162b229b441d1f6d4680383815a270809eb33522c0d480fa5002c4e ;;
+    macos:*)       CMDTOOLS_FILE="commandlinetools-mac_x86_64-${CMDTOOLS_BUILD}_latest.zip"
+                   CMDTOOLS_SHA256=c5a6378ab5cf7e0d5701921405115befff13e9ff7417fb588389338f8bd050f3 ;;
+    *)             CMDTOOLS_FILE="commandlinetools-linux-${CMDTOOLS_BUILD}_latest.zip"
+                   CMDTOOLS_SHA256=4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583 ;;
+  esac
+  if [ "$CMDTOOLS_BUILD" != 15859902 ]; then
+    echo "ANDROID_CMDTOOLS_BUILD overrides the pinned build, but no checksum is pinned for it." >&2
+    return 1
+  fi
+}
+sha256_of() {
+  if has sha256sum; then sha256sum "$1" | cut -d' ' -f1; else shasum -a 256 "$1" | cut -d' ' -f1; fi
+}
 fix_cmdtools() {
-  case "$OS" in macos) kind=mac ;; *) kind=linux ;; esac
-  num="$(curl -fsSL https://developer.android.com/studio | grep -o "commandlinetools-$kind-[0-9]*_latest.zip" | head -1)"
-  num="${num:-commandlinetools-${kind}-11076708_latest.zip}"
+  cmdtools_pin || return 1
   tmp="$(mktemp -d)" || return 1
-  mkdir -p "$ANDROID_HOME/cmdline-tools" &&
-    curl -fsSL -o "$tmp/cmdline.zip" "https://dl.google.com/android/repository/$num" &&
-    unzip -q "$tmp/cmdline.zip" -d "$tmp" &&
+  if ! mkdir -p "$ANDROID_HOME/cmdline-tools" ||
+     ! curl -fsSL -o "$tmp/cmdline.zip" "https://dl.google.com/android/repository/$CMDTOOLS_FILE"; then
+    rm -rf "$tmp"; return 1
+  fi
+  got="$(sha256_of "$tmp/cmdline.zip")"
+  if [ "$got" != "$CMDTOOLS_SHA256" ]; then
+    echo "SHA-256 mismatch for $CMDTOOLS_FILE: expected $CMDTOOLS_SHA256, got $got. Aborting; nothing was extracted." >&2
+    rm -rf "$tmp"; return 1
+  fi
+  unzip -q "$tmp/cmdline.zip" -d "$tmp" &&
     rm -rf "$ANDROID_HOME/cmdline-tools/latest" &&
     mv "$tmp/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
   rc=$?; rm -rf "$tmp"; return $rc
 }
+# Licenses are never auto-accepted: sdkmanager shows each one and the user answers it.
 fix_licenses() {
-  yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" --licenses
+  if [ "$IS_TTY" = 0 ]; then
+    echo "  Android SDK licenses must be read and accepted by you. Run in a terminal:"
+    echo "    $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME --licenses"
+    return 1
+  fi
+  echo "  Read each Android SDK license and answer y to accept it (n to refuse)."
+  "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" --licenses </dev/tty
   [ -f "$ANDROID_HOME/licenses/android-sdk-license" ]
 }
 fix_sdkpkgs()  {
@@ -640,6 +702,15 @@ while IFS='|' read -r id label check fix; do
     signing|device_ios|device_android) continue ;;
   esac
   if $check; then line_ok "$label"; continue; fi
+  case "$id" in
+    rust) rust_repair ;;
+    licenses)
+      # Interactive: the user reads and accepts the licenses, so no spinner and no log capture.
+      header "Android SDK licenses"
+      if fix_licenses; then line_ok "$label"; else line_fail "$label"; exit 1; fi
+      refresh_env
+      continue ;;
+  esac
   # shellcheck disable=SC2086
   task "$label" $fix
   refresh_env
