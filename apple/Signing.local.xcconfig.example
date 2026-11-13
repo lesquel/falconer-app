@@ -1,0 +1,25 @@
+// Local signing configuration (iOS + macOS). Never committed.
+//
+//   cp apple/Signing.local.xcconfig.example apple/Signing.local.xcconfig
+//
+// `scripts/setup.sh` writes this file for you. It is gitignored, and every
+// include of it is optional (`#include?`), so builds work without it
+// (iOS `--no-codesign`, macOS ad-hoc "sign to run locally").
+
+// Your Apple Developer Team ID (10 characters). Find it in Xcode > Settings >
+// Accounts, or: security find-certificate -c "Apple Development" -p | \
+//   openssl x509 -noout -subject    (the OU field)
+DEVELOPMENT_TEAM = YOURTEAMID
+
+// Free (Personal Team) accounts cannot use a bundle id already registered by
+// another team. Uncomment to use a unique one.
+// PRODUCT_BUNDLE_IDENTIFIER = dev.yourname.openmosh
+
+// macOS only: use the entitlements that add `keychain-access-groups`, which
+// the data-protection keychain needs to store SSH keys behind Touch ID /
+// password. Requires DEVELOPMENT_TEAM above. Without it the app falls back to
+// the legacy keychain plus an in-app authentication prompt.
+OPENMOSH_ENTITLEMENTS_SUFFIX = Keychain
+
+// Use your Apple Development certificate for macOS builds (default is ad-hoc).
+CODE_SIGN_IDENTITY[sdk=macosx*] = Apple Development

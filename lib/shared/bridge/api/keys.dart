@@ -13,18 +13,13 @@ DeviceKeyMaterial generateEd25519Key({required String comment}) =>
     RustLib.instance.api.crateApiKeysGenerateEd25519Key(comment: comment);
 
 /// `passphrase` decrypts a protected key; `None` or empty for a plain one.
-DeviceKeyMaterial importPrivateKey({
-  required String privateOpenssh,
-  String? passphrase,
-}) => RustLib.instance.api.crateApiKeysImportPrivateKey(
-  privateOpenssh: privateOpenssh,
-  passphrase: passphrase,
-);
-
-String publicKeyFingerprint({required String publicOpenssh}) => RustLib
+DeviceKeyMaterial importPrivateKey({required String privateOpenssh, String? passphrase}) => RustLib
     .instance
     .api
-    .crateApiKeysPublicKeyFingerprint(publicOpenssh: publicOpenssh);
+    .crateApiKeysImportPrivateKey(privateOpenssh: privateOpenssh, passphrase: passphrase);
+
+String publicKeyFingerprint({required String publicOpenssh}) =>
+    RustLib.instance.api.crateApiKeysPublicKeyFingerprint(publicOpenssh: publicOpenssh);
 
 /// Returned to Dart once; the caller stores `private_openssh` in secure
 /// storage immediately and drops its copy.
@@ -40,8 +35,7 @@ class DeviceKeyMaterial {
   });
 
   @override
-  int get hashCode =>
-      privateOpenssh.hashCode ^ publicOpenssh.hashCode ^ fingerprint.hashCode;
+  int get hashCode => privateOpenssh.hashCode ^ publicOpenssh.hashCode ^ fingerprint.hashCode;
 
   @override
   bool operator ==(Object other) =>

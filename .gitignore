@@ -57,3 +57,6 @@ android/.kotlin/
 *.keystore
 key.properties
 *.minisign.key
+
+# Per-developer signing (see apple/Signing.local.xcconfig.example)
+apple/Signing.local.xcconfig

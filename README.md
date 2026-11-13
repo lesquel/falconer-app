@@ -180,6 +180,17 @@ offered once and installed with your package manager (or skipped). Output goes t
 `build/setup.log`. Android installs the `--release` APK for arm64; without `android/key.properties`
 Gradle signs it with the debug key. `scripts/setup-apple.sh` still works (iOS only).
 
+**Apple signing.** No team is committed. `apple/Signing.local.xcconfig` (gitignored, included
+optionally by the iOS and macOS projects) holds your `DEVELOPMENT_TEAM` and, optionally, a unique
+`PRODUCT_BUNDLE_IDENTIFIER`; `scripts/setup.sh` detects your Apple Development certificate and
+writes it. By hand: `cp apple/Signing.local.xcconfig.example apple/Signing.local.xcconfig` and set
+your Team ID. Without it, `flutter build ios --no-codesign` and an ad-hoc macOS build still work;
+the macOS app then keeps SSH keys in the legacy keychain behind an in-app unlock instead of the
+protected keychain (which needs the `keychain-access-groups` entitlement, enabled by the local
+file). The first signed macOS build needs
+`xcodebuild -workspace macos/Runner.xcworkspace -scheme Runner -allowProvisioningUpdates build`
+once so Xcode can create the profile; `setup.sh` does it for you.
+
 ### Manual requirements
 
 Requirements:

@@ -100,6 +100,10 @@ class SecureKeyVault implements KeyVault {
   @override
   Future<String> unlockPrivate(String id, {required String reason}) async {
     if (await _storage.hasBoundSshPrivate(id)) {
+      // macOS without the keychain entitlement: no hardware prompt, so ask here.
+      if (_storage.sshFallbackActive && !await _auth.authenticate(reason)) {
+        throw const UserCancelledFailure();
+      }
       return await _storage.readSshPrivate(id) ?? (throw _missing);
     }
     if (!await _storage.hasLegacySshPrivate(id)) throw _missing;

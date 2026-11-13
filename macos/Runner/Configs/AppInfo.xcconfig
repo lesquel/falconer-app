@@ -12,3 +12,14 @@ PRODUCT_BUNDLE_IDENTIFIER = dev.openmosh.openmosh
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2026 dev.openmosh. All rights reserved.
+
+// Entitlements: plain by default. Signing.local.xcconfig sets
+// OPENMOSH_ENTITLEMENTS_SUFFIX = Keychain to add keychain-access-groups
+// (needs a signing team; the restricted entitlement breaks unsigned builds).
+OPENMOSH_ENTITLEMENTS_SUFFIX =
+CODE_SIGN_ENTITLEMENTS = Runner/Release$(OPENMOSH_ENTITLEMENTS_SUFFIX).entitlements
+CODE_SIGN_ENTITLEMENTS[config=Debug] = Runner/DebugProfile$(OPENMOSH_ENTITLEMENTS_SUFFIX).entitlements
+CODE_SIGN_ENTITLEMENTS[config=Profile] = Runner/DebugProfile$(OPENMOSH_ENTITLEMENTS_SUFFIX).entitlements
+
+// Optional per-developer overrides (team, bundle id, entitlements switch).
+#include? "../../../apple/Signing.local.xcconfig"
