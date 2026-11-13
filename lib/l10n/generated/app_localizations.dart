@@ -909,6 +909,24 @@ abstract class AppLocalizations {
   /// **'Android phone'**
   String get defaultDeviceName;
 
+  /// Default name of this iPhone on the host.
+  ///
+  /// In en, this message translates to:
+  /// **'iPhone'**
+  String get defaultDeviceNameIphone;
+
+  /// Default name of this iPad on the host.
+  ///
+  /// In en, this message translates to:
+  /// **'iPad'**
+  String get defaultDeviceNameIpad;
+
+  /// Default name of this Mac on the host.
+  ///
+  /// In en, this message translates to:
+  /// **'Mac'**
+  String get defaultDeviceNameMac;
+
   /// No description provided for @pairReviewNote.
   ///
   /// In en, this message translates to:
@@ -1232,6 +1250,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The host rejected this device key.'**
   String get errAuthRejected;
+
+  /// No description provided for @errAuthTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'The host did not answer the SSH key. If Tailscale SSH is enabled on it, run: sudo tailscale set --ssh=false'**
+  String get errAuthTimeout;
 
   /// No description provided for @errCannotReachHost.
   ///

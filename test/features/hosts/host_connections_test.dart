@@ -1,10 +1,12 @@
 import 'dart:convert';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openmosh/features/hosts/domain/entities/host_draft.dart';
 import 'package:openmosh/features/hosts/domain/usecases/host_connections.dart';
 import 'package:openmosh/features/hosts/domain/usecases/manage_hosts.dart';
+import 'package:openmosh/l10n/l10n.dart';
 import 'package:openmosh/shared/domain/failure.dart';
 import 'package:openmosh/shared/hook/domain/hook_command.dart';
 import 'package:openmosh/shared/ssh/data/datasources/ssh_bridge.dart';
@@ -66,6 +68,16 @@ void main() {
     vault.cancel = true;
     await expectLater(pool.connection('h1'), throwsA(isA<UserCancelledFailure>()));
     expect(connector.endpoints, isEmpty);
+  });
+
+  test('auth_timeout from the core maps to a non-retrying failure with the fix', () {
+    final failure = mapCoreError(AnyhowException('auth_timeout'));
+    expect(failure, isA<AuthTimeoutFailure>());
+    expect(failure.message, contains('sudo tailscale set --ssh=false'));
+    expect(
+      lookupAppLocalizations(const Locale('es')).failureText(failure),
+      contains('Tailscale SSH'),
+    );
   });
 
   test('host key mismatch from the core is surfaced as non-overridable', () async {

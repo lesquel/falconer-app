@@ -503,6 +503,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get defaultDeviceName => 'Android phone';
 
   @override
+  String get defaultDeviceNameIphone => 'iPhone';
+
+  @override
+  String get defaultDeviceNameIpad => 'iPad';
+
+  @override
+  String get defaultDeviceNameMac => 'Mac';
+
+  @override
   String get pairReviewNote =>
       'This creates an SSH key on this phone, authorizes it on the host only from your tailnet, and registers encrypted notifications.';
 
@@ -679,6 +688,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errAuthRejected => 'The host rejected this device key.';
+
+  @override
+  String get errAuthTimeout =>
+      'The host did not answer the SSH key. If Tailscale SSH is enabled on it, run: sudo tailscale set --ssh=false';
 
   @override
   String get errCannotReachHost => 'Could not reach the host.';

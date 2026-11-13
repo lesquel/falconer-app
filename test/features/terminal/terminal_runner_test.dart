@@ -169,6 +169,14 @@ void main() {
     expect(sleeps, isEmpty);
   });
 
+  test('an unanswered SSH key is fatal: no retry', () async {
+    connector.fail = const AuthTimeoutFailure();
+    await runner.start();
+    expect(runner.phase, TerminalPhase.failed);
+    expect(runner.failure, isA<AuthTimeoutFailure>());
+    expect(sleeps, isEmpty);
+  });
+
   test('transient failures back off 0.5, 1, 2 s', () async {
     var n = 0;
     connector.make = () {

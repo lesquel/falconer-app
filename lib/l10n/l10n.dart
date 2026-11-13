@@ -67,6 +67,8 @@ extension FailureL10n on AppLocalizations {
   String failureMessage(String message) => switch (message) {
     'Host key changed. The connection was blocked.' => errHostKeyChanged,
     'The host rejected this device key.' => errAuthRejected,
+    'The host did not answer the SSH key. If Tailscale SSH is enabled on it, run: sudo tailscale set --ssh=false' =>
+      errAuthTimeout,
     'Could not reach the host.' => errCannotReachHost,
     'Unlock was cancelled.' => errUnlockCancelled,
     'Changing address or port needs a new host key check. Add the host again.' =>

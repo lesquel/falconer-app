@@ -15,6 +15,9 @@ pub enum CoreError {
         actual: String,
     },
     AuthFailed,
+    /// The server completed the handshake but never answered the key (for
+    /// example Tailscale SSH holding port 22 in "check" mode).
+    AuthTimeout,
     Connect(String),
     Channel(String),
     InvalidKey(String),
@@ -29,6 +32,7 @@ impl CoreError {
             CoreError::HostKeyMismatch { .. } => "host_key_mismatch",
             CoreError::HostKeyObserved { .. } => "host_key_observed",
             CoreError::AuthFailed => "auth_failed",
+            CoreError::AuthTimeout => "auth_timeout",
             CoreError::Connect(_) => "connect_failed",
             CoreError::Channel(_) => "channel_failed",
             CoreError::InvalidKey(_) => "invalid_key",
@@ -46,7 +50,10 @@ impl fmt::Display for CoreError {
                 write!(f, "{}: expected {expected} got {actual}", self.code())
             }
             CoreError::HostKeyObserved { actual } => write!(f, "{}: {actual}", self.code()),
-            CoreError::AuthFailed | CoreError::Timeout | CoreError::TooLarge => {
+            CoreError::AuthFailed
+            | CoreError::AuthTimeout
+            | CoreError::Timeout
+            | CoreError::TooLarge => {
                 write!(f, "{}", self.code())
             }
             CoreError::Connect(d)
@@ -76,5 +83,6 @@ mod tests {
             "host_key_mismatch: expected SHA256:a got SHA256:b"
         );
         assert_eq!(CoreError::AuthFailed.to_string(), "auth_failed");
+        assert_eq!(CoreError::AuthTimeout.to_string(), "auth_timeout");
     }
 }

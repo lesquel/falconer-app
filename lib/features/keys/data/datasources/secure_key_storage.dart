@@ -7,6 +7,7 @@
 /// background engine must decrypt notifications without a prompt.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -35,11 +36,42 @@ class FlutterSecretStore implements SecretStore {
 }
 
 class SecureKeyStorage {
-  SecureKeyStorage({SecretStore? ssh, SecretStore? legacySsh, SecretStore? push})
-    : _ssh = ssh ?? const FlutterSecretStore(FlutterSecureStorage(aOptions: sshOptions)),
-      _legacySsh =
-          legacySsh ?? const FlutterSecretStore(FlutterSecureStorage(aOptions: legacySshOptions)),
-      _push = push ?? const FlutterSecretStore(FlutterSecureStorage(aOptions: pushOptions));
+  SecureKeyStorage({
+    SecretStore? ssh,
+    SecretStore? legacySsh,
+    SecretStore? push,
+    SecretStore? legacyPush,
+    TargetPlatform? platform,
+  }) : _ssh = ssh ?? _store(sshOptions, appleSshOptions),
+       _legacySsh = legacySsh ?? _store(legacySshOptions, appleLegacyOptions),
+       _push = push ?? _store(pushOptions, applePushOptions),
+       // Only Apple platforms ever wrote push data to the plugin's default
+       // account; Android keeps its own namespaces untouched.
+       _legacyPush =
+           legacyPush ?? (_isApple(platform) ? _store(pushOptions, appleLegacyOptions) : null);
+
+  static bool _isApple(TargetPlatform? platform) {
+    final p = platform ?? defaultTargetPlatform;
+    return p == TargetPlatform.iOS || p == TargetPlatform.macOS;
+  }
+
+  static SecretStore _store(AndroidOptions android, AppleOptions apple) => FlutterSecretStore(
+    FlutterSecureStorage(
+      aOptions: android,
+      iOptions: IOSOptions(
+        accountName: apple.accountName,
+        accessibility: apple.accessibility,
+        synchronizable: apple.synchronizable,
+        accessControlFlags: apple.accessControlFlags,
+      ),
+      mOptions: MacOsOptions(
+        accountName: apple.accountName,
+        accessibility: apple.accessibility,
+        synchronizable: apple.synchronizable,
+        accessControlFlags: apple.accessControlFlags,
+      ),
+    ),
+  );
 
   /// Hardware-bound SSH key namespace. `resetOnError` is off: a cancelled or
   /// failed prompt must never wipe the keys.
@@ -58,9 +90,40 @@ class SecureKeyStorage {
 
   static const pushOptions = AndroidOptions(storageNamespace: 'openmosh_push');
 
+  // --- iOS / macOS -------------------------------------------------------
+  // `accountName` is the keychain `kSecAttrService`, the only thing that
+  // separates the stores there (Android's `storageNamespace` is ignored).
+
+  /// SSH keys: this device only, never synced to iCloud, and every read needs
+  /// Face ID / Touch ID or the device passcode (`userPresence` access control,
+  /// enforced by the Secure Enclave / keychain, not only by the app). The
+  /// passcode accessibility class makes the item unusable (and unwritable) if
+  /// the passcode is removed. Limitation: unlike Android there is no per-read
+  /// freshness guarantee; iOS may cache a successful authentication briefly.
+  static const appleSshOptions = IOSOptions(
+    accountName: 'openmosh_ssh_keys_v2',
+    accessibility: KeychainAccessibility.passcode,
+    synchronizable: false,
+    accessControlFlags: [AccessControlFlag.userPresence],
+  );
+
+  /// Push key and web-push registration: the background engine must decrypt
+  /// notifications without a prompt, so no access control; still device-only
+  /// and available after the first unlock.
+  static const applePushOptions = IOSOptions(
+    accountName: 'openmosh_push',
+    accessibility: KeychainAccessibility.first_unlock_this_device,
+    synchronizable: false,
+  );
+
+  /// The plugin's default account: where builds before this hardening wrote
+  /// every SSH key (unprotected) and the push data.
+  static const appleLegacyOptions = IOSOptions();
+
   final SecretStore _ssh;
   final SecretStore _legacySsh;
   final SecretStore _push;
+  final SecretStore? _legacyPush;
 
   static String _k(String id) => 'ssh:$id';
 
@@ -71,7 +134,7 @@ class SecureKeyStorage {
   Future<String?> readSshPrivate(String id) => _guard(() => _ssh.read(_k(id)));
 
   /// No prompt: presence only.
-  Future<bool> hasBoundSshPrivate(String id) => _ssh.containsKey(_k(id));
+  Future<bool> hasBoundSshPrivate(String id) => _guard(() => _ssh.containsKey(_k(id)));
 
   Future<bool> hasLegacySshPrivate(String id) => _legacySsh.containsKey(_k(id));
   Future<String?> readLegacySshPrivate(String id) => _legacySsh.read(_k(id));
@@ -82,15 +145,51 @@ class SecureKeyStorage {
     await _legacySsh.delete(_k(id));
   }
 
-  Future<String?> readPush(String name) => _push.read(name);
-  Future<void> writePush(String name, String value) => _push.write(name, value);
-  Future<void> deletePush(String name) => _push.delete(name);
+  /// Read-through migration (Apple only): a value still in the default
+  /// account is moved to the push account on first read.
+  Future<String?> readPush(String name) async {
+    final v = await _push.read(name);
+    final old = _legacyPush;
+    if (v != null || old == null) return v;
+    final moved = await old.read(name);
+    if (moved == null) return null;
+    await _push.write(name, moved);
+    await old.delete(name);
+    return moved;
+  }
+
+  Future<void> writePush(String name, String value) async {
+    await _push.write(name, value);
+    await _legacyPush?.delete(name);
+  }
+
+  Future<void> deletePush(String name) async {
+    await _push.delete(name);
+    await _legacyPush?.delete(name);
+  }
 
   static Future<T> _guard<T>(Future<T> Function() op) async {
     try {
       return await op();
     } on PlatformException catch (e) {
       final detail = '${e.code} ${e.message}';
+      final code = _isApple(null) ? _keychainStatus(e) : null;
+      if (code != null) {
+        switch (code) {
+          case _errSecUserCanceled || _errSecAuthFailed:
+            throw const UserCancelledFailure();
+          case _errSecNotAvailable:
+            throw const ValidationFailure(
+              'Set a screen lock (PIN, pattern, password or biometrics) to store SSH keys.',
+            );
+          case _errSecInteractionNotAllowed:
+            throw const ValidationFailure('Unlock this device and try again.');
+          default:
+            // Not a cancel: surface it so a real keychain problem (e.g. a
+            // missing entitlement) is not mistaken for the user backing out.
+            throw ValidationFailure('The keychain refused the operation (OSStatus $code).');
+        }
+      }
       if (detail.contains('BIOMETRIC_UNAVAILABLE')) {
         throw const ValidationFailure(
           'Set a screen lock (PIN, pattern, password or biometrics) to store SSH keys.',
@@ -104,5 +203,24 @@ class SecureKeyStorage {
       }
       throw const UserCancelledFailure();
     }
+  }
+
+  /// `errSecNotAvailable`: no passcode is set on the device.
+  static const _errSecNotAvailable = -25291;
+
+  /// `errSecUserCanceled` / `errSecAuthFailed`: the prompt was dismissed or failed.
+  static const _errSecUserCanceled = -128;
+  static const _errSecAuthFailed = -25293;
+
+  /// `errSecInteractionNotAllowed`: the device is locked.
+  static const _errSecInteractionNotAllowed = -25308;
+
+  /// OSStatus reported by the Darwin plugin (`details`, or "Code: -128" in the
+  /// message); null on Android.
+  static int? _keychainStatus(PlatformException e) {
+    final d = e.details;
+    if (d is int) return d;
+    final m = RegExp(r'Code: (-?\d+)').firstMatch(e.message ?? '');
+    return m == null ? null : int.parse(m.group(1)!);
   }
 }

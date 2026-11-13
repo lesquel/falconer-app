@@ -505,6 +505,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get defaultDeviceName => 'Teléfono Android';
 
   @override
+  String get defaultDeviceNameIphone => 'iPhone';
+
+  @override
+  String get defaultDeviceNameIpad => 'iPad';
+
+  @override
+  String get defaultDeviceNameMac => 'Mac';
+
+  @override
   String get pairReviewNote =>
       'Esto crea una clave SSH en este teléfono, la autoriza en el equipo solo desde tu tailnet y registra notificaciones cifradas.';
 
@@ -682,6 +691,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errAuthRejected => 'El equipo rechazó la clave de este dispositivo.';
+
+  @override
+  String get errAuthTimeout =>
+      'El equipo no respondió a la clave SSH. Si Tailscale SSH está activado en él, ejecuta: sudo tailscale set --ssh=false';
 
   @override
   String get errCannotReachHost => 'No se pudo conectar con el equipo.';

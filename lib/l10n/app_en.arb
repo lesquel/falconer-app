@@ -383,6 +383,18 @@
   "@defaultDeviceName": {
     "description": "Default name of this phone on the host."
   },
+  "defaultDeviceNameIphone": "iPhone",
+  "@defaultDeviceNameIphone": {
+    "description": "Default name of this iPhone on the host."
+  },
+  "defaultDeviceNameIpad": "iPad",
+  "@defaultDeviceNameIpad": {
+    "description": "Default name of this iPad on the host."
+  },
+  "defaultDeviceNameMac": "Mac",
+  "@defaultDeviceNameMac": {
+    "description": "Default name of this Mac on the host."
+  },
   "pairReviewNote": "This creates an SSH key on this phone, authorizes it on the host only from your tailnet, and registers encrypted notifications.",
   "pairing": "Pairing…",
   "pair": "Pair",
@@ -487,6 +499,7 @@
   },
   "errHostKeyChanged": "Host key changed. The connection was blocked.",
   "errAuthRejected": "The host rejected this device key.",
+  "errAuthTimeout": "The host did not answer the SSH key. If Tailscale SSH is enabled on it, run: sudo tailscale set --ssh=false",
   "errCannotReachHost": "Could not reach the host.",
   "errUnlockCancelled": "Unlock was cancelled.",
   "errAddressNeedsNewCheck": "Changing address or port needs a new host key check. Add the host again.",
