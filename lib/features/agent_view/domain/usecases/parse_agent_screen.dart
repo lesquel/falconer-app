@@ -14,9 +14,27 @@ import '../parsing/screen_region.dart';
 List<ScreenBlock> parseAgentScreen(String? agent, List<String> lines) {
   final screen = normalizeScreen(lines);
   final detector = detectorFor(agent);
-  final region =
-      _firstMatch(detector.choiceScanners, screen) ?? _firstMatch(detector.inputScanners, screen);
+  final menu = _firstMatch(detector.choiceScanners, screen);
+  final input = _firstMatch(detector.inputScanners, screen);
+  final region = menu != null && !_answered(screen, menu, input, detector) ? menu : input;
   return _assemble(screen, _withDetail(screen, region, detector), detector);
+}
+
+/// A menu with newer output under it was already answered: the agent wrote
+/// a new paragraph after it (a tool call, a prompt) or, for an agent that
+/// hides its input line while a menu waits, shows that input line again.
+/// Only a menu that is still the last thing on the screen is live.
+bool _answered(
+  List<ScreenLine> screen,
+  ScreenRegion menu,
+  ScreenRegion? input,
+  AgentDetector detector,
+) {
+  if (detector.menuHidesInput && input != null && input.at > menu.at) return true;
+  for (var i = menu.at + 1; i < screen.length; i++) {
+    if (detector.roleStart(screen[i], TextRole.agent) != null) return true;
+  }
+  return false;
 }
 
 /// Adds the command or file a menu is about; its lines stay as text too.

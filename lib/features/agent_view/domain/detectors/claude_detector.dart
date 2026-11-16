@@ -14,6 +14,10 @@ final class ClaudeDetector extends AgentDetector {
   @override
   List<ChoiceScanner> get choiceScanners => const [NumberedMenuScanner(cursors: '❯>')];
 
+  /// The permission menu takes the place of the input box.
+  @override
+  bool get menuHidesInput => true;
+
   @override
   List<InputScanner> get inputScanners => [
     FramedPromptInput(prompts: '>❯', placeholders: [RegExp(r'^Try ".*"$')]),

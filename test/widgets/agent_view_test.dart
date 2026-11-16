@@ -122,12 +122,11 @@ void main() {
     expect(find.text('needs you'), findsOneWidget);
   });
 
-  testWidgets('a menu answer is sent once; the card waits for the next screen', (t) async {
+  testWidgets('a menu answer is sent once and the card hides until a new menu shows', (t) async {
     await pump(t);
     expect(find.byKey(const Key('agent-permission-card')), findsOneWidget);
     await t.ensureVisible(find.byKey(const Key('choice-2')));
     await t.tap(find.byKey(const Key('choice-2')));
-    await t.pump();
     await t.tap(find.byKey(const Key('choice-0')), warnIfMissed: false);
     await t.pump();
     expect(repo.actions.map(actionJson), [
@@ -137,23 +136,59 @@ void main() {
         'keys': ['3'],
       },
     ]);
-    final button = find.byKey(const Key('choice-0'));
-    expect((t.widget(button) as ButtonStyleButton).enabled, isFalse);
+    // Answered: the screen still shows the menu until the next read.
+    expect(find.byKey(const Key('agent-permission-card')), findsNothing);
 
-    // The same menu again, with the cursor moved: a new screen enables it.
+    // A different menu docks the card again.
     repo.changeScreen(
       PaneScreen(agent: 'claude', lines: fixture('claude', 'permission_edit_boxed')),
     );
     await t.pumpAndSettle();
+    final button = find.byKey(const Key('choice-0'));
     expect((t.widget(button) as ButtonStyleButton).enabled, isTrue);
     await t.ensureVisible(button);
     await t.tap(button);
     await t.pump();
     expect(repo.actions, hasLength(2));
+    expect(find.byKey(const Key('agent-permission-card')), findsNothing);
 
     repo.changeScreen(PaneScreen(agent: 'claude', lines: fixture('claude', 'plain')));
     await t.pumpAndSettle();
     expect(find.byKey(const Key('agent-permission-card')), findsNothing);
+  });
+
+  testWidgets('the answered menu stays hidden while later reads still show it', (t) async {
+    await pump(t);
+    await t.ensureVisible(find.byKey(const Key('choice-0')));
+    await t.tap(find.byKey(const Key('choice-0')));
+    await t.pump();
+    // The agent has not redrawn yet: the same menu, its cursor moved.
+    final lines = fixture(
+      'claude',
+      'permission',
+    ).map((l) => l.replaceFirst('❯ 1.', '  1.').replaceFirst('  3. No', '❯ 3. No')).toList();
+    repo.changeScreen(PaneScreen(agent: 'claude', lines: lines));
+    await t.pumpAndSettle();
+    expect(find.byKey(const Key('agent-permission-card')), findsNothing);
+
+    // Once the menu left the screen, the same menu asked again docks again.
+    repo.changeScreen(PaneScreen(agent: 'claude', lines: fixture('claude', 'plain')));
+    await t.pumpAndSettle();
+    repo.changeScreen(PaneScreen(agent: 'claude', lines: fixture('claude', 'permission')));
+    await t.pumpAndSettle();
+    expect(find.byKey(const Key('agent-permission-card')), findsOneWidget);
+  });
+
+  testWidgets('a failed answer keeps the card so it can be sent again', (t) async {
+    repo.actError = Exception('offline');
+    await pump(t);
+    await t.ensureVisible(find.byKey(const Key('choice-0')));
+    await t.tap(find.byKey(const Key('choice-0')));
+    await t.pumpAndSettle();
+    expect(repo.actions, hasLength(1));
+    expect(find.byKey(const Key('agent-permission-card')), findsOneWidget);
+    final button = find.byKey(const Key('choice-0'));
+    expect((t.widget(button) as ButtonStyleButton).enabled, isTrue);
   });
 
   testWidgets('every key of the row presses its key in the pane', (t) async {
