@@ -147,11 +147,11 @@ abstract class AppLocalizations {
   /// **'Not found'**
   String get notFound;
 
-  /// Accessibility label of the mascot.
+  /// Accessibility label of the app logo.
   ///
   /// In en, this message translates to:
-  /// **'OpenMosh mole'**
-  String get moleSemanticLabel;
+  /// **'Falconer logo'**
+  String get logoSemanticLabel;
 
   /// No description provided for @somethingWentWrong.
   ///
@@ -552,7 +552,7 @@ abstract class AppLocalizations {
   /// No description provided for @revokeThisPhoneBody.
   ///
   /// In en, this message translates to:
-  /// **'This is the phone you are using. OpenMosh will lose access to {alias}: the host removes its SSH key and push key. Pair again to get access back.'**
+  /// **'This is the phone you are using. Falconer will lose access to {alias}: the host removes its SSH key and push key. Pair again to get access back.'**
   String revokeThisPhoneBody(String alias);
 
   /// No description provided for @revokeDeviceBody.
@@ -870,7 +870,7 @@ abstract class AppLocalizations {
   /// No description provided for @cameraPermissionDenied.
   ///
   /// In en, this message translates to:
-  /// **'OpenMosh cannot use the camera. Allow it in Android Settings > Apps > OpenMosh > Permissions > Camera, then tap Retry.'**
+  /// **'Falconer cannot use the camera. Allow it in Android Settings > Apps > Falconer > Permissions > Camera, then tap Retry.'**
   String get cameraPermissionDenied;
 
   /// No description provided for @cameraUnavailable.
@@ -1038,13 +1038,13 @@ abstract class AppLocalizations {
   /// No description provided for @lockApp.
   ///
   /// In en, this message translates to:
-  /// **'Lock OpenMosh'**
+  /// **'Lock Falconer'**
   String get lockApp;
 
   /// No description provided for @lockAppBody.
   ///
   /// In en, this message translates to:
-  /// **'Ask for your fingerprint, face or screen lock when OpenMosh opens and after a minute in the background. Turning it on or off asks for it too.'**
+  /// **'Ask for your fingerprint, face or screen lock when Falconer opens and after a minute in the background. Turning it on or off asks for it too.'**
   String get lockAppBody;
 
   /// No description provided for @terminalFontSize.
@@ -1860,7 +1860,7 @@ abstract class AppLocalizations {
   /// No description provided for @lockedTitle.
   ///
   /// In en, this message translates to:
-  /// **'OpenMosh is locked'**
+  /// **'Falconer is locked'**
   String get lockedTitle;
 
   /// No description provided for @lockedBody.
@@ -1878,19 +1878,19 @@ abstract class AppLocalizations {
   /// System biometric prompt reason.
   ///
   /// In en, this message translates to:
-  /// **'Unlock OpenMosh'**
+  /// **'Unlock Falconer'**
   String get lockPromptUnlock;
 
   /// System biometric prompt reason.
   ///
   /// In en, this message translates to:
-  /// **'Turn on the OpenMosh lock'**
+  /// **'Turn on the Falconer lock'**
   String get lockPromptTurnOn;
 
   /// System biometric prompt reason.
   ///
   /// In en, this message translates to:
-  /// **'Turn off the OpenMosh lock'**
+  /// **'Turn off the Falconer lock'**
   String get lockPromptTurnOff;
 
   /// Pairing success when the phone paired without a push endpoint.
@@ -2742,7 +2742,7 @@ abstract class AppLocalizations {
   /// No description provided for @webPushExplain.
   ///
   /// In en, this message translates to:
-  /// **'Install the OpenMosh Notifications web app, enable notifications there and send the code here.'**
+  /// **'Install the Falconer Notifications web app, enable notifications there and send the code here.'**
   String get webPushExplain;
 
   /// No description provided for @webPushStatusOff.
@@ -2850,7 +2850,7 @@ abstract class AppLocalizations {
   /// No description provided for @errWebPushVersion.
   ///
   /// In en, this message translates to:
-  /// **'This web notifications code is from another OpenMosh version. Update the app.'**
+  /// **'This web notifications code is from another Falconer version. Update the app.'**
   String get errWebPushVersion;
 }
 

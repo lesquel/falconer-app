@@ -11,9 +11,9 @@ void main() {
   );
 
   testWidgets('camera stays on screen after an error so the user can scan again', (t) async {
-    await t.pumpWidget(view(error: 'This is not a valid OpenMosh pairing code.'));
+    await t.pumpWidget(view(error: 'This is not a valid Falconer pairing code.'));
     expect(find.text('camera'), findsOneWidget);
-    expect(find.text('This is not a valid OpenMosh pairing code.'), findsOneWidget);
+    expect(find.text('This is not a valid Falconer pairing code.'), findsOneWidget);
   });
 
   testWidgets('paste field says which link it expects', (t) async {

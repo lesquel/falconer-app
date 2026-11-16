@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/l10n.dart';
-import '../../../../shared/ui/molecules/themed_mole.dart';
+import '../../../../shared/ui/molecules/themed_falcon.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
 
 /// Shown over the app while it is locked.
@@ -24,7 +24,7 @@ class LockView extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const ThemedMole(size: 150, semanticLabel: null),
+                const ThemedFalcon(size: 150, semanticLabel: null),
                 const SizedBox(height: 16),
                 Text(
                   l.lockedTitle,

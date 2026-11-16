@@ -14,7 +14,7 @@ class AppLockGate extends StatefulWidget {
 
   final AppLock lock;
 
-  /// The "Lock OpenMosh" setting; null while settings are loading.
+  /// The "Lock Falconer" setting; null while settings are loading.
   final bool? enabled;
   final Widget child;
 

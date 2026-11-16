@@ -32,7 +32,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "dev.openmosh.openmosh"
+        applicationId = "dev.falconer.app"
         // Android 9+: SSH keys are stored under an auth-bound Keystore key
         // (flutter_secure_storage AndroidOptions.biometric requires API 28).
         minSdk = 28

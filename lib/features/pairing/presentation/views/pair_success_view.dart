@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/l10n.dart';
-import '../../../../shared/ui/molecules/themed_mole.dart';
+import '../../../../shared/ui/molecules/themed_falcon.dart';
 
-/// Shown once pairing finished: the mole celebrates, then open the host.
+/// Shown once pairing finished: the falcon celebrates, then open the host.
 class PairSuccessView extends StatelessWidget {
   const PairSuccessView({
     super.key,
@@ -19,7 +19,7 @@ class PairSuccessView extends StatelessWidget {
   final bool pushEnabled;
 
   @override
-  Widget build(BuildContext context) => MoleMessage(
+  Widget build(BuildContext context) => FalconMessage(
     title: context.l10n.pairedWith(alias),
     message: pushEnabled ? context.l10n.pairedBody : context.l10n.pairedWithoutPush,
     size: 180,

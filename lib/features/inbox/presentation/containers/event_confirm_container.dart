@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/di.dart';
 import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/atoms/time_ago.dart';
-import '../../../../shared/ui/molecules/themed_mole.dart';
+import '../../../../shared/ui/molecules/themed_falcon.dart';
 import '../../domain/entities/inbox_event.dart';
 import '../controllers/event_confirm_controller.dart';
 import '../views/event_confirm_view.dart';
@@ -41,7 +41,7 @@ class EventConfirmContainer extends ConsumerWidget {
 
     return Scaffold(
       body: event == null
-          ? MoleMessage(
+          ? FalconMessage(
               title: l.eventNotFound,
               message: l.eventMayBeCleared,
               actions: [TextButton(onPressed: close, child: Text(l.back))],

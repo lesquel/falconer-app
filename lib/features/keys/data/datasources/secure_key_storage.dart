@@ -113,7 +113,7 @@ class SecureKeyStorage {
     requireBiometricsPerOperation: true,
     resetOnError: false,
     biometricPromptTitle: 'Unlock SSH key',
-    biometricPromptSubtitle: 'OpenMosh needs your fingerprint, face or screen lock',
+    biometricPromptSubtitle: 'Falconer needs your fingerprint, face or screen lock',
   );
 
   /// v0.1 namespace (Keystore-wrapped, not auth-bound). Keys found here are

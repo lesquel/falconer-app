@@ -4,7 +4,7 @@ import '../../../../l10n/l10n.dart';
 import '../../../../shared/ui/atoms/status_badge.dart';
 import '../../../../shared/ui/atoms/time_ago.dart';
 import '../../../../shared/ui/molecules/mosh_tile.dart';
-import '../../../../shared/ui/molecules/themed_mole.dart';
+import '../../../../shared/ui/molecules/themed_falcon.dart';
 import '../../../../shared/ui/organisms/thumb_page.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
 import '../../domain/entities/inbox_event.dart';
@@ -47,7 +47,7 @@ class InboxView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     if (events.isEmpty) {
-      return MoleMessage(title: l.noAgentEventsTitle, message: l.noAgentEventsBody);
+      return FalconMessage(title: l.noAgentEventsTitle, message: l.noAgentEventsBody);
     }
     final c = MoshColors.of(context);
     final clock = now ?? DateTime.now();

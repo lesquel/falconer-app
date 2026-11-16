@@ -35,7 +35,7 @@ class PairingController extends Notifier<PairingState> {
     if (raw == null) return;
     state = PairingState(step: PairStep.pairing, raw: raw, code: state.code);
     try {
-      final name = deviceName.trim().isEmpty ? 'OpenMosh device' : deviceName.trim();
+      final name = deviceName.trim().isEmpty ? 'Falconer device' : deviceName.trim();
       final host = await ref.read(pairWithQrProvider)(
         raw,
         deviceName: name.length > 64 ? name.substring(0, 64) : name,

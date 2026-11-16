@@ -9,9 +9,9 @@
   "delete": "Delete",
   "dismiss": "Dismiss",
   "notFound": "Not found",
-  "moleSemanticLabel": "OpenMosh mole",
-  "@moleSemanticLabel": {
-    "description": "Accessibility label of the mascot."
+  "logoSemanticLabel": "Falconer logo",
+  "@logoSemanticLabel": {
+    "description": "Accessibility label of the app logo."
   },
   "somethingWentWrong": "Something went wrong.",
   "navHosts": "Hosts",
@@ -214,7 +214,7 @@
       }
     }
   },
-  "revokeThisPhoneBody": "This is the phone you are using. OpenMosh will lose access to {alias}: the host removes its SSH key and push key. Pair again to get access back.",
+  "revokeThisPhoneBody": "This is the phone you are using. Falconer will lose access to {alias}: the host removes its SSH key and push key. Pair again to get access back.",
   "@revokeThisPhoneBody": {
     "placeholders": {
       "alias": {
@@ -366,7 +366,7 @@
     "description": "Reason shown in the biometric prompt."
   },
   "pairAHost": "Pair a host",
-  "cameraPermissionDenied": "OpenMosh cannot use the camera. Allow it in Android Settings > Apps > OpenMosh > Permissions > Camera, then tap Retry.",
+  "cameraPermissionDenied": "Falconer cannot use the camera. Allow it in Android Settings > Apps > Falconer > Permissions > Camera, then tap Retry.",
   "cameraUnavailable": "The camera could not start. Close other apps using it and tap Retry.",
   "newComputer": "New computer",
   "pairWith": "Pair with {ip}",
@@ -433,8 +433,8 @@
   "notificationPreviewsBody": "Off: notifications only say \"<host>: <agent> needs you\". On: they show the request text, hidden on the lock screen.",
   "keepConnected": "Keep sessions connected",
   "keepConnectedBody": "Terminals stay open and keep reconnecting after you leave them, until you disconnect or close the app.",
-  "lockApp": "Lock OpenMosh",
-  "lockAppBody": "Ask for your fingerprint, face or screen lock when OpenMosh opens and after a minute in the background. Turning it on or off asks for it too.",
+  "lockApp": "Lock Falconer",
+  "lockAppBody": "Ask for your fingerprint, face or screen lock when Falconer opens and after a minute in the background. Turning it on or off asks for it too.",
   "terminalFontSize": "Terminal font size · {size}",
   "@terminalFontSize": {
     "placeholders": {
@@ -769,18 +769,18 @@
   },
   "pastePrivateKey": "Paste the OpenSSH private key",
   "importAction": "Import",
-  "lockedTitle": "OpenMosh is locked",
+  "lockedTitle": "Falconer is locked",
   "lockedBody": "Verify it is you to continue.",
   "unlock": "Unlock",
-  "lockPromptUnlock": "Unlock OpenMosh",
+  "lockPromptUnlock": "Unlock Falconer",
   "@lockPromptUnlock": {
     "description": "System biometric prompt reason."
   },
-  "lockPromptTurnOn": "Turn on the OpenMosh lock",
+  "lockPromptTurnOn": "Turn on the Falconer lock",
   "@lockPromptTurnOn": {
     "description": "System biometric prompt reason."
   },
-  "lockPromptTurnOff": "Turn off the OpenMosh lock",
+  "lockPromptTurnOff": "Turn off the Falconer lock",
   "@lockPromptTurnOff": {
     "description": "System biometric prompt reason."
   },
@@ -1185,7 +1185,7 @@
   "herdrWorkspaceGone": "This workspace is no longer open.",
   "herdrPickWorkspace": "Pick a workspace to see its terminals.",
   "webPushTitle": "Web notifications (iOS / browser)",
-  "webPushExplain": "Install the OpenMosh Notifications web app, enable notifications there and send the code here.",
+  "webPushExplain": "Install the Falconer Notifications web app, enable notifications there and send the code here.",
   "webPushStatusOff": "Not set",
   "webPushStatusOn": "Active via {service}",
   "@webPushStatusOn": {
@@ -1231,5 +1231,5 @@
   },
   "webPushDone": "Done",
   "errWebPushCode": "This is not a valid web notifications code.",
-  "errWebPushVersion": "This web notifications code is from another OpenMosh version. Update the app."
+  "errWebPushVersion": "This web notifications code is from another Falconer version. Update the app."
 }

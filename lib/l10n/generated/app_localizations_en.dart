@@ -37,7 +37,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notFound => 'Not found';
 
   @override
-  String get moleSemanticLabel => 'OpenMosh mole';
+  String get logoSemanticLabel => 'Falconer logo';
 
   @override
   String get somethingWentWrong => 'Something went wrong.';
@@ -287,7 +287,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String revokeThisPhoneBody(String alias) {
-    return 'This is the phone you are using. OpenMosh will lose access to $alias: the host removes its SSH key and push key. Pair again to get access back.';
+    return 'This is the phone you are using. Falconer will lose access to $alias: the host removes its SSH key and push key. Pair again to get access back.';
   }
 
   @override
@@ -478,7 +478,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cameraPermissionDenied =>
-      'OpenMosh cannot use the camera. Allow it in Android Settings > Apps > OpenMosh > Permissions > Camera, then tap Retry.';
+      'Falconer cannot use the camera. Allow it in Android Settings > Apps > Falconer > Permissions > Camera, then tap Retry.';
 
   @override
   String get cameraUnavailable =>
@@ -573,11 +573,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Terminals stay open and keep reconnecting after you leave them, until you disconnect or close the app.';
 
   @override
-  String get lockApp => 'Lock OpenMosh';
+  String get lockApp => 'Lock Falconer';
 
   @override
   String get lockAppBody =>
-      'Ask for your fingerprint, face or screen lock when OpenMosh opens and after a minute in the background. Turning it on or off asks for it too.';
+      'Ask for your fingerprint, face or screen lock when Falconer opens and after a minute in the background. Turning it on or off asks for it too.';
 
   @override
   String terminalFontSize(String size) {
@@ -1018,7 +1018,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importAction => 'Import';
 
   @override
-  String get lockedTitle => 'OpenMosh is locked';
+  String get lockedTitle => 'Falconer is locked';
 
   @override
   String get lockedBody => 'Verify it is you to continue.';
@@ -1027,13 +1027,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unlock => 'Unlock';
 
   @override
-  String get lockPromptUnlock => 'Unlock OpenMosh';
+  String get lockPromptUnlock => 'Unlock Falconer';
 
   @override
-  String get lockPromptTurnOn => 'Turn on the OpenMosh lock';
+  String get lockPromptTurnOn => 'Turn on the Falconer lock';
 
   @override
-  String get lockPromptTurnOff => 'Turn off the OpenMosh lock';
+  String get lockPromptTurnOff => 'Turn off the Falconer lock';
 
   @override
   String get pairedWithoutPush =>
@@ -1537,7 +1537,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get webPushExplain =>
-      'Install the OpenMosh Notifications web app, enable notifications there and send the code here.';
+      'Install the Falconer Notifications web app, enable notifications there and send the code here.';
 
   @override
   String get webPushStatusOff => 'Not set';
@@ -1602,5 +1602,5 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errWebPushVersion =>
-      'This web notifications code is from another OpenMosh version. Update the app.';
+      'This web notifications code is from another Falconer version. Update the app.';
 }

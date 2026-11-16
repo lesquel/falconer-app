@@ -1,11 +1,11 @@
-# openmosh-app
+# falconer-app
 
-Mobile client of [OpenMosh](https://github.com/lesquel/OpenMosh): an SSH terminal designed for
+Mobile client of [Falconer](https://github.com/lesquel/falconer): an SSH terminal designed for
 AI coding agents, with end-to-end encrypted push notifications and one-tap approvals.
 **Android first.**
 
 > Status: v0.2.0. Android 9+. The release APK for most phones (`arm64-v8a`) is about 26.4 MB (the on-device speech engine adds about 11 MB; models are downloaded separately, only on request).
-> Download it from the [latest release](https://github.com/lesquel/openmosh-app/releases/latest).
+> Download it from the [latest release](https://github.com/lesquel/falconer-app/releases/latest).
 
 ## What it does
 
@@ -80,12 +80,12 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
 - **Paired devices** — the host screen lists every device paired with that host
   (`openmosh-hook devices list`): name, paired date, a stale push endpoint and which one is
   *this phone*. *Revoke* asks for confirmation, then for your fingerprint, face or screen lock,
-  and runs `openmosh-hook devices revoke`. Revoking this phone warns first that OpenMosh loses
+  and runs `openmosh-hook devices revoke`. Revoking this phone warns first that Falconer loses
   access to that host.
-- **App lock** — optional, off by default (*Settings → Lock OpenMosh*). When on, OpenMosh asks
+- **App lock** — optional, off by default (*Settings → Lock Falconer*). When on, Falconer asks
   for user verification when it opens and after more than 60 s in the background (timed on the
   boot clock, so deep sleep and clock changes count correctly); until then
-  the screen shows only the mole and nothing keeps the keyboard focus. Turning the lock on or off
+  the screen shows only the falcon logo and nothing keeps the keyboard focus. Turning the lock on or off
   asks for that verification too (turning it on fails, and the lock stays off, when the phone
   has no fingerprint, face or screen lock).
 - **Inbox** — encrypted pushes are decrypted on the phone; approve, deny or reply from the inbox
@@ -106,7 +106,8 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
 
 The app follows the "UI-G" one-hand design: black `#0A0A0A` / white `#FAFAFA`, rounded cards
 (`#171717` / `#262626` on dark), big actions in the bottom half of the screen and one accent
-color. The mascot, **Topo** the mole with accent goggles, is the launcher icon (adaptive, with
+color. The logo, a falcon head on a night-blue tile with its iris in the accent color
+(master artwork: `assets/branding/falconer.svg`), is the launcher icon (adaptive, with
 an Android 13 themed variant), the splash screen and the empty, loading and pairing-success
 states.
 
@@ -156,10 +157,10 @@ Installs and checks everything needed to build and run the app, then installs it
 
 ```sh
 # While the repository is private (needs `gh auth login`)
-bash <(gh api -H 'Accept: application/vnd.github.raw' repos/lesquel/openmosh-app/contents/scripts/install.sh)
+bash <(gh api -H 'Accept: application/vnd.github.raw' repos/lesquel/falconer-app/contents/scripts/install.sh)
 
 # Once it is public
-curl -fsSL https://raw.githubusercontent.com/lesquel/openmosh-app/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/lesquel/falconer-app/main/scripts/install.sh | bash
 ```
 
 The installer clones the repo into `~/openmosh-app` (`OPENMOSH_DIR` to change it; an existing

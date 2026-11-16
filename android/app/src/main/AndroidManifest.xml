@@ -17,7 +17,7 @@
     <!-- Security (T-5): no backup or device transfer of app data, no
          cleartext except Tailscale names, no Flutter deep-link handling. -->
     <application
-        android:label="OpenMosh"
+        android:label="Falconer"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"

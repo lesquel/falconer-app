@@ -1,4 +1,4 @@
-/// A Web Push registration made by the OpenMosh notifications PWA: the
+/// A Web Push registration made by the Falconer notifications PWA: the
 /// browser's push subscription plus the VAPID key pair the PWA generated.
 /// It holds a private key, so it is never logged and only lives in secure
 /// storage.
@@ -24,7 +24,7 @@ final class WebPushCodeFailure extends AppFailure {
 
   static const malformedMessage = 'This is not a valid web notifications code.';
   static const versionMessage =
-      'This web notifications code is from another OpenMosh version. Update the app.';
+      'This web notifications code is from another Falconer version. Update the app.';
 
   factory WebPushCodeFailure.of(WebPushCodeError e) => WebPushCodeFailure(
     e,

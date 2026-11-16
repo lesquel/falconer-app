@@ -131,7 +131,7 @@ extension FailureL10n on AppLocalizations {
     'Update openmosh-hook on this computer to use the Herdr navigator.' => errHerdrHookOutdated,
     'Message is longer than 4000 characters.' => errMessageTooLong4000,
     'This is not a valid web notifications code.' => errWebPushCode,
-    'This web notifications code is from another OpenMosh version. Update the app.' =>
+    'This web notifications code is from another Falconer version. Update the app.' =>
       errWebPushVersion,
     _ => message,
   };

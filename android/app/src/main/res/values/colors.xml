@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Topo, the OpenMosh mole: UI-G black background behind the icon and splash. -->
-    <color name="ic_launcher_background">#0A0A0A</color>
+    <!-- Night blue of the Falconer logo tile, behind the adaptive icon. -->
+    <color name="ic_launcher_background">#0F1530</color>
+    <!-- UI-G black behind the splash and the first frame. -->
     <color name="splash_background">#0A0A0A</color>
 </resources>

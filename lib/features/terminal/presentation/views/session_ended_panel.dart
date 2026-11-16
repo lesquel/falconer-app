@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/l10n.dart';
-import '../../../../shared/ui/molecules/themed_mole.dart';
+import '../../../../shared/ui/molecules/themed_falcon.dart';
 
 /// Shown when the remote shell exited: start it again or leave.
 class SessionEndedPanel extends StatelessWidget {
@@ -13,7 +13,7 @@ class SessionEndedPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    return MoleMessage(
+    return FalconMessage(
       title: l.sessionEndedTitle,
       message: l.sessionEndedBody,
       size: 120,
