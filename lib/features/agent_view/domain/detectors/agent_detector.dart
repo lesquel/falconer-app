@@ -13,8 +13,9 @@ const _commonNoise = [
   '↑↓ navigate',
 ];
 
-/// Compiled [AgentDetector.noise] matchers, one per detector type.
-final _noisePatterns = <Type, RegExp>{};
+/// Lower-case [AgentDetector.noise] fragments with the common ones, one list
+/// per detector type.
+final _noiseFragments = <Type, List<String>>{};
 
 /// How one agent draws its menus, input line and status lines.
 ///
@@ -53,12 +54,35 @@ abstract class AgentDetector {
   /// Lower-case fragments of status or footer lines to drop.
   List<String> get noise => const [];
 
+  /// A case-insensitive substring match. Only ASCII letters fold, as in a
+  /// non-unicode case-insensitive RegExp, but without its cost on every line
+  /// of a long screen.
   bool isNoise(String trimmed) {
     if (trimmed.isEmpty || trimmed.length > 160) return false;
-    final pattern = _noisePatterns[runtimeType] ??= RegExp(
-      [..._commonNoise, ...noise].map(RegExp.escape).join('|'),
-      caseSensitive: false,
-    );
-    return pattern.hasMatch(trimmed);
+    final fragments = _noiseFragments[runtimeType] ??= [
+      for (final f in [..._commonNoise, ...noise]) f.toLowerCase(),
+    ];
+    for (final f in fragments) {
+      if (_containsFolded(trimmed, f)) return true;
+    }
+    return false;
   }
 }
+
+/// Whether [s], with A-Z lowered, contains [lower] (already lower-case).
+bool _containsFolded(String s, String lower) {
+  final n = lower.length;
+  if (n == 0) return true;
+  final first = lower.codeUnitAt(0);
+  for (var i = 0, last = s.length - n; i <= last; i++) {
+    if (_fold(s.codeUnitAt(i)) != first) continue;
+    var k = 1;
+    while (k < n && _fold(s.codeUnitAt(i + k)) == lower.codeUnitAt(k)) {
+      k++;
+    }
+    if (k == n) return true;
+  }
+  return false;
+}
+
+int _fold(int c) => c >= 0x41 && c <= 0x5A ? c + 0x20 : c;
