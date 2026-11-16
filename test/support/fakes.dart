@@ -124,7 +124,7 @@ class FakeConnection implements SshConnection {
       throw UnimplementedError();
   @override
   Future<String> upload(String localPath, String remoteName) async =>
-      '/home/me/.openmosh/uploads/$remoteName';
+      '/home/me/.falconer/uploads/$remoteName';
 }
 
 ExecOutput ok(Object? data) => ExecOutput(

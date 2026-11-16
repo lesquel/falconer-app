@@ -340,7 +340,7 @@ void main() {
     expect(sent['op'], 'pane.text');
     expect(sent['submit'], true);
     final text = sent['text']! as String;
-    expect(text, startsWith('/home/me/.openmosh/uploads/'));
+    expect(text, startsWith('/home/me/.falconer/uploads/'));
     expect(text, contains('notes.txt'));
     expect(text, contains('read this'));
     expect(find.text('notes.txt'), findsNothing);

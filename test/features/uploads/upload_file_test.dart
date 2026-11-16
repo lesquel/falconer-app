@@ -20,7 +20,7 @@ void main() {
     );
     expect(
       await upload('h1', const PickedFile(path: '/cache/x', name: 'My shot.PNG', size: 10)),
-      '/home/me/.openmosh/uploads/deadbeef-My_shot.png',
+      '/home/me/.falconer/uploads/deadbeef-My_shot.png',
     );
     await expectLater(
       upload('h1', const PickedFile(path: '/c', name: 'big', size: 50 * 1024 * 1024 + 1)),
