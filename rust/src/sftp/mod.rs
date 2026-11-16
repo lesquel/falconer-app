@@ -1,4 +1,4 @@
-//! SFTP uploads into `~/.openmosh/uploads/` (directory 0700, files 0600).
+//! SFTP uploads into `~/.falconer/uploads/` (directory 0700, files 0600).
 use russh::client::Handle;
 use russh_sftp::client::SftpSession;
 use russh_sftp::protocol::{FileAttributes, OpenFlags};
@@ -8,7 +8,7 @@ use crate::error::{CoreError, CoreResult};
 use crate::ssh::client::{sanitize, PinningHandler};
 
 pub const MAX_UPLOAD_BYTES: u64 = 50 * 1024 * 1024;
-pub const UPLOAD_DIR: &str = ".openmosh/uploads";
+pub const UPLOAD_DIR: &str = ".falconer/uploads";
 
 /// Defense in depth: the Dart side already sanitizes, but the core refuses
 /// anything that could escape the uploads directory.
@@ -67,7 +67,7 @@ pub async fn upload(
         .map_err(s_err)?;
 
     let home = sftp.canonicalize(".").await.map_err(s_err)?;
-    let base = format!("{}/.openmosh", home.trim_end_matches('/'));
+    let base = format!("{}/.falconer", home.trim_end_matches('/'));
     let dir = format!("{base}/uploads");
     for d in [&base, &dir] {
         if !sftp.try_exists(d.as_str()).await.map_err(s_err)? {

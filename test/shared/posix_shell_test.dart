@@ -37,8 +37,8 @@ void main() {
 
   test('shQuoteIfNeeded keeps plain paths and quotes the rest', () {
     expect(
-      shQuoteIfNeeded('/home/me/.openmosh/uploads/a1-shot.png'),
-      '/home/me/.openmosh/uploads/a1-shot.png',
+      shQuoteIfNeeded('/home/me/.falconer/uploads/a1-shot.png'),
+      '/home/me/.falconer/uploads/a1-shot.png',
     );
     expect(shQuoteIfNeeded('/home/my user/x.png'), "'/home/my user/x.png'");
     expect(shQuoteIfNeeded("it's"), "'it'\\''s'");

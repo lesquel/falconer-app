@@ -39,7 +39,7 @@ abstract interface class SshConnection {
   Future<ExecOutput> exec(String command, {List<int>? stdin});
   Future<ShellChannel> openShell({required int cols, required int rows});
 
-  /// Uploads into `~/.openmosh/uploads/`; returns the remote absolute path.
+  /// Uploads into `~/.falconer/uploads/`; returns the remote absolute path.
   Future<String> upload(String localPath, String remoteName);
   bool get isClosed;
 

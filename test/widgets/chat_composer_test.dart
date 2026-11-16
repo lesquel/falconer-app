@@ -122,16 +122,16 @@ void main() {
       t,
       attachments: [
         ChatAttachment(
-          remotePath: '/h/.openmosh/uploads/a1-shot.png',
+          remotePath: '/h/.falconer/uploads/a1-shot.png',
           name: 'shot.png',
           preview: _png,
         ),
-        const ChatAttachment(remotePath: '/h/.openmosh/uploads/b2-notes.txt', name: 'notes.txt'),
+        const ChatAttachment(remotePath: '/h/.falconer/uploads/b2-notes.txt', name: 'notes.txt'),
       ],
     );
     expect(find.byType(Image), findsOneWidget);
     expect(find.text('notes.txt'), findsOneWidget);
-    expect(find.textContaining('.openmosh'), findsNothing);
+    expect(find.textContaining('.falconer'), findsNothing);
     await t.tap(find.byTooltip('Remove notes.txt'));
     expect(removed, [1]);
     await t.tap(find.byTooltip('Send'));
