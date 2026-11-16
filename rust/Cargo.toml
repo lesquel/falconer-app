@@ -23,8 +23,11 @@ zeroize = "1.9.1"
 # Smaller, faster native library. cargokit builds Android release with
 # `cargo build --release`, so this profile applies. Never `panic = "abort"`:
 # flutter_rust_bridge relies on unwinding to turn panics into Dart errors.
+# `opt-level = "s"`: the arm64 library is ~27% smaller (3.18 -> 2.32 MB,
+# ~410 KB less in the APK); the SSH ciphers' hot loops are ring's
+# assembly, which the level does not touch, and the rest is I/O-bound.
 [profile.release]
-opt-level = 3
+opt-level = "s"
 lto = "fat"
 codegen-units = 1
 strip = "symbols"
