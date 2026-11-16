@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/di.dart';
-import '../../../../shared/ui/molecules/themed_mole.dart';
+import '../../../../shared/ui/molecules/themed_falcon.dart';
 import '../../../../shared/ui/organisms/failure_panel.dart';
 import '../views/hosts_view.dart';
 
@@ -26,7 +26,7 @@ class HostsContainer extends ConsumerWidget {
           onOpenEvent: (e) => context.push('/inbox/${e.hostId}/${e.id}'),
           onInbox: () => context.go('/inbox'),
         ),
-        loading: () => const MoleMessage(title: 'OpenMosh', busy: true),
+        loading: () => const FalconMessage(title: 'Falconer', busy: true),
         error: (e, _) => FailurePanel(failure: e),
       ),
     );

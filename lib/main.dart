@@ -54,7 +54,7 @@ Future<void> main(List<String> args) async {
   runApp(
     UncontrolledProviderScope(
       container: container,
-      child: OpenMoshApp(router: router),
+      child: FalconerApp(router: router),
     ),
   );
   await push.notifier.requestPermission();

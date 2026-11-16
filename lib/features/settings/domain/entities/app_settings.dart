@@ -58,7 +58,7 @@ final class AppSettings {
   /// terminal screen, until the app is closed or the session is disconnected.
   final bool keepConnected;
 
-  /// "Lock OpenMosh": ask for user verification on a cold start and after
+  /// "Lock Falconer": ask for user verification on a cold start and after
   /// more than 60 s in the background. Off by default.
   final bool appLock;
 

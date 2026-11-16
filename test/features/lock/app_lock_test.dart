@@ -28,7 +28,7 @@ void main() {
     auth.allow = true;
     expect(await lock.unlock(), isTrue);
     expect(lock.locked, isFalse);
-    expect(auth.reasons, ['Unlock OpenMosh', 'Unlock OpenMosh']);
+    expect(auth.reasons, ['Unlock Falconer', 'Unlock Falconer']);
   });
 
   test('resuming after more than 60 s in the background locks', () async {
@@ -66,7 +66,7 @@ void main() {
     expect(await lock.verifyToggle(enable: false), isNotNull);
     auth.allow = true;
     expect(await lock.verifyToggle(enable: false), isNull);
-    expect(auth.reasons, ['Turn off the OpenMosh lock', 'Turn off the OpenMosh lock']);
+    expect(auth.reasons, ['Turn off the Falconer lock', 'Turn off the Falconer lock']);
   });
 
   test('turning the lock on first checks that the user can be verified', () async {
@@ -75,7 +75,7 @@ void main() {
     expect(why, contains('stays off'));
     auth.allow = true;
     expect(await lock.verifyToggle(enable: true), isNull);
-    expect(auth.reasons, ['Turn on the OpenMosh lock', 'Turn on the OpenMosh lock']);
+    expect(auth.reasons, ['Turn on the Falconer lock', 'Turn on the Falconer lock']);
   });
 
   test('a clock that goes back locks instead of skipping the timeout', () async {

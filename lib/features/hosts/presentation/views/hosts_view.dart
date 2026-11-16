@@ -6,7 +6,7 @@ import '../../../../shared/ui/atoms/sensitive_text.dart';
 import '../../../../shared/ui/atoms/status_badge.dart';
 import '../../../../shared/ui/atoms/time_ago.dart';
 import '../../../../shared/ui/molecules/mosh_tile.dart';
-import '../../../../shared/ui/molecules/themed_mole.dart';
+import '../../../../shared/ui/molecules/themed_falcon.dart';
 import '../../../../shared/ui/organisms/thumb_page.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
 import '../../../inbox/domain/entities/inbox_event.dart';
@@ -47,7 +47,7 @@ class HostsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     if (hosts.isEmpty) {
-      return MoleMessage(
+      return FalconMessage(
         title: l.noComputersTitle,
         message: l.noComputersBody,
         actions: [
@@ -116,7 +116,7 @@ class HostsView extends StatelessWidget {
                 child: _TileText(
                   top: l.addTile,
                   big: l.pairWithQr,
-                  small: 'openmosh-hook pair',
+                  small: 'falconer-hook pair',
                   smallColor: c.muted,
                 ),
               ),

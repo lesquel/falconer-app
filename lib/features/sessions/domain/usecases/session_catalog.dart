@@ -2,7 +2,7 @@ import '../../../../shared/hook/domain/hook_command.dart';
 import '../../../hosts/domain/usecases/host_connections.dart';
 import '../entities/remote_session.dart';
 
-/// Lists sessions and agents through `openmosh-hook … --json`.
+/// Lists sessions and agents through `falconer-hook … --json`.
 final class SessionCatalog {
   const SessionCatalog(this.connections);
   final HostConnections connections;

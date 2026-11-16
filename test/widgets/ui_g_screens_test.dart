@@ -12,7 +12,7 @@ import 'package:openmosh/features/inbox/presentation/views/inbox_view.dart';
 import 'package:openmosh/features/pairing/presentation/views/pair_success_view.dart';
 import 'package:openmosh/features/settings/domain/entities/app_settings.dart';
 import 'package:openmosh/features/settings/presentation/views/colors_view.dart';
-import 'package:openmosh/shared/ui/atoms/mole_logo.dart';
+import 'package:openmosh/shared/ui/atoms/falcon_logo.dart';
 
 import '../support/fakes.dart';
 
@@ -81,15 +81,15 @@ void main() {
     expect(find.byKey(const Key('approval_card')), findsNothing);
   });
 
-  testWidgets('home without hosts shows the mole', (t) async {
+  testWidgets('home without hosts shows the falcon', (t) async {
     await phone(t, HostsView(hosts: const [], onOpen: (_) {}, onPair: () {}, onAdd: () {}));
-    expect(find.byType(MoleLogo), findsOneWidget);
+    expect(find.byType(FalconLogo), findsOneWidget);
     expect(find.text('No computers yet'), findsOneWidget);
   });
 
-  testWidgets('empty inbox shows the mole', (t) async {
+  testWidgets('empty inbox shows the falcon', (t) async {
     await phone(t, InboxView(events: const [], hostAlias: (_) => 'work', onOpen: (_) {}));
-    expect(find.byType(MoleLogo), findsOneWidget);
+    expect(find.byType(FalconLogo), findsOneWidget);
   });
 
   testWidgets('approve screen: big approve block, deny and reply fit on a phone', (t) async {
@@ -118,10 +118,10 @@ void main() {
     expect(t.takeException(), isNull);
   });
 
-  testWidgets('pairing success shows the mole and opens the host', (t) async {
+  testWidgets('pairing success shows the falcon and opens the host', (t) async {
     var opened = 0;
     await phone(t, PairSuccessView(alias: 'laptop', onOpen: () => opened++));
-    expect(find.byType(MoleLogo), findsOneWidget);
+    expect(find.byType(FalconLogo), findsOneWidget);
     expect(find.text('Paired with laptop'), findsOneWidget);
     await t.tap(find.byKey(const Key('open_paired_host')));
     expect(opened, 1);

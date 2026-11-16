@@ -1,6 +1,6 @@
 # Agent screen fixtures
 
-Plain-text screens (ANSI already stripped, as `openmosh-hook herdr read` returns them)
+Plain-text screens (ANSI already stripped, as `falconer-hook herdr read` returns them)
 used by `parse_agent_screen_test.dart`. One folder per agent id, as the hook names them.
 
 No fixture is a live capture: running the agents until they show a permission prompt

@@ -37,7 +37,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get notFound => 'No encontrado';
 
   @override
-  String get moleSemanticLabel => 'Topo de OpenMosh';
+  String get logoSemanticLabel => 'Logo de Falconer';
 
   @override
   String get somethingWentWrong => 'Algo salió mal.';
@@ -104,7 +104,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noComputersBody =>
-      'Ejecuta `openmosh-hook pair` en tu equipo y luego escanea el código.';
+      'Ejecuta `falconer-hook pair` en tu equipo y luego escanea el código.';
 
   @override
   String get scanPairingCode => 'Escanear código de vinculación';
@@ -288,7 +288,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String revokeThisPhoneBody(String alias) {
-    return 'Este es el teléfono que estás usando. OpenMosh perderá el acceso a $alias: el equipo elimina su clave SSH y su clave push. Vuelve a vincularlo para recuperar el acceso.';
+    return 'Este es el teléfono que estás usando. Falconer perderá el acceso a $alias: el equipo elimina su clave SSH y su clave push. Vuelve a vincularlo para recuperar el acceso.';
   }
 
   @override
@@ -480,7 +480,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cameraPermissionDenied =>
-      'OpenMosh no puede usar la cámara. Permítelo en Ajustes de Android > Aplicaciones > OpenMosh > Permisos > Cámara y luego toca Reintentar.';
+      'Falconer no puede usar la cámara. Permítelo en Ajustes de Android > Aplicaciones > Falconer > Permisos > Cámara y luego toca Reintentar.';
 
   @override
   String get cameraUnavailable =>
@@ -527,7 +527,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get pasteLinkLabel => 'O pega el enlace openmosh://pair';
 
   @override
-  String get pasteLinkHelper => 'Muéstralo en el equipo con: openmosh-hook pair --uri';
+  String get pasteLinkHelper => 'Muéstralo en el equipo con: falconer-hook pair --uri';
 
   @override
   String pairedWith(String alias) {
@@ -576,11 +576,11 @@ class AppLocalizationsEs extends AppLocalizations {
       'Las terminales siguen abiertas y se reconectan después de salir de ellas, hasta que te desconectes o cierres la app.';
 
   @override
-  String get lockApp => 'Bloquear OpenMosh';
+  String get lockApp => 'Bloquear Falconer';
 
   @override
   String get lockAppBody =>
-      'Pide tu huella, tu rostro o el bloqueo de pantalla al abrir OpenMosh y después de un minuto en segundo plano. Activarlo o desactivarlo también lo pide.';
+      'Pide tu huella, tu rostro o el bloqueo de pantalla al abrir Falconer y después de un minuto en segundo plano. Activarlo o desactivarlo también lo pide.';
 
   @override
   String terminalFontSize(String size) {
@@ -724,7 +724,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errPairingUnreachable =>
-      'No se pudo conectar con el equipo. Comprueba que Tailscale esté activado y que openmosh-hook pair siga en ejecución.';
+      'No se pudo conectar con el equipo. Comprueba que Tailscale esté activado y que falconer-hook pair siga en ejecución.';
 
   @override
   String get errInvalidPush => 'Se descartó un mensaje push no válido.';
@@ -806,10 +806,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get errHostCommandFailed => 'Falló el comando en el equipo.';
 
   @override
-  String get errHookMissing => 'openmosh-hook no está instalado en este equipo.';
+  String get errHookMissing => 'falconer-hook no está instalado en este equipo.';
 
   @override
-  String get errHookUnexpectedOutput => 'openmosh-hook devolvió una salida inesperada.';
+  String get errHookUnexpectedOutput => 'falconer-hook devolvió una salida inesperada.';
 
   @override
   String get errUploadFailed => 'Falló la subida.';
@@ -1023,7 +1023,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get importAction => 'Importar';
 
   @override
-  String get lockedTitle => 'OpenMosh está bloqueado';
+  String get lockedTitle => 'Falconer está bloqueado';
 
   @override
   String get lockedBody => 'Verifica que eres tú para continuar.';
@@ -1032,13 +1032,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get unlock => 'Desbloquear';
 
   @override
-  String get lockPromptUnlock => 'Desbloquear OpenMosh';
+  String get lockPromptUnlock => 'Desbloquear Falconer';
 
   @override
-  String get lockPromptTurnOn => 'Activar el bloqueo de OpenMosh';
+  String get lockPromptTurnOn => 'Activar el bloqueo de Falconer';
 
   @override
-  String get lockPromptTurnOff => 'Desactivar el bloqueo de OpenMosh';
+  String get lockPromptTurnOff => 'Desactivar el bloqueo de Falconer';
 
   @override
   String get pairedWithoutPush =>
@@ -1129,7 +1129,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get usageLoading => 'Leyendo el uso…';
 
   @override
-  String get errHookOutdatedUsage => 'Actualiza openmosh-hook en este equipo para ver el uso.';
+  String get errHookOutdatedUsage => 'Actualiza falconer-hook en este equipo para ver el uso.';
 
   @override
   String get errUsagePeriod => 'El periodo debe ser de 1 a 31 días.';
@@ -1209,7 +1209,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get pairConfirmOnComputer =>
-      'Confirma en tu computadora: escribe y en la terminal donde corre openmosh-hook pair.';
+      'Confirma en tu computadora: escribe y en la terminal donde corre falconer-hook pair.';
 
   @override
   String get enterKey => 'Enter';
@@ -1500,7 +1500,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errHerdrHookOutdated =>
-      'Actualiza openmosh-hook en esta computadora para usar el navegador de Herdr.';
+      'Actualiza falconer-hook en esta computadora para usar el navegador de Herdr.';
 
   @override
   String get errMessageTooLong4000 => 'El mensaje tiene más de 4000 caracteres.';
@@ -1544,7 +1544,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get webPushExplain =>
-      'Instala la web app OpenMosh Notifications, activa las notificaciones allí y envía el código aquí.';
+      'Instala la web app Falconer Notifications, activa las notificaciones allí y envía el código aquí.';
 
   @override
   String get webPushStatusOff => 'Sin configurar';
@@ -1598,7 +1598,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String webPushHostTooOld(String host) {
-    return '$host: actualiza openmosh-hook (versión demasiado antigua)';
+    return '$host: actualiza falconer-hook (versión demasiado antigua)';
   }
 
   @override
@@ -1609,5 +1609,5 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errWebPushVersion =>
-      'Este código de notificaciones web es de otra versión de OpenMosh. Actualiza la app.';
+      'Este código de notificaciones web es de otra versión de Falconer. Actualiza la app.';
 }

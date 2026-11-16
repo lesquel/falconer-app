@@ -4,9 +4,9 @@ import '../../../hosts/domain/usecases/host_connections.dart';
 import '../entities/agent_usage.dart';
 
 /// Message of the failure raised when the host's hook predates `usage`.
-const hookOutdatedForUsage = 'Update openmosh-hook on this computer to see usage.';
+const hookOutdatedForUsage = 'Update falconer-hook on this computer to see usage.';
 
-/// Loads token usage per agent through `openmosh-hook usage --json`.
+/// Loads token usage per agent through `falconer-hook usage --json`.
 final class LoadAgentUsage {
   const LoadAgentUsage(this.connections);
   final HostConnections connections;

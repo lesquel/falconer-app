@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/l10n.dart';
-import '../atoms/mole_logo.dart';
+import '../atoms/falcon_logo.dart';
 import '../tokens/mosh_colors.dart';
 
-/// [MoleLogo] colored from the current theme: goggles follow the accent.
-class ThemedMole extends StatelessWidget {
-  const ThemedMole({super.key, this.size = 160, this.semanticLabel = defaultLabel});
+/// [FalconLogo] colored from the current theme: the iris follows the accent.
+class ThemedFalcon extends StatelessWidget {
+  const ThemedFalcon({super.key, this.size = 160, this.semanticLabel = defaultLabel});
 
-  /// Replaced by the localized mascot label; pass `null` to hide it.
-  static const defaultLabel = 'OpenMosh mole';
+  /// Replaced by the localized logo label; pass `null` to hide it.
+  static const defaultLabel = 'Falconer logo';
 
   final double size;
   final String? semanticLabel;
@@ -17,21 +17,18 @@ class ThemedMole extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = MoshColors.of(context);
-    return MoleLogo(
+    return FalconLogo(
       size: size,
-      // A black accent would vanish into the goggle frames.
-      goggles: c.accent.computeLuminance() < 0.05 ? const Color(0xFF6B93FF) : c.accent,
-      ground: c.surfaceHigh,
-      bubble: c.isDark ? c.inverse : c.surfaceHigh,
-      bubbleInk: c.isDark ? const Color(0xFF1F4FD8) : c.accent,
-      semanticLabel: semanticLabel == defaultLabel ? context.l10n.moleSemanticLabel : semanticLabel,
+      // A near-black accent would vanish into the pupil.
+      iris: c.accent.computeLuminance() < 0.05 ? FalconLogo.defaultIris : c.accent,
+      semanticLabel: semanticLabel == defaultLabel ? context.l10n.logoSemanticLabel : semanticLabel,
     );
   }
 }
 
-/// Mole plus a message: used for loading and empty states.
-class MoleMessage extends StatelessWidget {
-  const MoleMessage({
+/// Falcon plus a message: used for loading and empty states.
+class FalconMessage extends StatelessWidget {
+  const FalconMessage({
     super.key,
     required this.title,
     this.message,
@@ -45,7 +42,7 @@ class MoleMessage extends StatelessWidget {
   final List<Widget> actions;
   final double size;
 
-  /// Shows a progress bar under the mole (loading state).
+  /// Shows a progress bar under the falcon (loading state).
   final bool busy;
 
   @override
@@ -58,7 +55,7 @@ class MoleMessage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ThemedMole(size: size, semanticLabel: null),
+            ThemedFalcon(size: size, semanticLabel: null),
             const SizedBox(height: 16),
             Text(
               title,

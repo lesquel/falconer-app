@@ -100,7 +100,7 @@ class LocalEventNotifier implements EventNotifier {
   }
 
   /// Always VISIBILITY_PRIVATE: a secure lock screen shows only that
-  /// OpenMosh has a notification, never the host alias or agent. The plugin
+  /// Falconer has a notification, never the host alias or agent. The plugin
   /// cannot attach a custom public version, so Android shows its own
   /// redacted one ("Contents hidden").
   static AndroidNotificationDetails androidDetails(List<AndroidNotificationAction> actions) =>

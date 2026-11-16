@@ -110,7 +110,7 @@ void main() {
 
   test('an older hook is marked too old without crashing; retried later', () async {
     await sync.activate(reg(1));
-    failWith = {'a': const HookFailure('protocol', 'openmosh-hook returned unexpected output.')};
+    failWith = {'a': const HookFailure('protocol', 'falconer-hook returned unexpected output.')};
     final out = await sync.syncAll(run);
     expect(out['a'], WebPushHostResult.hookTooOld);
     expect(out['b'], WebPushHostResult.delivered);

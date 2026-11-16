@@ -29,7 +29,7 @@ class PairSocket {
       socket = await Socket.connect(ip, port, timeout: left());
     } on SocketException {
       throw const PairingFailure(
-        'Could not reach the host. Check that Tailscale is on and openmosh-hook pair is still running.',
+        'Could not reach the host. Check that Tailscale is on and falconer-hook pair is still running.',
       );
     }
     try {

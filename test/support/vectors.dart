@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-/// Loads a cross-implementation vector file committed by openmosh-hook
+/// Loads a cross-implementation vector file committed by falconer-hook
 /// (`hook/tests/vectors/`), copied into `test/fixtures/vectors/`.
 Map<String, Object?>? loadVector(String name) {
   final f = File('test/fixtures/vectors/$name');

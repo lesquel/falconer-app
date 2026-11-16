@@ -8,7 +8,7 @@ import '../../../../app/di.dart';
 import '../../../../l10n/device_name.dart';
 import '../../../../l10n/l10n.dart';
 import '../../../../shared/hook/domain/hook_command.dart';
-import '../../../../shared/ui/molecules/themed_mole.dart';
+import '../../../../shared/ui/molecules/themed_falcon.dart';
 import '../../../../shared/ui/organisms/failure_panel.dart';
 import '../../../settings/domain/entities/app_settings.dart';
 import '../../../settings/domain/entities/notification_hours.dart';
@@ -119,7 +119,7 @@ class HostDetailContainer extends ConsumerWidget {
     final settings = ref.watch(settingsProvider).value ?? const AppSettings();
     final devicesCtrl = ref.read(pairedDevicesControllerProvider(hostId).notifier);
     if (host == null) {
-      return Scaffold(body: MoleMessage(title: context.l10n.openingHost, busy: true));
+      return Scaffold(body: FalconMessage(title: context.l10n.openingHost, busy: true));
     }
     return Scaffold(
       body: HostDetailView(

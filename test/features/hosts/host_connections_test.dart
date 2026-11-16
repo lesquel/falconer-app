@@ -26,7 +26,7 @@ void main() {
     vault = FakeVault();
     conn = FakeConnection(
       (_, stdin) => utf8.decode(stdin!).startsWith('command -v')
-          ? text('/home/me/.local/bin/openmosh-hook\n')
+          ? text('/home/me/.local/bin/falconer-hook\n')
           : ok(const []),
     );
     connector = FakeConnector(() => conn);
@@ -100,8 +100,8 @@ void main() {
     await pool.runHook('h1', HookCommand.agentsList());
     expect(conn.scripts.where((c) => c.startsWith('command -v')).length, 1);
     expect(conn.commands.toSet(), {'sh -s'});
-    expect((await repo.byId('h1'))!.hookPath, '/home/me/.local/bin/openmosh-hook');
-    expect(conn.scripts.last, "'/home/me/.local/bin/openmosh-hook' 'agents' 'list' '--json'\n");
+    expect((await repo.byId('h1'))!.hookPath, '/home/me/.local/bin/falconer-hook');
+    expect(conn.scripts.last, "'/home/me/.local/bin/falconer-hook' 'agents' 'list' '--json'\n");
   });
 
   test('a host without the hook binary reports hook_missing', () async {

@@ -29,6 +29,10 @@ abstract class AgentDetector {
   /// Tried in order when no menu is showing; the first match wins.
   List<InputScanner> get inputScanners;
 
+  /// The input line disappears while a menu waits for an answer, so an
+  /// input line under a menu means the menu was answered.
+  bool get menuHidesInput => false;
+
   /// Whether [line] starts a paragraph of a known speaker (S12). [current] is
   /// the role of the paragraph being built, null when [line] starts one.
   /// Null keeps the line in the current paragraph or, when it starts one,

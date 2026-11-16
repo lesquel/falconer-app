@@ -30,8 +30,8 @@ void main() {
 
   test('shJoin quotes every argument including the program', () {
     expect(
-      shJoin(['/home/u/.local/bin/openmosh-hook', 'respond', "e'1", '--text', r'$HOME']),
-      "'/home/u/.local/bin/openmosh-hook' 'respond' 'e'\\''1' '--text' '\$HOME'",
+      shJoin(['/home/u/.local/bin/falconer-hook', 'respond', "e'1", '--text', r'$HOME']),
+      "'/home/u/.local/bin/falconer-hook' 'respond' 'e'\\''1' '--text' '\$HOME'",
     );
   });
 

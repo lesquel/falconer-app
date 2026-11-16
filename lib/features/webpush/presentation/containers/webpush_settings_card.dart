@@ -10,7 +10,7 @@ import '../controllers/webpush_controller.dart';
 import '../containers/webpush_container.dart';
 import '../views/webpush_view.dart';
 
-/// Settings entry for notifications through the OpenMosh web app (the way
+/// Settings entry for notifications through the Falconer web app (the way
 /// to get notifications on iOS and macOS, and an alternative on Android).
 class WebPushSettingsCard extends ConsumerStatefulWidget {
   const WebPushSettingsCard({super.key});

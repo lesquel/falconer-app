@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The full logo tile (assets/branding/falconer.svg) for the launch screen before Android 12. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="100dp"
+    android:height="100dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <clip-path android:pathData="M22,0 H78 A22,22 0 0 1 100,22 V78 A22,22 0 0 1 78,100 H22 A22,22 0 0 1 0,78 V22 A22,22 0 0 1 22,0 Z" />
+    <path android:pathData="M0,0 H100 V100 H0 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="radial"
+                android:centerX="60"
+                android:centerY="40"
+                android:gradientRadius="65"
+                android:startColor="#1B2645"
+                android:endColor="#0A0E1A" />
+        </aapt:attr>
+    </path>
+    <path
+        android:fillColor="#F4F1EA"
+        android:pathData="M30,100 C28,82 26,66 30,54 C33,36 46,24 60,24 C70,24 77,29 80,36 L86,40 C90,43 91,49 89,54 C88,58 85,61 81,62 C82,58 82,55 80,53 C77,55 73,56 70,56 C68,66 68,80 72,100 Z" />
+    <path
+        android:fillColor="#2B3348"
+        android:pathData="M30,100 C28,82 26,66 30,54 C33,36 46,24 60,24 C70,24 77,29 80,36 L76,40 C72,38 68,38 64,40 C58,44 56,52 56,62 C56,68 52,70 49,66 C47,62 46,56 44,52 C40,58 38,70 40,100 Z" />
+    <path
+        android:strokeColor="#3E4A6A"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:pathData="M35,76 C37,68 39,62 42,57 M32,92 C33,85 34,79 36,73 M44,32 C50,28 56,27 62,28" />
+    <path
+        android:fillColor="#2B3348"
+        android:pathData="M58.6,43 A7.4,7.4 0 1 0 73.4,43 A7.4,7.4 0 1 0 58.6,43 Z" />
+    <path
+        android:fillColor="#F2C14E"
+        android:pathData="M75,35.5 C79.5,36.5 83,39 85.5,42.5 L80,47.5 C79,43.5 77,41 73.5,39.5 Z" />
+    <path
+        android:fillColor="#46526F"
+        android:pathData="M85.5,42.5 C89.5,45 91,49.5 89,54.5 C88,58 85,61 81,62 C82,58 82,55 80,52.5 L80,47.5 Z" />
+    <path
+        android:fillColor="#F2C14E"
+        android:pathData="M60.4,43 A5.6,5.6 0 1 0 71.6,43 A5.6,5.6 0 1 0 60.4,43 Z" />
+    <path
+        android:fillColor="#6B93FF"
+        android:pathData="M61.8,43 A4.2,4.2 0 1 0 70.2,43 A4.2,4.2 0 1 0 61.8,43 Z" />
+    <path
+        android:fillColor="#0A0E1A"
+        android:pathData="M64.3,43.4 A2.3,2.3 0 1 0 68.9,43.4 A2.3,2.3 0 1 0 64.3,43.4 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M63.6,41.4 A1,1 0 1 0 65.6,41.4 A1,1 0 1 0 63.6,41.4 Z" />
+</vector>

@@ -218,7 +218,7 @@ class _AgentViewContainerState extends ConsumerState<AgentViewContainer>
           onRetry: _ctrl.retry,
           onKeys: (keys) async => _show(await _ctrl.sendKeys(keys)),
           onChoice: (keys) async {
-            final failure = await _ctrl.sendKeys(keys);
+            final failure = await _ctrl.choose(keys);
             _show(failure);
             return failure;
           },

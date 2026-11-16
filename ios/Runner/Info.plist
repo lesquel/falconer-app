@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Openmosh</string>
+	<string>Falconer</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>openmosh</string>
+	<string>Falconer</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -40,13 +40,13 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>OpenMosh uses the camera to scan pairing QR codes.</string>
+	<string>Falconer uses the camera to scan pairing QR codes.</string>
 	<key>NSFaceIDUsageDescription</key>
-	<string>OpenMosh uses Face ID to unlock the app.</string>
+	<string>Falconer uses Face ID to unlock the app.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>OpenMosh uses the microphone for on-device voice input.</string>
+	<string>Falconer uses the microphone for on-device voice input.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>OpenMosh lets you attach images from your library.</string>
+	<string>Falconer lets you attach images from your library.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -8,8 +8,8 @@ import '../l10n/l10n.dart';
 import 'di.dart';
 import 'theme.dart';
 
-class OpenMoshApp extends ConsumerWidget {
-  const OpenMoshApp({super.key, required this.router});
+class FalconerApp extends ConsumerWidget {
+  const FalconerApp({super.key, required this.router});
   final GoRouter router;
 
   @override
@@ -19,7 +19,7 @@ class OpenMoshApp extends ConsumerWidget {
     // Until settings load, the gate shows nothing; a failed load locks.
     final lockEnabled = settings.hasValue ? s.appLock : (settings.hasError ? true : null);
     return MaterialApp.router(
-      title: 'OpenMosh',
+      title: 'Falconer',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(Brightness.light, accent: s.accent),
       darkTheme: buildTheme(Brightness.dark, accent: s.accent),

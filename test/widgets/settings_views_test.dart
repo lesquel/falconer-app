@@ -61,7 +61,7 @@ void main() {
     final sw = find.byKey(const Key('app_lock'));
     await t.scrollUntilVisible(sw, 200);
     expect(t.widget<SwitchListTile>(sw).value, isFalse);
-    expect(find.text('Lock OpenMosh'), findsOneWidget);
+    expect(find.text('Lock Falconer'), findsOneWidget);
     await t.tap(sw);
     expect(toggled, isTrue);
     expect(changed, isNull, reason: 'the container saves only after verification');

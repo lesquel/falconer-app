@@ -74,7 +74,7 @@ class UnifiedPushDatasource implements PushEndpointSource {
       await _up.saveDistributor(ds.first);
     }
     final w = _waiting = Completer<String>();
-    await _up.register(instance, const [], 'OpenMosh agent notifications', null);
+    await _up.register(instance, const [], 'Falconer agent notifications', null);
     try {
       return await w.future.timeout(const Duration(seconds: 30));
     } on TimeoutException {

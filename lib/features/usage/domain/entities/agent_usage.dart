@@ -1,4 +1,4 @@
-/// Token usage per agent reported by `openmosh-hook usage --json`.
+/// Token usage per agent reported by `falconer-hook usage --json`.
 ///
 /// Parsing is tolerant: malformed entries are skipped, numbers may arrive as
 /// int or double, and missing token counts are zero.

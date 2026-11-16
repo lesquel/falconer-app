@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/di.dart';
 import '../../../../l10n/l10n.dart';
-import '../../../../shared/ui/molecules/themed_mole.dart';
+import '../../../../shared/ui/molecules/themed_falcon.dart';
 import '../../../../shared/ui/organisms/failure_panel.dart';
 import '../views/inbox_view.dart';
 
@@ -24,7 +24,7 @@ class InboxContainer extends ConsumerWidget {
           hostAlias: alias,
           onOpen: (e) => context.push('/inbox/${e.hostId}/${e.id}'),
         ),
-        loading: () => MoleMessage(title: l.navInbox, busy: true),
+        loading: () => FalconMessage(title: l.navInbox, busy: true),
         error: (e, _) => FailurePanel(failure: e),
       ),
     );

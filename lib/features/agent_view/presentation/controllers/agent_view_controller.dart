@@ -79,7 +79,7 @@ class AgentViewController extends ChangeNotifier {
     if (s.lines.length < requested) historyComplete = true;
     final changed = _history.merge(s.lines, requested: requested);
     if (changed || s.agent != screen?.agent || screen == null) {
-      blocks = parseAgentScreen(s.agent, _history.lines);
+      blocks = _hideAnswered(parseAgentScreen(s.agent, _history.lines));
       parses++;
     }
     screen = s;
@@ -131,6 +131,43 @@ class AgentViewController extends ChangeNotifier {
       ..start()
       ..poke();
   }
+
+  /// The menu answered last. The pane may still show it for a read or two;
+  /// it stays hidden until the screen shows another menu or none.
+  ChoiceBlock? _answered;
+
+  /// Answers the docked menu with an option's [keys]. On success the menu
+  /// is hidden right away; a failure keeps it so it can be sent again.
+  Future<Object?> choose(List<String> keys) async {
+    final menu = blocks.whereType<ChoiceBlock>().lastOrNull;
+    final failure = await sendKeys(keys);
+    if (failure == null && menu != null && !_disposed) {
+      _answered = menu;
+      blocks = _hideAnswered(blocks);
+      notifyListeners();
+    }
+    return failure;
+  }
+
+  List<ScreenBlock> _hideAnswered(List<ScreenBlock> parsed) {
+    final answered = _answered;
+    if (answered == null) return parsed;
+    final menu = parsed.whereType<ChoiceBlock>().lastOrNull;
+    if (menu == null || !_sameMenu(menu, answered)) {
+      _answered = null;
+      return parsed;
+    }
+    return [
+      for (final b in parsed)
+        if (b is! ChoiceBlock) b,
+    ];
+  }
+
+  /// The same question and options, wherever the cursor is.
+  static bool _sameMenu(ChoiceBlock a, ChoiceBlock b) =>
+      a.question == b.question &&
+      a.detail == b.detail &&
+      listEquals([for (final o in a.options) o.label], [for (final o in b.options) o.label]);
 
   /// Presses [keys] in the pane (a menu answer).
   Future<Object?> sendKeys(List<String> keys) => _act(() => HerdrAction.paneKeys(paneId, keys));

@@ -1,4 +1,4 @@
-/// Optional app lock (off by default): when on, OpenMosh asks for user
+/// Optional app lock (off by default): when on, Falconer asks for user
 /// verification on a cold start and after more than [lockAfterBackground]
 /// in the background. Pure Dart; the gate widget feeds it lifecycle events.
 library;
@@ -12,9 +12,9 @@ const lockAfterBackground = Duration(seconds: 60);
 /// the localized texts; the defaults are English.
 final class LockPrompts {
   const LockPrompts({
-    this.unlock = 'Unlock OpenMosh',
-    this.turnOn = 'Turn on the OpenMosh lock',
-    this.turnOff = 'Turn off the OpenMosh lock',
+    this.unlock = 'Unlock Falconer',
+    this.turnOn = 'Turn on the Falconer lock',
+    this.turnOff = 'Turn off the Falconer lock',
   });
 
   final String unlock;
@@ -53,7 +53,7 @@ final class AppLock {
     if (away.isNegative || away > lockAfterBackground) _locked = true;
   }
 
-  /// Verifies the user before the "Lock OpenMosh" setting changes: turning
+  /// Verifies the user before the "Lock Falconer" setting changes: turning
   /// it off must not be possible for someone holding an unlocked phone, and
   /// turning it on first proves a credential exists (else the user would be
   /// locked out on the next start). Returns null when the change may be

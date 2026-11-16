@@ -1,4 +1,4 @@
-/// Herdr/tmux sessions and agents reported by `openmosh-hook`.
+/// Herdr/tmux sessions and agents reported by `falconer-hook`.
 library;
 
 import '../../../../shared/domain/display_text.dart';
@@ -11,7 +11,9 @@ enum AgentState { idle, working, blocked, done, unknown }
 final _name = RegExp(r'^[A-Za-z0-9._:@%+=-]{1,128}$');
 
 const _herdrAttachScript =
-    r'h=$(command -v openmosh-hook || echo "$HOME/.local/bin/openmosh-hook"); '
+    r'h=$(command -v falconer-hook || command -v openmosh-hook || '
+    r'{ for p in "$HOME/.local/bin/falconer-hook" "$HOME/.local/bin/openmosh-hook"; do '
+    r'if [ -x "$p" ]; then echo "$p"; break; fi; done; }); '
     r'if [ -x "$h" ]; then exec "$h" attach herdr --session "$1"; fi; '
     r'exec herdr session attach "$1"';
 
@@ -30,7 +32,7 @@ final class RemoteSession {
 
   /// Shell command typed into the PTY to (re)attach this session.
   ///
-  /// Herdr goes through `openmosh-hook attach herdr`, which mirrors navigation
+  /// Herdr goes through `falconer-hook attach herdr`, which mirrors navigation
   /// so the computer follows the phone; without the hook it runs Herdr directly.
   /// The logic runs in `sh -c` (name passed as `$1`) so it works under any login
   /// shell, including fish.

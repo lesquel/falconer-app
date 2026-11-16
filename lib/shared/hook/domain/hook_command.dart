@@ -1,4 +1,4 @@
-/// Commands of the `openmosh-hook` CLI that the app runs over SSH exec.
+/// Commands of the `falconer-hook` CLI that the app runs over SSH exec.
 /// Arguments are built as argv and only turned into a shell string by
 /// [HookCommand.toShell], which single-quotes every word.
 library;
@@ -38,9 +38,14 @@ final class HookCommand {
 
   final List<String> argv;
 
-  /// Run once at pairing; prints the absolute hook path.
+  /// Run once at pairing; prints the absolute hook path. Prefers
+  /// `falconer-hook` and falls back to `openmosh-hook` on hosts that were
+  /// not upgraded yet.
   static const resolvePathScript =
-      r'command -v openmosh-hook || echo "$HOME/.local/bin/openmosh-hook"';
+      r'command -v falconer-hook || command -v openmosh-hook || '
+      r'{ for p in "$HOME/.local/bin/falconer-hook" "$HOME/.local/bin/openmosh-hook"; do '
+      r'if [ -x "$p" ]; then echo "$p"; exit 0; fi; done; '
+      r'echo "$HOME/.local/bin/falconer-hook"; }';
 
   factory HookCommand.sessionsList() => const HookCommand._(['sessions', 'list', '--json']);
 

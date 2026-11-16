@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openmosh/features/lock/domain/app_lock.dart';
 import 'package:openmosh/features/lock/presentation/app_lock_gate.dart';
 import 'package:openmosh/l10n/l10n.dart';
-import 'package:openmosh/shared/ui/atoms/mole_logo.dart';
+import 'package:openmosh/shared/ui/atoms/falcon_logo.dart';
 
 import '../features/hosts/paired_devices_test.dart' show ScriptedAuth;
 
@@ -36,12 +36,12 @@ void main() {
     expect(auth.reasons, isEmpty);
   });
 
-  testWidgets('lock on: cold start hides content behind the mole until verified', (t) async {
+  testWidgets('lock on: cold start hides content behind the falcon until verified', (t) async {
     await t.pumpWidget(gate(true));
     await t.pump();
     expect(contentVisible(t), isFalse);
-    expect(find.byType(MoleLogo), findsOneWidget);
-    expect(auth.reasons, ['Unlock OpenMosh'], reason: 'prompts once on its own');
+    expect(find.byType(FalconLogo), findsOneWidget);
+    expect(auth.reasons, ['Unlock Falconer'], reason: 'prompts once on its own');
     auth.allow = true;
     await t.tap(find.text('Unlock'));
     await t.pump();
@@ -123,8 +123,8 @@ void main() {
       ),
     );
     await t.pump();
-    expect(find.text('OpenMosh está bloqueado'), findsOneWidget);
+    expect(find.text('Falconer está bloqueado'), findsOneWidget);
     expect(find.text('Desbloquear'), findsOneWidget);
-    expect(auth.reasons, ['Desbloquear OpenMosh']);
+    expect(auth.reasons, ['Desbloquear Falconer']);
   });
 }

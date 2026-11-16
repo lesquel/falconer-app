@@ -107,6 +107,43 @@ void main() {
       );
     });
 
+    test('an answered menu followed by newer output is not docked', () {
+      final blocks = parseFixture('claude', 'answered');
+      expectNoChoice(blocks);
+      expect(allText(blocks), contains('added 120 packages in 4s'));
+      expect(blocks.last, const InputBlock(''));
+    });
+
+    test('an answered menu followed only by a reply and the input box is not docked', () {
+      final r = '─' * 80;
+      final blocks = parseAgentScreen('claude', [
+        ...fixture('claude', 'permission'),
+        '',
+        '⏺ Okay, I will not install them.',
+        '',
+        r,
+        '> ',
+        r,
+      ]);
+      expectNoChoice(blocks);
+      expect(allText(blocks), contains('Okay, I will not install them.'));
+    });
+
+    test('a line-prompt agent keeps its menu above its own prompt', () {
+      expect(parseFixture('kiro', 'permission').last, isA<ChoiceBlock>());
+    });
+
+    test('a pending menu at the bottom stays docked under older output', () {
+      final blocks = parseAgentScreen('claude', [
+        ...fixture('claude', 'answered'),
+        '',
+        ...fixture('claude', 'permission'),
+      ]);
+      expect(blocks.last, isA<ChoiceBlock>());
+      expect(blocks.whereType<ChoiceBlock>(), hasLength(1));
+      expect(allText(blocks), contains('added 120 packages in 4s'));
+    });
+
     test('plain output is only text, without borders or status noise', () {
       expect(parseFixture('claude', 'plain'), const [
         TextBlock('✻ Welcome to Claude Code!'),

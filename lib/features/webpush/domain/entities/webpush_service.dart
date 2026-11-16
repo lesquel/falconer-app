@@ -1,6 +1,6 @@
 /// Browser push services a Web Push registration may point at. The endpoint
 /// is user-supplied (pasted from the PWA), so the host must belong to one of
-/// the services browsers actually use; anything else would make the OpenMosh
+/// the services browsers actually use; anything else would make the Falconer
 /// host POST to an arbitrary https URL.
 library;
 

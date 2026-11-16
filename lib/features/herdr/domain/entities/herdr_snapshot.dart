@@ -1,4 +1,4 @@
-/// Herdr session state as `openmosh-hook herdr snapshot|read` reports it.
+/// Herdr session state as `falconer-hook herdr snapshot|read` reports it.
 /// Host-provided values are validated here: ids must match the hook's
 /// validators (entries with bad ids are dropped) and text is cleaned.
 library;
@@ -12,7 +12,7 @@ enum HerdrStatus { working, blocked, done, idle, unknown }
 HerdrStatus _status(Object? raw) =>
     HerdrStatus.values.where((s) => s.name == raw).firstOrNull ?? HerdrStatus.unknown;
 
-const _protocol = HookFailure('protocol', 'openmosh-hook returned unexpected output.');
+const _protocol = HookFailure('protocol', 'falconer-hook returned unexpected output.');
 
 final class HerdrWorkspace {
   const HerdrWorkspace({required this.id, required this.label, this.focused = false});
