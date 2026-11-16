@@ -408,6 +408,15 @@ void main() {
     expect(find.textContaining('the very beginning'), findsOneWidget);
   });
 
+  testWidgets('a long history builds only the paragraphs on screen, newest first', (t) async {
+    repo.screen = PaneScreen(lines: [for (var i = 0; i < 300; i++) ...['para $i', '']]);
+    await pump(t);
+    expect(find.text('para 299'), findsOneWidget);
+    final built = find.textContaining('para ', skipOffstage: false).evaluate().length;
+    expect(built, greaterThan(0));
+    expect(built, lessThan(300));
+  });
+
   test('the screen is parsed once per change of what was read', () async {
     final same = _SameRevRepository();
     final ctrl = AgentViewController(

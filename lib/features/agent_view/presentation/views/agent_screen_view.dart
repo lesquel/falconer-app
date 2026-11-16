@@ -79,22 +79,21 @@ class AgentScreenView extends StatelessWidget {
       );
     } else {
       // Reversed: the newest output sits above the composer, like the terminal.
-      body = ListView(
+      // Built lazily: a long history makes hundreds of paragraphs, and only
+      // the visible ones are created on each poll.
+      final earlier = onLoadEarlier;
+      body = ListView.builder(
         key: const Key('agent-blocks'),
         reverse: true,
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-        children: [
-          for (final (i, b) in shown.indexed.toList().reversed)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _TextCard(b.text, role: b.role, key: Key('text-${b.role.name}-$i')),
-            ),
-          // Reversed list: the last child sits at the top.
-          if (onLoadEarlier != null)
-            Center(
+        itemCount: shown.length + (earlier != null ? 1 : 0),
+        itemBuilder: (context, index) {
+          // Reversed list: the last item sits at the top.
+          if (index == shown.length) {
+            return Center(
               child: TextButton.icon(
                 key: const Key('agent-load-earlier'),
-                onPressed: loadingEarlier ? null : onLoadEarlier,
+                onPressed: loadingEarlier ? null : earlier,
                 icon: loadingEarlier
                     ? const SizedBox.square(
                         dimension: 16,
@@ -103,8 +102,15 @@ class AgentScreenView extends StatelessWidget {
                     : const Icon(Icons.history),
                 label: Text(l.agentViewLoadEarlier),
               ),
-            ),
-        ],
+            );
+          }
+          final i = shown.length - 1 - index;
+          final b = shown[i];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: _TextCard(b.text, role: b.role, key: Key('text-${b.role.name}-$i')),
+          );
+        },
       );
     }
     return SafeArea(
