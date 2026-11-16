@@ -22,8 +22,8 @@ final class PairCodeFailure extends AppFailure {
   static const _messages = {
     PairCodeError.malformed: 'This is not a valid Falconer pairing code.',
     PairCodeError.unsupportedVersion:
-        'This pairing code is from another Falconer version. Update the app and openmosh-hook.',
-    PairCodeError.expired: 'This pairing code expired. Run `openmosh-hook pair` again.',
+        'This pairing code is from another Falconer version. Update the app and falconer-hook.',
+    PairCodeError.expired: 'This pairing code expired. Run `falconer-hook pair` again.',
     PairCodeError.notTailnet: 'The host address is not a Tailscale address.',
   };
 }

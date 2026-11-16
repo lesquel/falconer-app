@@ -5,7 +5,7 @@ enum WebPushDeliveryStatus {
   /// The host accepted the registration with [WebPushDelivery.hash].
   delivered,
 
-  /// The host's `openmosh-hook` does not know `set-webpush`.
+  /// The host's `falconer-hook` does not know `set-webpush`.
   hookTooOld,
 
   /// "Turn off" could not reach the host yet; `clear-webpush` is owed.

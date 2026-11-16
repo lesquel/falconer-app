@@ -129,7 +129,7 @@ void main() {
 
   testWidgets('an older hook asks to update it', (t) async {
     await pump(t, error: const HookFailure('hook_outdated', hookOutdatedForUsage));
-    expect(find.text('Update openmosh-hook on this computer to see usage.'), findsOneWidget);
+    expect(find.text('Update falconer-hook on this computer to see usage.'), findsOneWidget);
     expect(find.text('Retry'), findsOneWidget);
   });
 
@@ -147,7 +147,7 @@ void main() {
       error: const HookFailure('hook_outdated', hookOutdatedForUsage),
       locale: const Locale('es'),
     );
-    expect(find.text('Actualiza openmosh-hook en este equipo para ver el uso.'), findsOneWidget);
+    expect(find.text('Actualiza falconer-hook en este equipo para ver el uso.'), findsOneWidget);
   });
 
   for (final locale in const [Locale('en'), Locale('es')]) {

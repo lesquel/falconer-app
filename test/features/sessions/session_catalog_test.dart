@@ -28,11 +28,14 @@ void main() {
       {'name': 'x', 'kind': 'screen'},
     ]).sessions('h1');
     expect(list.map((s) => s.name), ['main', 'work']);
+    // Which binary the script picks is covered by hook_path_script_test.
+    expect(list[0].attachCommand, startsWith("'sh' '-c' 'h=\$(command -v falconer-hook || "));
     expect(
       list[0].attachCommand,
-      "'sh' '-c' 'h=\$(command -v openmosh-hook || echo \"\$HOME/.local/bin/openmosh-hook\"); "
-      'if [ -x "\$h" ]; then exec "\$h" attach herdr --session "\$1"; fi; '
-      "exec herdr session attach \"\$1\"' 'sh' 'main'",
+      endsWith(
+        'if [ -x "\$h" ]; then exec "\$h" attach herdr --session "\$1"; fi; '
+        "exec herdr session attach \"\$1\"' 'sh' 'main'",
+      ),
     );
     expect(list[1].attachCommand, "'tmux' 'new-session' '-A' '-s' 'work'");
     expect(list[1].windows, 3);

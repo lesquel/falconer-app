@@ -83,7 +83,7 @@ extension FailureL10n on AppLocalizations {
     'The host rejected pairing. Check that both devices use the same Tailscale account '
         'and that the code is still valid.' =>
       errPairingRejected,
-    'Could not reach the host. Check that Tailscale is on and openmosh-hook pair is still '
+    'Could not reach the host. Check that Tailscale is on and falconer-hook pair is still '
         'running.' =>
       errPairingUnreachable,
     'Discarded an invalid push message.' => errInvalidPush,
@@ -112,9 +112,9 @@ extension FailureL10n on AppLocalizations {
     'Unreadable file size.' => errUnreadableFileSize,
     'Write a message first.' => errWriteMessageFirst,
     'Host command failed.' => errHostCommandFailed,
-    'openmosh-hook is not installed on this host.' => errHookMissing,
-    'openmosh-hook returned unexpected output.' => errHookUnexpectedOutput,
-    'Update openmosh-hook on this computer to see usage.' => errHookOutdatedUsage,
+    'falconer-hook is not installed on this host.' => errHookMissing,
+    'falconer-hook returned unexpected output.' => errHookUnexpectedOutput,
+    'Update falconer-hook on this computer to see usage.' => errHookOutdatedUsage,
     'The period must be 1–31 days.' => errUsagePeriod,
     'Upload failed.' => errUploadFailed,
     'The data is too large.' => errDataTooLarge,
@@ -128,7 +128,7 @@ extension FailureL10n on AppLocalizations {
     'Herdr no longer has that item. The list was refreshed.' => errHerdrInvalid,
     'Herdr is not running on this computer.' => errHerdrNotRunning,
     'Herdr refused the request.' => errHerdrRefused,
-    'Update openmosh-hook on this computer to use the Herdr navigator.' => errHerdrHookOutdated,
+    'Update falconer-hook on this computer to use the Herdr navigator.' => errHerdrHookOutdated,
     'Message is longer than 4000 characters.' => errMessageTooLong4000,
     'This is not a valid web notifications code.' => errWebPushCode,
     'This web notifications code is from another Falconer version. Update the app.' =>

@@ -96,7 +96,7 @@ jobs:
           mkdir dist
           v="${GITHUB_REF_NAME}"
           for abi in arm64-v8a armeabi-v7a x86_64; do
-            cp "build/app/outputs/flutter-apk/app-$abi-release.apk" "dist/openmosh-$v-$abi.apk"
+            cp "build/app/outputs/flutter-apk/app-$abi-release.apk" "dist/falconer-$v-$abi.apk"
           done
           (cd dist && sha256sum *.apk > SHA256SUMS)
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -132,7 +132,7 @@ jobs:
         run: |
           umask 077
           printf '%s\n' "$MINISIGN_SECRET_KEY" > "$RUNNER_TEMP/minisign.key"
-          rsign sign -W -s "$RUNNER_TEMP/minisign.key" -t "openmosh-app $GITHUB_REF_NAME" dist/SHA256SUMS < /dev/null
+          rsign sign -W -s "$RUNNER_TEMP/minisign.key" -t "falconer-app $GITHUB_REF_NAME" dist/SHA256SUMS < /dev/null
           rm -f "$RUNNER_TEMP/minisign.key"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -163,5 +163,5 @@ jobs:
           pre=""
           case "$GITHUB_REF_NAME" in *-*) pre="--prerelease" ;; esac
           gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 \
-            || gh release create "$GITHUB_REF_NAME" $pre --title "OpenMosh $GITHUB_REF_NAME" --notes "Android app. Install the APK for your phone (most phones: arm64-v8a)."
+            || gh release create "$GITHUB_REF_NAME" $pre --title "Falconer $GITHUB_REF_NAME" --notes "Android app. Install the APK for your phone (most phones: arm64-v8a)."
           gh release upload "$GITHUB_REF_NAME" dist/* --clobber

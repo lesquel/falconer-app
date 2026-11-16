@@ -1,28 +1,28 @@
 #!/bin/sh
-# openmosh-app one-line installer: clones (or updates) the repo, then runs
+# falconer-app one-line installer: clones (or updates) the repo, then runs
 # scripts/setup.sh, which checks/installs the toolchain and installs the app.
 #
-#   curl -fsSL https://raw.githubusercontent.com/lesquel/openmosh-app/main/scripts/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/lesquel/falconer-app/main/scripts/install.sh | bash
 #
 # While the repository is private, anonymous downloads fail: install and log
 # in to the GitHub CLI (`gh auth login`) and run
 #
-#   bash <(gh api -H 'Accept: application/vnd.github.raw' repos/lesquel/openmosh-app/contents/scripts/install.sh)
+#   bash <(gh api -H 'Accept: application/vnd.github.raw' repos/lesquel/falconer-app/contents/scripts/install.sh)
 #
 # Options (the rest is passed to scripts/setup.sh: --platforms, --yes, --check,
 # --no-tui, --force):
 #   --branch <name>   branch to install from (default: main)
 #   -h, --help
 #
-# Environment: OPENMOSH_DIR (default ~/openmosh-app), OPENMOSH_NO_GH=1 (never
+# Environment: OPENMOSH_DIR (default ~/falconer-app), OPENMOSH_NO_GH=1 (never
 # use the GitHub CLI), OPENMOSH_REPO_URL (clone from this URL instead; testing).
 #
 # Prints every command before running it and never uses sudo itself.
 set -eu
 
-REPO="lesquel/openmosh-app"
+REPO="lesquel/falconer-app"
 REPO_URL="${OPENMOSH_REPO_URL:-https://github.com/$REPO.git}"
-DIR="${OPENMOSH_DIR:-$HOME/openmosh-app}"
+DIR="${OPENMOSH_DIR:-$HOME/falconer-app}"
 BRANCH="main"
 
 say() { printf '%s\n' "$*"; }
@@ -56,7 +56,7 @@ Linux) OS=linux ;;
 MINGW* | MSYS* | CYGWIN*) OS=windows ;;
 *) die "unsupported OS: $(uname -s)" ;;
 esac
-say "openmosh-app installer ($OS), branch $BRANCH, into $DIR"
+say "falconer-app installer ($OS), branch $BRANCH, into $DIR"
 
 if ! have git; then
 	case "$OS" in

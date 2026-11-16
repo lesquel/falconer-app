@@ -264,7 +264,7 @@ abstract class AppLocalizations {
   /// No description provided for @noComputersBody.
   ///
   /// In en, this message translates to:
-  /// **'Run `openmosh-hook pair` on your computer, then scan the code.'**
+  /// **'Run `falconer-hook pair` on your computer, then scan the code.'**
   String get noComputersBody;
 
   /// No description provided for @scanPairingCode.
@@ -954,7 +954,7 @@ abstract class AppLocalizations {
   /// No description provided for @pasteLinkHelper.
   ///
   /// In en, this message translates to:
-  /// **'Print it on the host with: openmosh-hook pair --uri'**
+  /// **'Print it on the host with: falconer-hook pair --uri'**
   String get pasteLinkHelper;
 
   /// No description provided for @pairedWith.
@@ -1302,7 +1302,7 @@ abstract class AppLocalizations {
   /// No description provided for @errPairingUnreachable.
   ///
   /// In en, this message translates to:
-  /// **'Could not reach the host. Check that Tailscale is on and openmosh-hook pair is still running.'**
+  /// **'Could not reach the host. Check that Tailscale is on and falconer-hook pair is still running.'**
   String get errPairingUnreachable;
 
   /// No description provided for @errInvalidPush.
@@ -1464,13 +1464,13 @@ abstract class AppLocalizations {
   /// No description provided for @errHookMissing.
   ///
   /// In en, this message translates to:
-  /// **'openmosh-hook is not installed on this host.'**
+  /// **'falconer-hook is not installed on this host.'**
   String get errHookMissing;
 
   /// No description provided for @errHookUnexpectedOutput.
   ///
   /// In en, this message translates to:
-  /// **'openmosh-hook returned unexpected output.'**
+  /// **'falconer-hook returned unexpected output.'**
   String get errHookUnexpectedOutput;
 
   /// No description provided for @errUploadFailed.
@@ -2022,7 +2022,7 @@ abstract class AppLocalizations {
   /// No description provided for @errHookOutdatedUsage.
   ///
   /// In en, this message translates to:
-  /// **'Update openmosh-hook on this computer to see usage.'**
+  /// **'Update falconer-hook on this computer to see usage.'**
   String get errHookOutdatedUsage;
 
   /// No description provided for @errUsagePeriod.
@@ -2091,7 +2091,7 @@ abstract class AppLocalizations {
   /// **'Theme'**
   String get appTheme;
 
-  /// Primary host action: attach the Herdr session through openmosh-hook (mirroring).
+  /// Primary host action: attach the Herdr session through falconer-hook (mirroring).
   ///
   /// In en, this message translates to:
   /// **'Open Herdr'**
@@ -2166,7 +2166,7 @@ abstract class AppLocalizations {
   /// Shown while pairing waits for the host user's y/N confirmation.
   ///
   /// In en, this message translates to:
-  /// **'Confirm on your computer: type y in the terminal where openmosh-hook pair is running.'**
+  /// **'Confirm on your computer: type y in the terminal where falconer-hook pair is running.'**
   String get pairConfirmOnComputer;
 
   /// Accessibility label of the Enter key in the arrow cross.
@@ -2688,7 +2688,7 @@ abstract class AppLocalizations {
   /// No description provided for @errHerdrHookOutdated.
   ///
   /// In en, this message translates to:
-  /// **'Update openmosh-hook on this computer to use the Herdr navigator.'**
+  /// **'Update falconer-hook on this computer to use the Herdr navigator.'**
   String get errHerdrHookOutdated;
 
   /// No description provided for @errMessageTooLong4000.
@@ -2832,7 +2832,7 @@ abstract class AppLocalizations {
   /// No description provided for @webPushHostTooOld.
   ///
   /// In en, this message translates to:
-  /// **'{host}: update openmosh-hook (hook too old)'**
+  /// **'{host}: update falconer-hook (hook too old)'**
   String webPushHostTooOld(String host);
 
   /// No description provided for @webPushDone.

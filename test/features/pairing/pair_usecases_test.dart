@@ -129,7 +129,7 @@ void main() {
       testHost(
         deviceId: 'd1',
         hpk: b64uEncode(List.filled(32, 1)),
-        hookPath: '/h/openmosh-hook',
+        hookPath: '/h/falconer-hook',
       ).copyWith(endpointSent: ''),
     );
     final conn = FakeConnection((cmd, _) => ok({'id': 'd1'}));
@@ -153,7 +153,7 @@ void main() {
   });
 
   test('SSH pairing reply alias is cleaned; an oversized one is refused', () async {
-    await hosts.save(testHost(hookPath: '/h/openmosh-hook'));
+    await hosts.save(testHost(hookPath: '/h/falconer-hook'));
     var alias = '\u202Ebox\u200B';
     final conn = FakeConnection(
       (cmd, _) => ok({'device_id': 'd9', 'alias': alias, 'hpk': b64uEncode(List.filled(32, 1))}),
@@ -174,7 +174,7 @@ void main() {
   });
 
   test('SSH pairing refuses a device id that is not b64u', () async {
-    await hosts.save(testHost(hookPath: '/h/openmosh-hook'));
+    await hosts.save(testHost(hookPath: '/h/falconer-hook'));
     final conn = FakeConnection(
       (cmd, _) => ok({'device_id': '../d', 'alias': 'box', 'hpk': b64uEncode(List.filled(32, 1))}),
     );
@@ -192,7 +192,7 @@ void main() {
   });
 
   test('SSH pairing sends name, push key and endpoint on stdin and stores the reply', () async {
-    await hosts.save(testHost(hookPath: '/h/openmosh-hook'));
+    await hosts.save(testHost(hookPath: '/h/falconer-hook'));
     final conn = FakeConnection(
       (cmd, _) => ok({'device_id': 'd9', 'alias': 'box', 'hpk': b64uEncode(List.filled(32, 1))}),
     );
@@ -210,7 +210,7 @@ void main() {
     expect(conn.commands.single, 'sh -s');
     final script = conn.scripts.single;
     expect(script, startsWith("printf '%s' '"));
-    expect(script, endsWith("' | '/h/openmosh-hook' 'pair-ssh' '--json'\n"));
+    expect(script, endsWith("' | '/h/falconer-hook' 'pair-ssh' '--json'\n"));
     final json = script.substring("printf '%s' '".length, script.indexOf("' | '"));
     expect(jsonDecode(json), {
       'name': 'Phone',

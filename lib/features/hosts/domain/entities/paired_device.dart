@@ -1,4 +1,4 @@
-/// One device paired with a host, as `openmosh-hook devices list` shows it.
+/// One device paired with a host, as `falconer-hook devices list` shows it.
 /// The push endpoint URL is not kept: the app only needs its stale flag.
 library;
 

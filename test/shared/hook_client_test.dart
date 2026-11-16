@@ -7,7 +7,7 @@ import 'package:openmosh/shared/hook/domain/hook_command.dart';
 import '../support/fakes.dart';
 
 void main() {
-  const hook = '/home/me/.local/bin/openmosh-hook';
+  const hook = '/home/me/.local/bin/falconer-hook';
   const client = HookClient();
 
   test('the login shell only sees `sh -s`; the quoted argv goes on stdin', () async {
@@ -45,8 +45,8 @@ void main() {
   });
 
   test('hook path resolution also runs through `sh -s`', () async {
-    final conn = FakeConnection((_, _) => text('/usr/bin/openmosh-hook\n'));
-    expect(await client.resolvePath(conn), '/usr/bin/openmosh-hook');
+    final conn = FakeConnection((_, _) => text('/usr/bin/falconer-hook\n'));
+    expect(await client.resolvePath(conn), '/usr/bin/falconer-hook');
     expect(conn.commands.single, 'sh -s');
     expect(conn.scripts.single, '${HookCommand.resolvePathScript}\n');
   });

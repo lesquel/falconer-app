@@ -37,7 +37,7 @@ void main() {
     expect(p.token, List<int>.filled(16, 9));
   });
 
-  test('code from openmosh-hook fits a small QR', () {
+  test('code from falconer-hook fits a small QR', () {
     final longest = link({
       ...valid(),
       'i': '100.100.100.100',

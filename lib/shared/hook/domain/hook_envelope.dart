@@ -11,10 +11,10 @@ Object? parseHookEnvelope(List<int> stdout) {
   try {
     decoded = jsonDecode(utf8.decode(stdout, allowMalformed: true));
   } on FormatException {
-    throw const HookFailure('protocol', 'openmosh-hook returned unexpected output.');
+    throw const HookFailure('protocol', 'falconer-hook returned unexpected output.');
   }
   if (decoded is! Map<String, Object?>) {
-    throw const HookFailure('protocol', 'openmosh-hook returned unexpected output.');
+    throw const HookFailure('protocol', 'falconer-hook returned unexpected output.');
   }
   if (decoded['ok'] == true) return decoded['data'];
   final err = decoded['error'];
@@ -23,5 +23,5 @@ Object? parseHookEnvelope(List<int> stdout) {
     final msg = err['message'] is String ? err['message']! as String : 'Host command failed.';
     throw HookFailure(code, msg.length > 200 ? msg.substring(0, 200) : msg);
   }
-  throw const HookFailure('protocol', 'openmosh-hook returned unexpected output.');
+  throw const HookFailure('protocol', 'falconer-hook returned unexpected output.');
 }

@@ -2,7 +2,7 @@ import '../entities/herdr_action.dart';
 import '../entities/herdr_snapshot.dart';
 
 /// Herdr navigator port: structured state and allowlisted actions of a
-/// host's Herdr session, through `openmosh-hook herdr …`.
+/// host's Herdr session, through `falconer-hook herdr …`.
 abstract interface class HerdrRepository {
   /// Whether the host's hook speaks the Herdr navigator protocol (`herdr` ≥ 1).
   Future<bool> supportsHerdr(String hostId);

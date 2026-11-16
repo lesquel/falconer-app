@@ -104,7 +104,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noComputersBody =>
-      'Ejecuta `openmosh-hook pair` en tu equipo y luego escanea el código.';
+      'Ejecuta `falconer-hook pair` en tu equipo y luego escanea el código.';
 
   @override
   String get scanPairingCode => 'Escanear código de vinculación';
@@ -527,7 +527,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get pasteLinkLabel => 'O pega el enlace openmosh://pair';
 
   @override
-  String get pasteLinkHelper => 'Muéstralo en el equipo con: openmosh-hook pair --uri';
+  String get pasteLinkHelper => 'Muéstralo en el equipo con: falconer-hook pair --uri';
 
   @override
   String pairedWith(String alias) {
@@ -724,7 +724,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errPairingUnreachable =>
-      'No se pudo conectar con el equipo. Comprueba que Tailscale esté activado y que openmosh-hook pair siga en ejecución.';
+      'No se pudo conectar con el equipo. Comprueba que Tailscale esté activado y que falconer-hook pair siga en ejecución.';
 
   @override
   String get errInvalidPush => 'Se descartó un mensaje push no válido.';
@@ -806,10 +806,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get errHostCommandFailed => 'Falló el comando en el equipo.';
 
   @override
-  String get errHookMissing => 'openmosh-hook no está instalado en este equipo.';
+  String get errHookMissing => 'falconer-hook no está instalado en este equipo.';
 
   @override
-  String get errHookUnexpectedOutput => 'openmosh-hook devolvió una salida inesperada.';
+  String get errHookUnexpectedOutput => 'falconer-hook devolvió una salida inesperada.';
 
   @override
   String get errUploadFailed => 'Falló la subida.';
@@ -1129,7 +1129,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get usageLoading => 'Leyendo el uso…';
 
   @override
-  String get errHookOutdatedUsage => 'Actualiza openmosh-hook en este equipo para ver el uso.';
+  String get errHookOutdatedUsage => 'Actualiza falconer-hook en este equipo para ver el uso.';
 
   @override
   String get errUsagePeriod => 'El periodo debe ser de 1 a 31 días.';
@@ -1209,7 +1209,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get pairConfirmOnComputer =>
-      'Confirma en tu computadora: escribe y en la terminal donde corre openmosh-hook pair.';
+      'Confirma en tu computadora: escribe y en la terminal donde corre falconer-hook pair.';
 
   @override
   String get enterKey => 'Enter';
@@ -1500,7 +1500,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errHerdrHookOutdated =>
-      'Actualiza openmosh-hook en esta computadora para usar el navegador de Herdr.';
+      'Actualiza falconer-hook en esta computadora para usar el navegador de Herdr.';
 
   @override
   String get errMessageTooLong4000 => 'El mensaje tiene más de 4000 caracteres.';
@@ -1598,7 +1598,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String webPushHostTooOld(String host) {
-    return '$host: actualiza openmosh-hook (versión demasiado antigua)';
+    return '$host: actualiza falconer-hook (versión demasiado antigua)';
   }
 
   @override

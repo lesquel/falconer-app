@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Cross-platform setup for openmosh-app (macOS, Linux, WSL; Git Bash is detected
+# Cross-platform setup for falconer-app (macOS, Linux, WSL; Git Bash is detected
 # and redirected to WSL2). Checks every dependency for the chosen build targets,
 # fixes what is missing after a single confirmation, then builds and installs
 # the app on a connected device.
@@ -467,7 +467,7 @@ fix_engine()   {
 fix_path()     {
   mkdir -p "$(dirname "$RC_FILE")"
   {
-    printf '\n# openmosh-app toolchain\n'
+    printf '\n# falconer-app toolchain\n'
     printf 'export PATH="%s$HOME/.cargo/bin:%s/bin:$PATH"\n' "${RUSTUP_BIN:+$RUSTUP_BIN:}" "$FLUTTER_HOME"
     if [ "$WANT_ANDROID" = 1 ]; then
       printf 'export ANDROID_HOME="%s"\nexport ANDROID_SDK_ROOT="$ANDROID_HOME"\n' "$ANDROID_HOME"
@@ -609,9 +609,9 @@ build_steps() {
 # --- Flow ----------------------------------------------------------------------------------------------------------
 if [ "$USE_GUM" = 1 ]; then
   gum style --border double --border-foreground 212 --padding "0 3" --margin "1 0" --bold \
-    "openmosh-app setup" "$(gum style --faint "$OS_LABEL")"
+    "falconer-app setup" "$(gum style --faint "$OS_LABEL")"
 else
-  printf '%sopenmosh-app%s %s· setup · %s%s\n' "$B" "$X" "$D" "$OS_LABEL" "$X"
+  printf '%sfalconer-app%s %s· setup · %s%s\n' "$B" "$X" "$D" "$OS_LABEL" "$X"
 fi
 
 pick_targets

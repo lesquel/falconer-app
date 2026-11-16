@@ -77,7 +77,7 @@
     "description": "Label of the presented host key fingerprint."
   },
   "noComputersTitle": "No computers yet",
-  "noComputersBody": "Run `openmosh-hook pair` on your computer, then scan the code.",
+  "noComputersBody": "Run `falconer-hook pair` on your computer, then scan the code.",
   "scanPairingCode": "Scan pairing code",
   "addHostManually": "Add host manually",
   "allQuiet": "All quiet.",
@@ -399,7 +399,7 @@
   "pairing": "Pairing…",
   "pair": "Pair",
   "pasteLinkLabel": "Or paste the openmosh://pair link",
-  "pasteLinkHelper": "Print it on the host with: openmosh-hook pair --uri",
+  "pasteLinkHelper": "Print it on the host with: falconer-hook pair --uri",
   "pairedWith": "Paired with {alias}",
   "@pairedWith": {
     "placeholders": {
@@ -507,7 +507,7 @@
   "errNeedsScreenLock": "Set a screen lock (PIN, pattern, password or biometrics) to store SSH keys.",
   "errKeyInvalidated": "The screen lock or biometrics changed, so this key can no longer be unlocked. Pair the host again.",
   "errPairingRejected": "The host rejected pairing. Check that both devices use the same Tailscale account and that the code is still valid.",
-  "errPairingUnreachable": "Could not reach the host. Check that Tailscale is on and openmosh-hook pair is still running.",
+  "errPairingUnreachable": "Could not reach the host. Check that Tailscale is on and falconer-hook pair is still running.",
   "errInvalidPush": "Discarded an invalid push message.",
   "errEnterAddress": "Enter a hostname or IP address.",
   "errEnterUser": "Enter a valid user name.",
@@ -534,8 +534,8 @@
   "errUnreadableFileSize": "Unreadable file size.",
   "errWriteMessageFirst": "Write a message first.",
   "errHostCommandFailed": "Host command failed.",
-  "errHookMissing": "openmosh-hook is not installed on this host.",
-  "errHookUnexpectedOutput": "openmosh-hook returned unexpected output.",
+  "errHookMissing": "falconer-hook is not installed on this host.",
+  "errHookUnexpectedOutput": "falconer-hook returned unexpected output.",
   "errUploadFailed": "Upload failed.",
   "errDataTooLarge": "The data is too large.",
   "errKeyImportFailed": "That is not an ssh-ed25519 private key, or the passphrase is wrong.",
@@ -873,7 +873,7 @@
   "usageNotRecordedHint": "These agents leave no local usage logs to read.",
   "usageEmpty": "No agent usage recorded in this period.",
   "usageLoading": "Reading usage…",
-  "errHookOutdatedUsage": "Update openmosh-hook on this computer to see usage.",
+  "errHookOutdatedUsage": "Update falconer-hook on this computer to see usage.",
   "errUsagePeriod": "The period must be 1–31 days.",
   "notifyHours": "Notification hours",
   "@notifyHours": {
@@ -929,7 +929,7 @@
   "openHerdr": "Open Herdr",
   "openHerdrHint": "Opens the Herdr session with mirroring: the computer follows the tab and workspace you pick here.",
   "@openHerdr": {
-    "description": "Primary host action: attach the Herdr session through openmosh-hook (mirroring)."
+    "description": "Primary host action: attach the Herdr session through falconer-hook (mirroring)."
   },
   "@openHerdrHint": {
     "description": "Tooltip of the Open Herdr action."
@@ -974,7 +974,7 @@
   "@chooseKeyFile": {
     "description": "Import key dialog: pick the private key file with the system file picker."
   },
-  "pairConfirmOnComputer": "Confirm on your computer: type y in the terminal where openmosh-hook pair is running.",
+  "pairConfirmOnComputer": "Confirm on your computer: type y in the terminal where falconer-hook pair is running.",
   "@pairConfirmOnComputer": {
     "description": "Shown while pairing waits for the host user's y/N confirmation."
   },
@@ -1156,7 +1156,7 @@
   "errHerdrInvalid": "Herdr no longer has that item. The list was refreshed.",
   "errHerdrNotRunning": "Herdr is not running on this computer.",
   "errHerdrRefused": "Herdr refused the request.",
-  "errHerdrHookOutdated": "Update openmosh-hook on this computer to use the Herdr navigator.",
+  "errHerdrHookOutdated": "Update falconer-hook on this computer to use the Herdr navigator.",
   "errMessageTooLong4000": "Message is longer than 4000 characters.",
   "herdrViewAsAgents": "View as agents",
   "@herdrViewAsAgents": {
@@ -1221,7 +1221,7 @@
       }
     }
   },
-  "webPushHostTooOld": "{host}: update openmosh-hook (hook too old)",
+  "webPushHostTooOld": "{host}: update falconer-hook (hook too old)",
   "@webPushHostTooOld": {
     "placeholders": {
       "host": {

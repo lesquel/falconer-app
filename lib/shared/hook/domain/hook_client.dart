@@ -1,4 +1,4 @@
-/// Runs `openmosh-hook` commands over an exec channel and decodes the
+/// Runs `falconer-hook` commands over an exec channel and decodes the
 /// JSON envelope. The exec request is always `sh -s` and the POSIX-quoted
 /// script is written to stdin, so the host's login shell never parses it.
 library;
@@ -22,7 +22,7 @@ final class HookClient {
     final script = cmd.toScript(hookPath, stdin: stdin);
     final out = await conn.exec(HookCommand.execCommand, stdin: utf8.encode(script));
     if (out.stdout.isEmpty && out.exitCode == 127) {
-      throw const HookFailure('hook_missing', 'openmosh-hook is not installed on this host.');
+      throw const HookFailure('hook_missing', 'falconer-hook is not installed on this host.');
     }
     if (!cmd.argv.contains('--json')) {
       if (out.exitCode != 0) {
@@ -41,7 +41,7 @@ final class HookClient {
     );
     final path = utf8.decode(out.stdout, allowMalformed: true).trim();
     if (!path.startsWith('/') || path.contains(RegExp(r'[\x00-\x1f\x7f]')) || path.length > 512) {
-      throw const HookFailure('hook_missing', 'openmosh-hook is not installed on this host.');
+      throw const HookFailure('hook_missing', 'falconer-hook is not installed on this host.');
     }
     return path;
   }

@@ -6,7 +6,7 @@ import 'package:openmosh/shared/hook/domain/hook_command.dart';
 import 'package:openmosh/shared/hook/domain/hook_envelope.dart';
 
 void main() {
-  const hook = '/home/me/.local/bin/openmosh-hook';
+  const hook = '/home/me/.local/bin/falconer-hook';
 
   group('HookCommand.usage', () {
     test('defaults to 7 days', () {
@@ -95,10 +95,9 @@ void main() {
     });
 
     test('hook path resolution probe is a fixed command', () {
-      expect(
-        HookCommand.resolvePathScript,
-        r'command -v openmosh-hook || echo "$HOME/.local/bin/openmosh-hook"',
-      );
+      // Its behaviour in a real shell is covered by hook_path_script_test.
+      expect(HookCommand.resolvePathScript, startsWith('command -v falconer-hook || '));
+      expect(HookCommand.resolvePathScript, isNot(contains("'")));
     });
   });
 
@@ -116,7 +115,7 @@ void main() {
 
     test('non-JSON output is a protocol error', () {
       expect(
-        () => parseHookEnvelope(utf8.encode('bash: openmosh-hook: not found')),
+        () => parseHookEnvelope(utf8.encode('bash: falconer-hook: not found')),
         throwsA(isA<HookFailure>().having((e) => e.code, 'code', 'protocol')),
       );
     });

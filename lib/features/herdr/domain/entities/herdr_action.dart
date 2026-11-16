@@ -1,5 +1,5 @@
 /// The fixed set of Herdr actions the phone may ask the hook for
-/// (`openmosh-hook herdr action`, body on stdin). Each factory validates its
+/// (`falconer-hook herdr action`, body on stdin). Each factory validates its
 /// arguments the way the hook does, so a bad request never leaves the phone.
 library;
 

@@ -9,9 +9,9 @@ import '../../domain/repositories/herdr_repository.dart';
 const herdrInvalid = 'Herdr no longer has that item. The list was refreshed.';
 const herdrNotRunning = 'Herdr is not running on this computer.';
 const herdrRefused = 'Herdr refused the request.';
-const herdrHookOutdated = 'Update openmosh-hook on this computer to use the Herdr navigator.';
+const herdrHookOutdated = 'Update falconer-hook on this computer to use the Herdr navigator.';
 
-/// [HerdrRepository] over `openmosh-hook herdr … --json` on the host's SSH
+/// [HerdrRepository] over `falconer-hook herdr … --json` on the host's SSH
 /// connection.
 final class HookHerdrRepository implements HerdrRepository {
   HookHerdrRepository(this.connections);

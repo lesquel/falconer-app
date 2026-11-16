@@ -48,7 +48,7 @@ class MainActivity : FlutterFragmentActivity() {
                     // must not show (Android 13+ honors EXTRA_IS_SENSITIVE).
                     "setSensitive" -> {
                         val text = call.argument<String>("text") ?: ""
-                        val clip = ClipData.newPlainText("OpenMosh", text)
+                        val clip = ClipData.newPlainText("Falconer", text)
                         clip.description.extras = PersistableBundle().apply {
                             val key = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                 ClipDescription.EXTRA_IS_SENSITIVE

@@ -116,7 +116,7 @@ class HostsView extends StatelessWidget {
                 child: _TileText(
                   top: l.addTile,
                   big: l.pairWithQr,
-                  small: 'openmosh-hook pair',
+                  small: 'falconer-hook pair',
                   smallColor: c.muted,
                 ),
               ),

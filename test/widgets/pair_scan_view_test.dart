@@ -19,7 +19,7 @@ void main() {
   testWidgets('paste field says which link it expects', (t) async {
     await t.pumpWidget(view());
     expect(find.textContaining('openmosh://pair'), findsOneWidget);
-    expect(find.textContaining('openmosh-hook pair --uri'), findsOneWidget);
+    expect(find.textContaining('falconer-hook pair --uri'), findsOneWidget);
   });
 
   testWidgets('denied camera explains where to allow it and retries', (t) async {

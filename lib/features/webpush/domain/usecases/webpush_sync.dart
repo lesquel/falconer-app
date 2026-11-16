@@ -22,7 +22,7 @@ typedef HostHookRunner = Future<Object?> Function(
   List<int>? stdin,
 });
 
-/// Error codes an `openmosh-hook` without `set-webpush` can answer with.
+/// Error codes an `falconer-hook` without `set-webpush` can answer with.
 const _unknownCommandCodes = {'unknown_command', 'unknown', 'usage', 'protocol', 'invalid_args'};
 
 bool _hookTooOld(Object e) => e is HookFailure && _unknownCommandCodes.contains(e.code);
