@@ -2,9 +2,9 @@
 
 Mobile client of [Falconer](https://github.com/lesquel/falconer): an SSH terminal designed for
 AI coding agents, with end-to-end encrypted push notifications and one-tap approvals.
-**Android first.**
+**Android first.** Website: <https://falconer-web.vercel.app/>.
 
-> Status: v0.2.0. Android 9+. The release APK for most phones (`arm64-v8a`) is about 26.4 MB (the on-device speech engine adds about 11 MB; models are downloaded separately, only on request).
+> Status: v0.2.0. Android 9+. The release APK for most phones (`arm64-v8a`) is about 26.2 MB (the on-device speech engine adds about 11 MB; models are downloaded separately, only on request).
 > Download it from the [latest release](https://github.com/lesquel/falconer-app/releases/latest).
 
 ## What it does
