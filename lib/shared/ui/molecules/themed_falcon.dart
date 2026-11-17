@@ -4,7 +4,7 @@ import '../../../l10n/l10n.dart';
 import '../atoms/falcon_logo.dart';
 import '../tokens/mosh_colors.dart';
 
-/// [FalconLogo] colored from the current theme: the iris follows the accent.
+/// [FalconLogo] with the localized screen-reader label.
 class ThemedFalcon extends StatelessWidget {
   const ThemedFalcon({super.key, this.size = 160, this.semanticLabel = defaultLabel});
 
@@ -16,11 +16,8 @@ class ThemedFalcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = MoshColors.of(context);
     return FalconLogo(
       size: size,
-      // A near-black accent would vanish into the pupil.
-      iris: c.accent.computeLuminance() < 0.05 ? FalconLogo.defaultIris : c.accent,
       semanticLabel: semanticLabel == defaultLabel ? context.l10n.logoSemanticLabel : semanticLabel,
     );
   }

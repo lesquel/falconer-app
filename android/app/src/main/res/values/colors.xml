@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Night blue of the Falconer logo tile, behind the adaptive icon. -->
-    <color name="ic_launcher_background">#0F1530</color>
+    <color name="ic_launcher_background">#030A1C</color>
     <!-- UI-G black behind the splash and the first frame. -->
     <color name="splash_background">#0A0A0A</color>
 </resources>

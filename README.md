@@ -106,8 +106,8 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
 
 The app follows the "UI-G" one-hand design: black `#0A0A0A` / white `#FAFAFA`, rounded cards
 (`#171717` / `#262626` on dark), big actions in the bottom half of the screen and one accent
-color. The logo, a falcon head on a night-blue tile with its iris in the accent color
-(master artwork: `assets/branding/falconer.svg`), is the launcher icon (adaptive, with
+color. The logo, a peregrine falcon head on a night-blue tile
+(artwork: `assets/branding/falconer.png`), is the launcher icon (adaptive, with
 an Android 13 themed variant), the splash screen and the empty, loading and pairing-success
 states.
 

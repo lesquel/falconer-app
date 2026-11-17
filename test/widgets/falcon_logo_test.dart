@@ -5,10 +5,12 @@ import 'package:openmosh/shared/ui/atoms/falcon_logo.dart';
 import 'package:openmosh/shared/ui/molecules/themed_falcon.dart';
 
 void main() {
-  testWidgets('falcon logo paints at the requested size with a screen-reader label', (t) async {
+  testWidgets('falcon logo renders the bundled artwork at the requested size with a screen-reader label', (t) async {
     await t.pumpWidget(const MaterialApp(home: Center(child: FalconLogo(size: 120))));
     expect(t.getSize(find.byType(FalconLogo)), const Size(120, 120));
     expect(find.bySemanticsLabel('Falconer logo'), findsOneWidget);
+    final image = t.widget<Image>(find.byType(Image)).image as AssetImage;
+    expect(image.assetName, FalconLogo.asset);
     expect(t.takeException(), isNull);
   });
 
@@ -27,14 +29,6 @@ void main() {
       ),
     );
     expect(find.bySemanticsLabel('Logo de Falconer'), findsOneWidget);
-  });
-
-  test('the painter repaints only when the iris color changes', () {
-    const a = FalconPainter(iris: Color(0xFF6B93FF));
-    const same = FalconPainter(iris: Color(0xFF6B93FF));
-    const green = FalconPainter(iris: Color(0xFF4ADE9E));
-    expect(a.shouldRepaint(same), isFalse);
-    expect(a.shouldRepaint(green), isTrue);
   });
 
   testWidgets('empty-state message shows the falcon, text and actions', (t) async {
