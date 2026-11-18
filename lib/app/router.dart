@@ -7,6 +7,7 @@ import '../features/herdr/presentation/containers/herdr_workspace_container.dart
 import '../features/hosts/presentation/containers/host_detail_container.dart';
 import '../features/hosts/presentation/containers/host_form_container.dart';
 import '../features/hosts/presentation/containers/hosts_container.dart';
+import '../features/inbox/domain/entities/suggested_answer.dart';
 import '../features/inbox/presentation/containers/event_confirm_container.dart';
 import '../features/inbox/presentation/containers/inbox_container.dart';
 import '../features/keys/presentation/containers/keys_container.dart';
@@ -24,15 +25,7 @@ import 'home_shell.dart';
 
 final _id = RegExp(r'^[A-Za-z0-9_-]{1,128}$');
 
-/// `openmosh://pair?...` (host `pair`) opened by the OS goes to the pair
-/// screen; the code itself is scanned or pasted there. `openmosh:///webpush`
-/// and `openmosh:///inbox` have an empty host and map by path.
-String? deepLinkRedirect(Uri uri) =>
-    uri.scheme == 'openmosh' && uri.host == 'pair' ? '/pair' : null;
-
 String? _guardIds(GoRouterState s) {
-  final link = deepLinkRedirect(s.uri);
-  if (link != null) return link;
   for (final v in s.pathParameters.values) {
     if (!_id.hasMatch(v)) return '/';
   }
@@ -45,8 +38,15 @@ String? _herdrSession(GoRouterState s) {
   return v != null && isHerdrSessionName(v) ? v : null;
 }
 
-GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
+/// External links are blocked: the app always starts at [initialLocation]
+/// (home, or the app's own notification that launched it), never at a route
+/// the platform hands over (an Android `route` extra, an iOS URL).
+/// Answers and Web Push codes travel only as `extra`, which in-app
+/// navigation sets and a URL cannot.
+GoRouter buildRouter({String initialLocation = '/', Object? initialExtra}) => GoRouter(
   initialLocation: initialLocation,
+  initialExtra: initialExtra,
+  overridePlatformDefaultLocation: true,
   redirect: (_, s) => _guardIds(s),
   errorBuilder: (context, _) => Scaffold(body: Center(child: Text(context.l10n.notFound))),
   routes: [
@@ -122,10 +122,15 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
         ),
       ],
     ),
-    // Web Push registration from the notifications PWA (`openmosh:///webpush?d=<code>`).
+    // Web Push registration: the code pasted in Settings, never from a URL.
     GoRoute(
       path: webPushRoute,
-      builder: (_, s) => WebPushContainer(code: s.uri.queryParameters['d']),
+      builder: (_, s) => WebPushContainer(
+        code: switch (s.extra) {
+          WebPushCode(:final value) => value,
+          _ => null,
+        },
+      ),
     ),
     // Full screen so the chat mic can open it on top of a terminal.
     GoRoute(path: voiceSettingsRoute, builder: (_, _) => const VoiceSettingsContainer()),
@@ -165,7 +170,10 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
       builder: (_, s) => EventConfirmContainer(
         hostId: s.pathParameters['host']!,
         eventId: s.pathParameters['event']!,
-        action: s.uri.queryParameters['action'],
+        action: switch (s.extra) {
+          SuggestedAnswer(:final action) => action,
+          _ => null,
+        },
       ),
     ),
   ],

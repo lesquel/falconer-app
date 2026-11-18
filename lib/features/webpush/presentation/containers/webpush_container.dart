@@ -10,7 +10,14 @@ import '../views/webpush_view.dart';
 
 const webPushRoute = '/webpush';
 
-/// `/webpush?d=<code>`: shows what the code registers, asks to confirm, then
+/// A Web Push code pasted or typed in the app. It travels as navigation
+/// `extra`, never in a URL, so a link opened from outside cannot fill it.
+class WebPushCode {
+  const WebPushCode(this.value);
+  final String value;
+}
+
+/// `/webpush` with a [WebPushCode] extra: shows what the code registers, asks to confirm, then
 /// forwards it to every paired host. The code never reaches the log.
 class WebPushContainer extends ConsumerStatefulWidget {
   const WebPushContainer({super.key, required this.code});

@@ -21,7 +21,7 @@ Future<void> main(List<String> args) async {
   // notifications start.
   final background = args.contains('--unifiedpush-bg');
   final (push, _) = await (
-    PushRuntime.start(onTap: (payload) => _router?.go(payload)),
+    PushRuntime.start(onTap: (path, answer) => _router?.go(path, extra: answer)),
     background ? Future<void>.value() : RustLib.init(),
   ).wait;
   if (background) return;
@@ -31,8 +31,11 @@ Future<void> main(List<String> args) async {
     final text = await rootBundle.loadString('assets/fonts/Manrope-OFL.txt');
     yield LicenseEntryWithLineBreaks(const ['Manrope'], text);
   });
-  final launch = await push.notifier.launchPayload();
-  final router = _router = buildRouter(initialLocation: launch ?? '/');
+  final launch = await push.notifier.launchRoute();
+  final router = _router = buildRouter(
+    initialLocation: launch?.path ?? '/',
+    initialExtra: launch?.answer,
+  );
 
   final container = ProviderContainer(
     overrides: [

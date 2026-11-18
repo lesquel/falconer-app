@@ -40,7 +40,7 @@ void main() {
   test('ids are stable and payloads carry only ids', () {
     expect(notificationId('h1', 'ev1'), notificationId('h1', 'ev1'));
     expect(notificationId('h1', 'ev1'), isNot(notificationId('h1', 'ev2')));
-    expect(notificationPayload('h1', 'ev1', 'allow'), '/inbox/h1/ev1?action=allow');
+    expect(notificationPayload('h1', 'ev1'), '/inbox/h1/ev1');
   });
 
   test('payload ids are single encoded segments', () {

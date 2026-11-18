@@ -43,7 +43,5 @@ int notificationId(String hostId, String eventId) {
 
 /// Payload routed back to the app; contains ids only, each as one encoded
 /// path segment so an id can never add or remove segments.
-String notificationPayload(String hostId, String eventId, [String? action]) => Uri(
-  pathSegments: ['', 'inbox', hostId, eventId],
-  queryParameters: action == null ? null : {'action': action},
-).toString();
+String notificationPayload(String hostId, String eventId) =>
+    Uri(pathSegments: ['', 'inbox', hostId, eventId]).toString();

@@ -5,10 +5,21 @@ library;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../../domain/entities/inbox_event.dart';
+import '../../domain/entities/suggested_answer.dart';
 import '../../domain/repositories/inbox_ports.dart';
 import '../models/notification_content.dart';
 
-typedef NotificationTap = void Function(String payload);
+typedef NotificationTap = void Function(String path, SuggestedAnswer? answer);
+
+/// Where a notification response leads: the event's path, plus the answer of
+/// the Approve or Deny button that was tapped. The answer stays out of the
+/// path, so the router never reads it from a URL.
+typedef NotificationRoute = ({String path, SuggestedAnswer? answer});
+
+NotificationRoute notificationRoute(String payload, String? actionId) => (
+  path: Uri.parse(payload).path,
+  answer: actionId == null || actionId == 'open' ? null : SuggestedAnswer(actionId),
+);
 
 class LocalEventNotifier implements EventNotifier {
   LocalEventNotifier(this._plugin);
@@ -27,15 +38,11 @@ class LocalEventNotifier implements EventNotifier {
   }
 
   /// Route for the notification that launched the app, if any.
-  Future<String?> launchPayload() async {
+  Future<NotificationRoute?> launchRoute() async {
     final d = await _plugin.getNotificationAppLaunchDetails();
     final r = d?.notificationResponse;
     if (d?.didNotificationLaunchApp != true || r?.payload == null) return null;
-    final uri = Uri.parse(r!.payload!);
-    final a = r.actionId;
-    return a == null || a == 'open'
-        ? uri.path
-        : Uri(path: uri.path, queryParameters: {'action': a}).toString();
+    return notificationRoute(r!.payload!, r.actionId);
   }
 
   static const channelId = 'agent_events';
@@ -73,10 +80,8 @@ class LocalEventNotifier implements EventNotifier {
   static void _route(NotificationResponse r, NotificationTap? onTap) {
     final p = r.payload;
     if (p == null || onTap == null) return;
-    final action = r.actionId;
-    if (action == null || action == 'open') return onTap(p);
-    final uri = Uri.parse(p);
-    onTap(Uri(path: uri.path, queryParameters: {'action': action}).toString());
+    final route = notificationRoute(p, r.actionId);
+    onTap(route.path, route.answer);
   }
 
   @override

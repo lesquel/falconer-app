@@ -35,7 +35,7 @@ class _State extends ConsumerState<WebPushSettingsCard> {
       WebPushRegistration.parse(raw);
       setState(() => _error = null);
       _code.clear();
-      context.push('$webPushRoute?d=${Uri.encodeQueryComponent(raw)}');
+      context.push(webPushRoute, extra: WebPushCode(raw));
     } catch (e) {
       setState(() => _error = context.l10n.failureText(e));
     }
