@@ -468,6 +468,7 @@ class _TerminalContainerState extends ConsumerState<TerminalContainer> with Widg
         fontSize: _pinchFont ?? settings.fontSize,
         terminalKey: _termKey,
         controller: _selection,
+        onCopySelection: _copySelection,
         onPinchStart: () => _pinchStart(settings),
         onPinchUpdate: _pinchUpdate,
         onPinchEnd: () => _pinchEnd(settings),

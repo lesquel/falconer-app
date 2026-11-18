@@ -1,9 +1,39 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:xterm/xterm.dart';
 
 import '../../../../l10n/l10n.dart';
+import '../../../../shared/domain/paste_text.dart';
 import '../../../../shared/ui/tokens/mosh_colors.dart';
 import '../../domain/usecases/terminal_runner.dart';
+
+/// Hardware-keyboard copy of the terminal selection, handled by the app.
+class SensitiveCopyIntent extends Intent {
+  const SensitiveCopyIntent();
+}
+
+/// Hardware-keyboard paste into the terminal, sanitized by the app.
+class SanitizedPasteIntent extends Intent {
+  const SanitizedPasteIntent();
+}
+
+/// The vendored xterm's default shortcuts, with copy and paste swapped for
+/// the app's own intents: its defaults copy to the plain clipboard and paste
+/// unfiltered text.
+Map<ShortcutActivator, Intent> terminalShortcuts(TargetPlatform platform) {
+  final apple = platform == TargetPlatform.iOS || platform == TargetPlatform.macOS;
+  return {
+    apple
+            ? const SingleActivator(LogicalKeyboardKey.keyC, meta: true)
+            : const SingleActivator(LogicalKeyboardKey.keyC, control: true, shift: true):
+        const SensitiveCopyIntent(),
+    SingleActivator(LogicalKeyboardKey.keyV, meta: apple, control: !apple):
+        const SanitizedPasteIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, meta: apple, control: !apple):
+        const SelectAllTextIntent(SelectionChangedCause.keyboard),
+  };
+}
 
 class TerminalScreenView extends StatelessWidget {
   const TerminalScreenView({
@@ -24,6 +54,7 @@ class TerminalScreenView extends StatelessWidget {
     this.onTwoFingerDoubleTap,
     this.selectionBar,
     this.corner,
+    this.onCopySelection,
   });
 
   final Terminal terminal;
@@ -53,6 +84,17 @@ class TerminalScreenView extends StatelessWidget {
 
   /// A control pinned to the terminal's top-right corner (exit full screen).
   final Widget? corner;
+
+  /// Copies the current selection (Ctrl+Shift+C, Cmd+C) through the app's
+  /// sensitive clipboard.
+  final VoidCallback? onCopySelection;
+
+  Future<void> _paste() async {
+    final text = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
+    if (text == null) return;
+    terminal.paste(sanitizePaste(text));
+    controller?.clearSelection();
+  }
 
   String? _banner(AppLocalizations l) => switch (phase) {
     TerminalPhase.connecting => l.connecting,
@@ -111,19 +153,30 @@ class TerminalScreenView extends StatelessWidget {
                             onTwoFingerDoubleTap: onTwoFingerDoubleTap,
                             child: Padding(
                               padding: const EdgeInsets.fromLTRB(8, 10, 8, 4),
-                              child: TerminalView(
-                                terminal,
-                                key: terminalKey,
-                                controller: controller,
-                                focusNode: focusNode,
-                                // The keyboard opens only from the keyboard button.
-                                showKeyboardOnTap: false,
-                                theme: theme,
-                                textStyle: TerminalStyle(
-                                  fontSize: fontSize,
-                                  fontFamily: 'monospace',
+                              child: Actions(
+                                actions: {
+                                  SensitiveCopyIntent: CallbackAction<SensitiveCopyIntent>(
+                                    onInvoke: (_) => onCopySelection?.call(),
+                                  ),
+                                  SanitizedPasteIntent: CallbackAction<SanitizedPasteIntent>(
+                                    onInvoke: (_) => _paste(),
+                                  ),
+                                },
+                                child: TerminalView(
+                                  terminal,
+                                  key: terminalKey,
+                                  controller: controller,
+                                  focusNode: focusNode,
+                                  shortcuts: terminalShortcuts(defaultTargetPlatform),
+                                  // The keyboard opens only from the keyboard button.
+                                  showKeyboardOnTap: false,
+                                  theme: theme,
+                                  textStyle: TerminalStyle(
+                                    fontSize: fontSize,
+                                    fontFamily: 'monospace',
+                                  ),
+                                  keyboardType: TextInputType.visiblePassword,
                                 ),
-                                keyboardType: TextInputType.visiblePassword,
                               ),
                             ),
                           ),
