@@ -27,10 +27,13 @@ const choiceResendAfter = Duration(seconds: 10);
 /// Longest labels that still fit side by side on a phone.
 const _rowLabelChars = 14;
 
-final _keyHint = RegExp(r'\s*\[[a-zA-Z](?:/[a-zA-Z])+\]:?\s*$');
+final _keyHint = RegExp(r'\s*\[[a-zA-Z](?:/[a-zA-Z])+\]:\s*$');
 
 /// [question] without its trailing `[y/n/t]:` key hint; the buttons answer it.
-String choiceQuestion(String question) => question.replaceFirst(_keyHint, '');
+String choiceQuestion(String question) {
+  final text = question.replaceFirst(_keyHint, '');
+  return text.isEmpty ? question : text;
+}
 
 /// The menu the agent waits on, docked above the composer: who asks, the
 /// question, the command or file it is about, and one button per answer.

@@ -349,11 +349,24 @@ class _EditCard extends StatelessWidget {
           _CardHeader(
             icon: Icons.edit_outlined,
             label: context.l10n.agentViewEdit,
-            trailing: added == null && removed == null
+            trailing: added == null && removed == null && !entry.failed
                 ? null
                 : Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      if (entry.failed) ...[
+                        Icon(Icons.close, size: 14, color: c.danger),
+                        const SizedBox(width: 4),
+                        Text(
+                          context.l10n.agentViewStateFailed,
+                          style: TextStyle(
+                            color: c.danger,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
                       if (added != null) Text('+$added', style: style.copyWith(color: c.success)),
                       const SizedBox(width: 6),
                       if (removed != null)
@@ -368,6 +381,7 @@ class _EditCard extends StatelessWidget {
               style: TextStyle(fontFamily: _mono, fontSize: 13, color: c.foreground),
             ),
           ),
+          if (entry.notes.isNotEmpty) _Output(entry.notes),
           for (final row in entry.diff) _DiffLine(row),
         ],
       ),
@@ -407,7 +421,9 @@ class _ActivityRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = MoshColors.of(context);
+    final failed = entry.failed;
     final icon = switch (entry.kind) {
+      _ when failed => Icons.error_outline,
       ActivityKind.read => Icons.description_outlined,
       ActivityKind.search => Icons.search,
       ActivityKind.other => Icons.build_outlined,

@@ -197,6 +197,8 @@ void main() {
   test('the key hint is removed from the question', () {
     expect(choiceQuestion('Allow this action? [y/n/t]:'), 'Allow this action?');
     expect(choiceQuestion('Use [a] or [b]?'), 'Use [a] or [b]?');
+    expect(choiceQuestion('Delete files matching src/[a/b]'), 'Delete files matching src/[a/b]');
+    expect(choiceQuestion('[y/n]:'), '[y/n]:');
   });
 
   testWidgets("the agent's current option is marked", (t) async {

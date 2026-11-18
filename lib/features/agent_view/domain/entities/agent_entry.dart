@@ -62,25 +62,36 @@ final class DiffRow {
   final String text;
 }
 
-/// A file the agent changed. The counts are null when the screen has none.
+/// A file the agent changed. The counts are null when the screen has none;
+/// [notes] are the lines under it that are not diff rows.
 final class EditEntry extends AgentEntry {
-  const EditEntry(this.path, {this.added, this.removed, this.diff = const []});
+  const EditEntry(
+    this.path, {
+    this.added,
+    this.removed,
+    this.diff = const [],
+    this.notes = const [],
+    this.failed = false,
+  });
 
   final String path;
   final int? added;
   final int? removed;
   final List<DiffRow> diff;
+  final List<String> notes;
+  final bool failed;
 }
 
 enum ActivityKind { read, search, other }
 
 /// A quiet tool step: reading a file, searching, calling a tool.
 final class ActivityEntry extends AgentEntry {
-  const ActivityEntry(this.kind, this.label, {this.detail = const []});
+  const ActivityEntry(this.kind, this.label, {this.detail = const [], this.failed = false});
 
   final ActivityKind kind;
   final String label;
   final List<String> detail;
+  final bool failed;
 }
 
 /// Output with no command on screen (a plain shell).

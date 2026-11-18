@@ -177,6 +177,124 @@ void main() {
     });
   });
 
+  group('nothing on screen is lost', () {
+    test('a failed claude edit keeps its error and says it failed', () {
+      final e = tool('● Update(src/a.dart)\n  ⎿  Error: String to replace not found in file.');
+      expect((e as EditEntry).failed, isTrue);
+      expect(e.notes, ['Error: String to replace not found in file.']);
+    });
+
+    test('a failed gemini write keeps its reason', () {
+      final e = tool('✕  WriteFile src/a.ts\nPermission denied');
+      expect((e as EditEntry).failed, isTrue);
+      expect(e.notes, ['Permission denied']);
+    });
+
+    test('the claude summary line stays next to the diff', () {
+      final e = tool(
+        '● Update(src/a.dart)\n'
+        '  ⎿  Updated src/a.dart with 1 addition and 1 removal\n'
+        '      12 -  old\n'
+        '      12 +  new',
+      );
+      expect((e as EditEntry).notes, ['Updated src/a.dart with 1 addition and 1 removal']);
+      expect(e.diff, hasLength(2));
+    });
+
+    test('a write preview is kept and is never read as a diff', () {
+      final e = tool(
+        '● Write(notes.md)\n  ⎿  Wrote 2 lines to notes.md\n     1 # Title\n     2 - first item',
+      );
+      expect((e as EditEntry).diff, isEmpty);
+      expect(e.notes, ['Wrote 2 lines to notes.md', '1 # Title', '2 - first item']);
+    });
+
+    test('pi write body', () {
+      expect((tool('write notes.md\nhello world') as EditEntry).notes, ['hello world']);
+    });
+
+    test('aider commit and edit keep the lines under them', () {
+      final commit = tool('Commit abc1234 fix: total\nYou can use /undo to undo this commit.');
+      expect((commit as ActivityEntry).detail, ['You can use /undo to undo this commit.']);
+      expect((tool('Applied edit to a.py\nmore') as EditEntry).notes, ['more']);
+    });
+
+    test('thinking keeps every line', () {
+      final e = agent('✻ Thought for 12s\nThe cache key ignores the locale.');
+      expect((e as ThinkingEntry).text, 'Thought for 12s\nThe cache key ignores the locale.');
+    });
+
+    test('a gemini row without arguments shows the tool name', () {
+      expect((tool('✔  ReadFolder') as ActivityEntry).label, 'ReadFolder');
+    });
+
+    test('a failed gemini read says so', () {
+      expect((tool('✕  ReadFile a.ts') as ActivityEntry).failed, isTrue);
+    });
+
+    test('tree output keeps its branches', () {
+      final e = tool('● Bash(tree)\n  ⎿  lib\n     └── b.dart');
+      expect((e as CommandEntry).output, ['lib', '└── b.dart']);
+      expect((tool('└── b.dart') as OutputEntry).lines, ['└── b.dart']);
+    });
+
+    test('a truncated command keeps its parentheses', () {
+      expect((tool(r'● Bash(echo $(date)') as CommandEntry).command, r'echo $(date)');
+      expect((tool(r'● Bash(echo $(date))') as CommandEntry).command, r'echo $(date)');
+    });
+  });
+
+  group('the state is never overstated', () {
+    test('gemini check mark with an error below is not a success', () {
+      final e = tool('✔  Shell npm test\nError: 3 tests failed');
+      expect((e as CommandEntry).state, CommandState.unknown);
+    });
+
+    test('gemini check mark with a non-zero exit code is a failure', () {
+      final e = tool('✔  Shell npm test\nExit Code: 1');
+      expect((e as CommandEntry).state, CommandState.failed);
+    });
+
+    test('a command that prints an error line did not necessarily fail', () {
+      final e = tool('● Bash(cat build.log)\n  ⎿  Error: disk full\n     done');
+      expect((e as CommandEntry).state, CommandState.unknown);
+    });
+
+    test('an exit code deep in printed output is not the command result', () {
+      final e = tool('● Bash(cat build.log)\n  ⎿  starting\n     Exit code 1');
+      expect((e as CommandEntry).state, CommandState.unknown);
+    });
+  });
+
+  group('prose stays prose', () {
+    for (final text in [
+      '• Ran the full test suite and everything passes.',
+      '• Added a retry to the upload client.',
+      '• Edited the docs to match the new flow.',
+      '• Deleted the old cache entries.',
+    ]) {
+      test(text, () => expect(tool(text), isA<MessageEntry>()));
+    }
+
+    test('a real codex command with a sentence-like shape keeps its output', () {
+      final e = tool('• Ran echo all done.\n  └ all done.');
+      expect((e as CommandEntry).command, 'echo all done.');
+    });
+
+    for (final text in [
+      '● Error handling: I added a retry around the upload.',
+      'Error messages: now translated.',
+      'Fatal flaw: the cache is shared.',
+    ]) {
+      test(text, () => expect(agent(text), isA<MessageEntry>()));
+    }
+
+    test('real errors are still errors', () {
+      expect(agent('Error: connection lost'), isA<ErrorEntry>());
+      expect(agent('Fatal error: out of memory'), isA<ErrorEntry>());
+    });
+  });
+
   test('a user prompt stays exactly as written', () {
     final e = entryFor(const TextBlock('fix it\n  please', role: TextRole.user));
     expect((e as UserEntry).text, 'fix it\n  please');

@@ -138,10 +138,10 @@ class AgentScreenView extends StatelessWidget {
     return SafeArea(
       child: Column(
         children: [
-          SizedBox(
-            height: 60,
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 60),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 4, 0),
+              padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
               child: Row(
                 children: [
                   if (onBack != null) ...[
@@ -151,6 +151,7 @@ class AgentScreenView extends StatelessWidget {
                   _Monogram(name),
                   const SizedBox(width: 10),
                   Expanded(
+                    flex: 3,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,7 +172,7 @@ class AgentScreenView extends StatelessWidget {
                       ],
                     ),
                   ),
-                  if (loaded) _StatusPill(status),
+                  if (loaded) Flexible(flex: 2, child: _StatusPill(status)),
                   IconButton(
                     key: const Key('agent-terminal-mode'),
                     tooltip: l.herdrTerminalMode,
@@ -268,8 +269,8 @@ class _StatusPill extends StatelessWidget {
       _ => (Icons.radio_button_unchecked, c.muted, null),
     };
     return Container(
-      height: 28,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      constraints: const BoxConstraints(minHeight: 28),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(14),
@@ -280,9 +281,13 @@ class _StatusPill extends StatelessWidget {
         children: [
           Icon(icon, size: 14, color: fg),
           const SizedBox(width: 5),
-          Text(
-            HerdrStatusBadge.label(context.l10n, status),
-            style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w700),
+          Flexible(
+            child: Text(
+              HerdrStatusBadge.label(context.l10n, status),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w700),
+            ),
           ),
         ],
       ),

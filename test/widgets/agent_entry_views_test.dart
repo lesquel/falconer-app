@@ -6,6 +6,7 @@ import 'package:openmosh/features/agent_view/domain/entities/agent_entry.dart';
 import 'package:openmosh/features/agent_view/domain/entities/screen_block.dart';
 import 'package:openmosh/features/agent_view/presentation/views/agent_entry_views.dart';
 import 'package:openmosh/features/agent_view/presentation/views/agent_screen_view.dart';
+import 'package:openmosh/features/herdr/domain/entities/herdr_snapshot.dart';
 import 'package:openmosh/features/terminal/presentation/views/chat_composer.dart';
 import 'package:openmosh/l10n/l10n.dart';
 
@@ -66,6 +67,50 @@ void main() {
       expect(find.text('−1'), findsOneWidget);
     });
   }
+
+  for (final scale in [1.5, 2.0]) {
+    testWidgets('the header fits 320 px at text scale $scale', (t) async {
+      t.view.physicalSize = const Size(320, 800);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.reset);
+      await t.pumpWidget(
+        MaterialApp(
+          theme: buildTheme(Brightness.dark),
+          locale: const Locale('es'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: supportedAppLocales,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)),
+            child: child!,
+          ),
+          home: Scaffold(
+            body: AgentScreenView(
+              title: 'copilot',
+              subtitle: 'omtest-a-rather-long-session-name',
+              status: HerdrStatus.blocked,
+              blocks: const [],
+              loaded: true,
+              onBack: () {},
+              onKeys: (_) {},
+              onRetry: () {},
+              onTerminalMode: () {},
+              composer: const SizedBox(height: 44),
+            ),
+          ),
+        ),
+      );
+      await t.pump();
+      expect(t.takeException(), isNull);
+    });
+  }
+
+  testWidgets('a failed edit says so and shows why', (t) async {
+    await t.pumpWidget(
+      app(const AgentEntryView(EditEntry('a.ts', failed: true, notes: ['Permission denied']))),
+    );
+    expect(find.text('Failed'), findsOneWidget);
+    expect(find.text('Permission denied'), findsOneWidget);
+  });
 
   testWidgets('long output is collapsed and opens on demand', (t) async {
     await t.pumpWidget(
