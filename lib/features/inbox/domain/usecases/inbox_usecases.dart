@@ -116,7 +116,17 @@ final class RespondToEvent {
       }
       // Typed but not submitted: the host already resolved the event, so it
       // is resolved here too and no retry can type the text a second time.
-      await _resolve(responding, hostId, eventId);
+      // It never stays "responding": a stale notification is harmless, and
+      // if the resolved state cannot be stored it is marked failed.
+      try {
+        await inbox.upsert(responding.responseSucceeded());
+      } catch (_) {
+        await inbox.upsert(responding.responseFailed());
+        throw const HookFailure('partial_delivery', respondPartialDelivery);
+      }
+      try {
+        await notifier.cancel(hostId, eventId);
+      } catch (_) {}
       throw const HookFailure('partial_delivery', respondPartialDelivery);
     } catch (_) {
       await inbox.upsert(responding.responseFailed());

@@ -78,6 +78,19 @@ class FakeNotifier implements EventNotifier {
   Future<void> cancel(String hostId, String eventId) async => cancelled.add(eventId);
 }
 
+class _CancelFails extends FakeNotifier {
+  @override
+  Future<void> cancel(String hostId, String eventId) async => throw StateError('cancel failed');
+}
+
+class _ResolvedWriteFails extends MemInbox {
+  @override
+  Future<void> upsert(InboxEvent e) async {
+    if (e.status == InboxStatus.resolved) throw StateError('disk full');
+    await super.upsert(e);
+  }
+}
+
 Map<String, Object?> wire({String id = 'ev1', String kind = 'approval_required', int seq = 5}) => {
   'id': id,
   'seq': seq,
@@ -361,6 +374,42 @@ void main() {
         throwsA(isA<InvalidTransition>()),
       );
       expect(conn.scripts, hasLength(1), reason: 'the text must not be typed twice');
+    });
+
+    RespondToEvent respondWith(InboxRepository store, EventNotifier n) => RespondToEvent(
+      inbox: store,
+      connections: HostConnections(
+        hosts: hosts,
+        vault: FakeVault(),
+        connector: FakeConnector(() => conn),
+      ),
+      notifier: n,
+    );
+    void partialDelivery() => reply = (_, _) => text(
+      '{"ok":false,"error":{"code":"partial_delivery","message":"submit key failed"}}',
+      code: 1,
+    );
+    final partialFailure = throwsA(
+      isA<HookFailure>().having((e) => e.code, 'code', 'partial_delivery'),
+    );
+
+    test('a partial delivery stays resolved when cancelling the notification fails', () async {
+      partialDelivery();
+      await expectLater(
+        respondWith(inbox, _CancelFails())('h1', 'ev1', ResponseKind.text, text: 'yes'),
+        partialFailure,
+      );
+      expect((await inbox.byId('h1', 'ev1'))!.status, InboxStatus.resolved);
+    });
+
+    test('a partial delivery never stays responding when storing it resolved fails', () async {
+      partialDelivery();
+      final store = _ResolvedWriteFails()..rows.addAll(inbox.rows);
+      await expectLater(
+        respondWith(store, notifier)('h1', 'ev1', ResponseKind.text, text: 'yes'),
+        partialFailure,
+      );
+      expect((await store.byId('h1', 'ev1'))!.status, InboxStatus.failed);
     });
   });
 

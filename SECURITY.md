@@ -75,8 +75,13 @@ phone, and the app is built around that:
   recents thumbnail.
 - **No backups.** App data is excluded from cloud backups and device transfers.
 - **External links are blocked.** Other apps and web pages cannot open a screen in the app, fill in
-  a code or preselect an answer. The app always starts at its home screen; Approve and Deny always
-  need your verification on the confirm screen.
+  a code or preselect an answer. `openmosh://` links only open the app at its home screen (that is
+  how a Web Push notification tap launches it). Approve and Deny always need your verification on
+  the confirm screen.
+- **Notification taps are HMAC-bound to notifications the app itself posted.** Each notification
+  carries an HMAC-SHA256 tag under a random per-install key kept in secure storage. A forged
+  notification intent from another app, without a valid tag, only opens the home screen and
+  cannot preselect an answer.
 - **Clipboard and paste.** Copied terminal text and public keys are marked sensitive so keyboards
   do not preview them. Pasted text is stripped of escape and control characters so it cannot end a
   bracketed paste early or inject terminal commands.

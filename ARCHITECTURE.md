@@ -93,10 +93,19 @@ TerminalRunner: connect ─► openShell ─► write attach command ─► stre
 
 ## External input
 
-The app opens no external links. Android has no `VIEW` intent-filter and
-`MainActivity.getInitialRoute` always returns `/`; iOS and macOS register no URL scheme and set
-`FlutterDeepLinkingEnabled` to false; `buildRouter` sets `overridePlatformDefaultLocation`, so
-go_router starts at `/` (or at the app's own notification that launched it). Values that change
+`openmosh://` links only open the app at its home screen. The scheme stays registered (an Android
+`VIEW` intent-filter, `CFBundleURLTypes` on iOS and macOS) because Web Push notification taps open
+`openmosh:///inbox`, but deep linking is off on every platform, `MainActivity.getInitialRoute`
+always returns `/`, and `buildRouter` sets `overridePlatformDefaultLocation`, so go_router starts
+at `/` (or at the app's own notification that launched it).
+
+Notification taps are HMAC-bound to notifications the app itself posted. The launcher activity is
+exported, and flutter_local_notifications reads `payload` and `actionId` from any
+`SELECT_NOTIFICATION` intent, so `LocalEventNotifier` posts `route|tag`, where the tag is
+HMAC-SHA256 under a random per-install key (`NotificationTagger`, push namespace of
+`SecureKeyStorage`, readable by the background engine). `notificationRoute` verifies the tag in
+constant time and accepts only `/inbox/<host>/<event>` with router-valid ids; otherwise it opens
+home and ignores `actionId`. Values that change
 what a screen does, such as a preselected answer (`SuggestedAnswer`) or a Web Push code
 (`WebPushCode`), travel as navigation `extra`, which only in-app code can set.
 
@@ -128,7 +137,7 @@ vector drawables under `android/app/src/main/res/` (`ic_launcher_foreground`,
 5. Concrete adapters are chosen only in `lib/app/di.dart` (and platform objects in `main.dart`).
    Tests use fakes for ports (`test/support/fakes.dart`).
 6. Legacy `openmosh` names (the Dart package, `dev.openmosh.*` ids and channels, the
-   `openmosh://pair` link, the `openmosh-hook` fallback) are kept for compatibility with
+   `openmosh://` scheme, the `openmosh-hook` fallback) are kept for compatibility with
    installed apps and paired hosts; new code uses Falconer names.
 7. Logs go through `shared/logging/redacting_logger.dart`; never log terminal bytes, prompts,
    payloads, tokens, keys or endpoints.
