@@ -12,6 +12,10 @@ ignore = [
     # pulled in transitively through flutter_rust_bridge; remove this entry once
     # flutter_rust_bridge drops it.
     { id = "RUSTSEC-2025-0056", reason = "unmaintained notice only; transitive via flutter_rust_bridge" },
+    # `chrono` is flagged unmaintained (informational, no vulnerability). It is
+    # pulled in transitively through russh-sftp; remove this entry once
+    # russh-sftp drops or replaces it.
+    { id = "RUSTSEC-2026-0543", reason = "unmaintained notice only; transitive via russh-sftp" },
 ]
 
 [licenses]
