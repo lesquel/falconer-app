@@ -27,6 +27,19 @@ void main() {
         }
         expect(contrastRatio(v(c.onAccent), v(c.accent)), greaterThanOrEqualTo(aa));
         expect(contrastRatio(v(c.onInverse), v(c.inverse)), greaterThanOrEqualTo(aa));
+        // Agent view: states, permission card and diff rows.
+        for (final bg in surfaces) {
+          expect(contrastRatio(v(c.success), v(bg)), greaterThanOrEqualTo(aa));
+        }
+        for (final fg in [c.foreground, c.muted, c.warning]) {
+          expect(contrastRatio(v(fg), v(c.warningSurface)), greaterThanOrEqualTo(aa));
+        }
+        expect(contrastRatio(v(c.onWarning), v(c.warning)), greaterThanOrEqualTo(aa));
+        for (final fg in [c.foreground, c.danger]) {
+          expect(contrastRatio(v(fg), v(c.dangerSurface)), greaterThanOrEqualTo(aa));
+        }
+        expect(contrastRatio(v(c.diffAddFg), v(c.diffAddBg)), greaterThanOrEqualTo(aa));
+        expect(contrastRatio(v(c.diffRemoveFg), v(c.diffRemoveBg)), greaterThanOrEqualTo(aa));
         // The approve button's check mark is drawn in the accent on black/white.
         expect(contrastRatio(v(c.accent), v(c.onAccent)), greaterThanOrEqualTo(aa));
       });
