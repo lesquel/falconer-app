@@ -37,9 +37,9 @@ Each `conversation.txt` holds a past user turn, an agent reply and a tool call, 
 | codex | `› ` at column 0 | `• Ran`, `• Explored`, `• Edited` ... with `└` rows | Partly verified in the codex-cli 0.154.0 binary (`›`, `Explored`, `Exploring`, `Edited`, `Added`, `Deleted`, `Waited for background terminal`, `Updated Plan` present); the history-cell layout is from memory of its TUI. |
 | pi | none: user messages differ only by background color, which `herdr read` drops | `$ command`, `read|edit|write|ls <path>` headers | Verified in the installed pi 1.5.0 sources (`UserMessageComponent`, `renderers/bash.js`, `formatToolCallWithArgs`). User turns therefore stay agent text. |
 | kiro | `> ` echoed by the REPL | none detected | Same `> ` prompt as the `input` fixture; echo in scrollback is assumed. |
-| aider | `> ` echoed by prompt_toolkit | none detected | Aider's documented `> ` prompt. |
+| aider | `> ` echoed by prompt_toolkit | `Applied edit to <path>`, `Commit <hash> <message>` | Aider's documented `> ` prompt; tool lines checked against aider's `base_coder.py` and `repo.py`. |
 | gemini | `> ` (not boxed) | boxed `✔  ToolName` rows | From memory (not installed). |
-| opencode | lines behind the `┃` bar | none detected | Same bar as the reconstructed `plain` fixture; not re-verified in the minified bundle. |
+| opencode | lines behind the `┃` bar | `✱ Grep`, `✱ Glob`, `% WebFetch`, `% Patch` rows | Same bar as the reconstructed `plain` fixture; tool rows checked in the opencode 1.18.21 bundle. |
 | shell | `user@host:dir$ `, `[user@host dir]$ `, `user@host dir % `, `$ `, `❯ ` | output after a command | Synthetic. Bare prompts are dropped. |
 
 Copilot, Cursor and Amp mark no roles (unverified layouts): everything stays agent text.

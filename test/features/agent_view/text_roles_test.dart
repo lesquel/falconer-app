@@ -70,10 +70,11 @@ void main() {
     ]);
   });
 
-  test('aider: echoed > prompts are user', () {
+  test('aider: echoed > prompts are user, edits and commits are tool', () {
     expect(parseAgentScreen('aider', conversation('aider')), const [
       TextBlock('add type hints to the cart functions', role: user),
-      TextBlock('Applied edit to src/cart.py\nCommit 1a2b3c4 feat: add type hints'),
+      TextBlock('Applied edit to src/cart.py', role: tool),
+      TextBlock('Commit 1a2b3c4 feat: add type hints', role: tool),
       InputBlock(''),
     ]);
   });

@@ -19,7 +19,14 @@ final class AiderDetector extends AgentDetector {
   @override
   List<String> get noise => const ['tokens:'];
 
-  /// The REPL echoes each sent prompt as a `> text` line.
+  /// The REPL echoes each sent prompt as a `> text` line; edits and commits
+  /// are reported as `Applied edit to <path>` and `Commit <hash> <message>`.
   @override
-  RoleStart? roleStart(ScreenLine line, TextRole? current) => glyphPrompt(line, '>');
+  RoleStart? roleStart(ScreenLine line, TextRole? current) {
+    final user = glyphPrompt(line, '>');
+    if (user != null) return user;
+    return line.indent == 0 && _tool.hasMatch(line.text) ? toolLine(line) : null;
+  }
 }
+
+final _tool = RegExp(r'^(?:Applied edit to \S|Commit [0-9a-f]{7,} )');

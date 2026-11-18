@@ -19,8 +19,15 @@ final class OpencodeDetector extends AgentDetector {
   ];
 
   /// User messages sit behind a `┃` bar like the prompt box; the agent's
-  /// replies have no bar.
+  /// replies have no bar. Tool rows start with `✱ Grep`, `✱ Glob`,
+  /// `% WebFetch` or `% Patch`.
   @override
-  RoleStart? roleStart(ScreenLine line, TextRole? current) =>
-      line.border == '┃' && current != TextRole.user ? (role: TextRole.user, line: line) : null;
+  RoleStart? roleStart(ScreenLine line, TextRole? current) {
+    if (line.border == '┃') {
+      return current != TextRole.user ? (role: TextRole.user, line: line) : null;
+    }
+    return _tool.hasMatch(line.trimmed) ? toolLine(line) : null;
+  }
 }
+
+final _tool = RegExp(r'^(?:✱ (?:Grep|Glob)\b|% (?:WebFetch|Patch)\b)');
