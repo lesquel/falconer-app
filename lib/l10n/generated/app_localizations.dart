@@ -1515,6 +1515,12 @@ abstract class AppLocalizations {
   /// **'This event was already answered.'**
   String get errAlreadyAnswered;
 
+  /// No description provided for @errReplyNotSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Your reply was typed but not sent. Press Enter in the terminal.'**
+  String get errReplyNotSubmitted;
+
   /// Terminal app bar title when there is no session or host name.
   ///
   /// In en, this message translates to:

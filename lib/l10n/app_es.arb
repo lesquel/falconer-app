@@ -237,6 +237,7 @@
   "errLockStaysOff": "No se pudo verificar tu identidad, así que el bloqueo sigue desactivado. Configura una huella, el rostro o un bloqueo de pantalla en este teléfono y vuelve a intentarlo.",
   "errLockStaysOn": "No se pudo verificar tu identidad, así que el bloqueo sigue activado.",
   "errAlreadyAnswered": "Este evento ya se respondió.",
+  "errReplyNotSubmitted": "Tu respuesta se escribió pero no se envió. Pulsa Intro en la terminal.",
   "terminalTitle": "Terminal",
   "terminalShell": "shell",
   "terminalHostShell": "{host} · shell",

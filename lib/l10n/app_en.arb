@@ -543,6 +543,7 @@
   "errLockStaysOff": "Could not verify you, so the lock stays off. Set up a fingerprint, face or screen lock on this phone, then try again.",
   "errLockStaysOn": "Could not verify you, so the lock stays on.",
   "errAlreadyAnswered": "This event was already answered.",
+  "errReplyNotSubmitted": "Your reply was typed but not sent. Press Enter in the terminal.",
   "terminalTitle": "Terminal",
   "@terminalTitle": {
     "description": "Terminal app bar title when there is no session or host name."

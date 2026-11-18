@@ -831,6 +831,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errAlreadyAnswered => 'This event was already answered.';
 
   @override
+  String get errReplyNotSubmitted =>
+      'Your reply was typed but not sent. Press Enter in the terminal.';
+
+  @override
   String get terminalTitle => 'Terminal';
 
   @override

@@ -89,6 +89,11 @@ final class HandlePushMessage {
   }
 }
 
+/// Shown when falconer-hook typed the reply into the agent's pane but the
+/// submit key failed (`partial_delivery`). The host keeps the event resolved,
+/// so the reply must not be sent again.
+const respondPartialDelivery = 'Your reply was typed but not sent. Press Enter in the terminal.';
+
 final class RespondToEvent {
   const RespondToEvent({required this.inbox, required this.connections, required this.notifier});
 
@@ -104,10 +109,23 @@ final class RespondToEvent {
     await inbox.upsert(responding);
     try {
       await connections.runHook(hostId, cmd);
+    } on HookFailure catch (e) {
+      if (e.code != 'partial_delivery') {
+        await inbox.upsert(responding.responseFailed());
+        rethrow;
+      }
+      // Typed but not submitted: the host already resolved the event, so it
+      // is resolved here too and no retry can type the text a second time.
+      await _resolve(responding, hostId, eventId);
+      throw const HookFailure('partial_delivery', respondPartialDelivery);
     } catch (_) {
       await inbox.upsert(responding.responseFailed());
       rethrow;
     }
+    return _resolve(responding, hostId, eventId);
+  }
+
+  Future<InboxEvent> _resolve(InboxEvent responding, String hostId, String eventId) async {
     final done = responding.responseSucceeded();
     await inbox.upsert(done);
     await notifier.cancel(hostId, eventId);

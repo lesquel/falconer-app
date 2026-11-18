@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openmosh/features/inbox/domain/usecases/inbox_usecases.dart';
 import 'package:openmosh/features/settings/domain/entities/app_settings.dart';
 import 'package:openmosh/l10n/l10n.dart';
 import 'package:openmosh/shared/domain/failure.dart';
@@ -19,6 +20,15 @@ void main() {
     expect(es.failureText(const ConnectionFailure()), 'No se pudo conectar con el equipo.');
     expect(es.failureText(const HookFailure('error', 'disk full')), 'disk full');
     expect(es.failureText(Exception('x')), 'Algo salió mal.');
+  });
+
+  test('a typed but unsent reply asks to press Enter, in both languages', () {
+    const f = HookFailure('partial_delivery', respondPartialDelivery);
+    expect(en.failureText(f), 'Your reply was typed but not sent. Press Enter in the terminal.');
+    expect(
+      es.failureText(f),
+      'Tu respuesta se escribió pero no se envió. Pulsa Intro en la terminal.',
+    );
   });
 
   test('plural strings follow the locale', () {

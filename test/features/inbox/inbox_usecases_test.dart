@@ -340,6 +340,28 @@ void main() {
         InboxStatus.resolved,
       );
     });
+
+    test('a typed but unsent reply resolves the event and is never retried', () async {
+      reply = (_, _) => text(
+        '{"ok":false,"error":{"code":"partial_delivery","message":"submit key failed"}}',
+        code: 1,
+      );
+      await expectLater(
+        respond('h1', 'ev1', ResponseKind.text, text: 'yes'),
+        throwsA(
+          isA<HookFailure>()
+              .having((e) => e.code, 'code', 'partial_delivery')
+              .having((e) => e.message, 'message', respondPartialDelivery),
+        ),
+      );
+      expect((await inbox.byId('h1', 'ev1'))!.status, InboxStatus.resolved);
+      expect(notifier.cancelled, ['ev1']);
+      await expectLater(
+        respond('h1', 'ev1', ResponseKind.text, text: 'yes'),
+        throwsA(isA<InvalidTransition>()),
+      );
+      expect(conn.scripts, hasLength(1), reason: 'the text must not be typed twice');
+    });
   });
 
   SyncInbox syncWith(FakeConnection conn) => SyncInbox(

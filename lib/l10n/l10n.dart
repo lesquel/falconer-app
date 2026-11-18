@@ -125,6 +125,7 @@ extension FailureL10n on AppLocalizations {
       errLockStaysOff,
     'Could not verify you, so the lock stays on.' => errLockStaysOn,
     'This event was already answered.' => errAlreadyAnswered,
+    'Your reply was typed but not sent. Press Enter in the terminal.' => errReplyNotSubmitted,
     'Herdr no longer has that item. The list was refreshed.' => errHerdrInvalid,
     'Herdr is not running on this computer.' => errHerdrNotRunning,
     'Herdr refused the request.' => errHerdrRefused,
