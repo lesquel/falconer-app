@@ -1454,9 +1454,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get agentViewStateRunning => 'Running';
 
   @override
-  String get agentViewStateSucceeded => 'Succeeded';
-
-  @override
   String get agentViewStateFailed => 'Failed';
 
   @override

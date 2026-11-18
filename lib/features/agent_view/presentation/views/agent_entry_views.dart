@@ -218,7 +218,6 @@ class _CommandCard extends StatelessWidget {
     final l = context.l10n;
     final (String? state, Color color, IconData? icon) = switch (entry.state) {
       CommandState.running => (l.agentViewStateRunning, c.muted, Icons.more_horiz),
-      CommandState.succeeded => (l.agentViewStateSucceeded, c.success, Icons.check),
       CommandState.failed => (l.agentViewStateFailed, c.danger, Icons.close),
       CommandState.unknown => (null, c.muted, null),
     };

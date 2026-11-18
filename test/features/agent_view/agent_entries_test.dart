@@ -44,8 +44,8 @@ void main() {
       expect(e.output, ['PASS src/cart.test.ts']);
     });
 
-    test('gemini shell row reports the state its glyph shows', () {
-      expect((tool('✔  Shell npm test') as CommandEntry).state, CommandState.succeeded);
+    test('gemini shell row: a check mark proves nothing, a cross is a failure', () {
+      expect((tool('✔  Shell npm test') as CommandEntry).state, CommandState.unknown);
       expect((tool('✕  Shell npm test') as CommandEntry).state, CommandState.failed);
     });
 
@@ -248,6 +248,15 @@ void main() {
     test('gemini check mark with an error below is not a success', () {
       final e = tool('✔  Shell npm test\nError: 3 tests failed');
       expect((e as CommandEntry).state, CommandState.unknown);
+    });
+
+    test('gemini check mark with the exit code split off by a blank row', () {
+      final blocks = parseAgentScreen('gemini', [
+        '│ ✔  Shell false       │',
+        '│                      │',
+        '│    Exit Code: 1      │',
+      ]).whereType<TextBlock>().map(entryFor).toList();
+      expect((blocks.first as CommandEntry).state, CommandState.unknown);
     });
 
     test('gemini check mark with a non-zero exit code is a failure', () {

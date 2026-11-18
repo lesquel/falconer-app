@@ -421,7 +421,6 @@
   "agentViewCommand": "Comando",
   "agentViewEdit": "Edición",
   "agentViewStateRunning": "En curso",
-  "agentViewStateSucceeded": "Correcto",
   "agentViewStateFailed": "Falló",
   "agentViewShowLess": "Mostrar menos",
   "agentViewShowMore": "{count, plural, =1{Mostrar 1 línea más} other{Mostrar {count} líneas más}}",

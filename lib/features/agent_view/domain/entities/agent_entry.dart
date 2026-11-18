@@ -41,8 +41,9 @@ final class MessageSegment {
   String toString() => 'MessageSegment(${kind.name}, "$text")';
 }
 
-/// Only what the agent's screen states: [unknown] when it does not say.
-enum CommandState { unknown, running, succeeded, failed }
+/// Only what the agent's screen proves. A finished-tool mark is no proof of
+/// success (it does not reflect the exit code), so success is never claimed.
+enum CommandState { unknown, running, failed }
 
 /// A shell command the agent ran, with its output.
 final class CommandEntry extends AgentEntry {

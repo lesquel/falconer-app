@@ -141,14 +141,11 @@ AgentEntry _geminiEntry(String head, String glyph, String name, String rest, Lis
   final failed = glyph == '✕' || glyph == '✗';
   final subject = rest.isEmpty ? name : rest;
   if (_geminiCommands.contains(name)) {
-    final CommandState state;
-    if (failed || output.any(_geminiExit.hasMatch)) {
-      state = CommandState.failed;
-    } else if (glyph == '⊷') {
-      state = CommandState.running;
-    } else {
-      state = output.any(_errorLine.hasMatch) ? CommandState.unknown : CommandState.succeeded;
-    }
+    final state = failed || output.any(_geminiExit.hasMatch)
+        ? CommandState.failed
+        : glyph == '⊷'
+        ? CommandState.running
+        : CommandState.unknown;
     return CommandEntry(subject, output: output, state: state);
   }
   if (_geminiEdits.contains(name)) {

@@ -1461,9 +1461,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get agentViewStateRunning => 'En curso';
 
   @override
-  String get agentViewStateSucceeded => 'Correcto';
-
-  @override
   String get agentViewStateFailed => 'Falló';
 
   @override

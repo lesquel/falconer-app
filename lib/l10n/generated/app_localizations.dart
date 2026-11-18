@@ -2619,12 +2619,6 @@ abstract class AppLocalizations {
   /// **'Running'**
   String get agentViewStateRunning;
 
-  /// No description provided for @agentViewStateSucceeded.
-  ///
-  /// In en, this message translates to:
-  /// **'Succeeded'**
-  String get agentViewStateSucceeded;
-
   /// No description provided for @agentViewStateFailed.
   ///
   /// In en, this message translates to:
