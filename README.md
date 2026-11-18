@@ -16,7 +16,7 @@ step in. It has three parts:
 - **[Tailscale](https://tailscale.com/)**: the private network between the phone and the
   computer. Nothing is exposed to the internet.
 
-> Status: v0.2.0. Android 9+. The release APK for most phones (`arm64-v8a`) is about 15.5 MB (the on-device speech engine adds about 11 MB; models are downloaded separately, only on request).
+> Status: v0.3.0. Android 9+. The release APK for most phones (`arm64-v8a`) is about 15.5 MB (the on-device speech engine adds about 11 MB; models are downloaded separately, only on request).
 > Download it from the [latest release](https://github.com/lesquel/falconer-app/releases/latest).
 
 ## Requirements
