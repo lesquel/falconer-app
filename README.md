@@ -4,8 +4,38 @@ Mobile client of [Falconer](https://github.com/lesquel/falconer): an SSH termina
 AI coding agents, with end-to-end encrypted push notifications and one-tap approvals.
 **Android first.** Website: <https://falconer-web.vercel.app/>.
 
+Falconer lets you leave an AI coding agent (Claude, Codex, Gemini and others) working on your
+computer and follow it from your phone: you get a notification when it needs you, approve or
+deny from the phone, and open a full terminal or a chat-like view of the agent when you want to
+step in. It has three parts:
+
+- **falconer-app** (this repository): the Flutter app on the phone.
+- **[falconer-hook](https://github.com/lesquel/falconer-hook)**: a small program on the computer
+  that the agents report to. It sends encrypted notifications and runs the commands the app asks
+  for over SSH.
+- **[Tailscale](https://tailscale.com/)**: the private network between the phone and the
+  computer. Nothing is exposed to the internet.
+
 > Status: v0.2.0. Android 9+. The release APK for most phones (`arm64-v8a`) is about 26.2 MB (the on-device speech engine adds about 11 MB; models are downloaded separately, only on request).
 > Download it from the [latest release](https://github.com/lesquel/falconer-app/releases/latest).
+
+## Requirements
+
+- An Android 9+ phone with a screen lock (PIN, pattern, password or biometrics). iOS and macOS
+  builds exist for development (see *Development*); Android is the supported target.
+- A computer running Linux or macOS with SSH enabled and [`falconer-hook`](https://github.com/lesquel/falconer-hook)
+  installed.
+- Tailscale on both, signed in with the same account. The app needs a network connection to
+  reach the computer.
+- Optional: a UnifiedPush distributor on the phone, such as **ntfy**, for notifications.
+
+## Quick start
+
+1. Install the APK from the [latest release](https://github.com/lesquel/falconer-app/releases/latest).
+2. Install `falconer-hook` on the computer and run `falconer-hook pair`.
+3. In the app, tap **Pair with QR**, scan the code and confirm on the computer.
+
+The full steps are in [Pairing a host](#pairing-a-host).
 
 ## What it does
 
@@ -14,19 +44,19 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
   public key. Private keys are encrypted
   under an auth-bound Android Keystore key: every new SSH connection asks for biometrics or the
   device credential, enforced by the hardware. Requires Android 9+ and a screen lock.
-- **QR pairing** — scan the code printed by `openmosh-hook pair` (or paste the `openmosh://pair`
-  link). The phone creates its keys, registers for UnifiedPush and pairs over a one-shot
+- **QR pairing** — scan the code printed by `falconer-hook pair` (or paste the `openmosh://pair`
+  link into the app; the link is not opened from other apps). The phone creates its keys, registers for UnifiedPush and pairs over a one-shot
   encrypted exchange inside the tailnet. The app waits up to 120 s while the host user confirms
   the phone (`y/N` on the host). The host's SSH key fingerprint arrives in the host's encrypted,
   token-authenticated reply and is pinned. Without a push distributor the phone still pairs, with
   notifications off; *Enable notifications* on the host screen turns them on later.
 - **SSH pairing** — for a host you already reach with your own key: add it manually, confirm its
-  host key fingerprint, then *Enable notifications* runs `openmosh-hook pair-ssh` over SSH.
+  host key fingerprint, then *Enable notifications* runs `falconer-hook pair-ssh` over SSH.
 - **Open Herdr / Shell** — the host screen has *Open Herdr*, which attaches the Herdr session
-  through `openmosh-hook attach herdr` so the computer follows the tab and workspace picked on
+  through `falconer-hook attach herdr` so the computer follows the tab and workspace picked on
   the phone (mirroring), and *Shell* for a plain login shell.
 - **View as agents (Herdr navigator)** — when the host's hook speaks the Herdr protocol
-  (`openmosh-hook version --json` reports `"herdr": 1`), *View as agents* sits next to *Open
+  (`falconer-hook version --json` reports `"herdr": 1`), *View as agents* sits next to *Open
   Herdr* and *Shell*. It lists the session's workspaces with how many agents and terminals each
   holds, a *needs you* badge when one waits on you, and which one the computer shows; create,
   rename and close them there. Tapping a workspace shows its tabs and panes: agents with live
@@ -60,13 +90,14 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
   scrollback each). In the background a dropped session waits for the app or the network to come
   back instead of retrying; after 10 minutes in the background every shell and SSH connection
   closes, and an open terminal reconnects when the app returns. Notifications do not use SSH.
-- **Voice input** — the chat's mic button dictates into the message, on the phone and offline.
+- **Voice input** — the chat's mic button dictates into the message. Speech is recognized on
+  the phone; the audio is never sent anywhere.
   Pick a speech model in *Settings → Voice input*: Parakeet TDT 0.6B v3 (recommended, 25
   European languages), Whisper Tiny, Base, Small and Turbo (99 languages), Moonshine Tiny
   (English only) or SenseVoice (Chinese, English, Japanese, Korean, Cantonese), each listed with
   its size and languages, or add your own sherpa-onnx `.tar.bz2` archive by HTTPS URL and
   SHA-256. A model is downloaded only when you tap *Download* (its size is shown first; progress
-  and cancel), once, and stays until you delete it; after that dictation needs no connection.
+  and cancel), once, and stays until you delete it.
   Built-in models come as separate files through Android's download manager, so the download
   keeps going with the app in the background or the screen off, resumes after a network drop and
   shows a notification; there is nothing to unpack. The
@@ -75,12 +106,12 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
   mic opens the voice settings.
 - **Sessions** — lists Herdr/tmux sessions and agents through the hook and attaches to one.
 - **Agent usage** — per host, the tokens the agents recorded on that computer (today and the
-  period, projects, models) and plan limits with their reset time, from `openmosh-hook usage`.
+  period, projects, models) and plan limits with their reset time, from `falconer-hook usage`.
   Only Codex records usage locally; other agents show why there is no data.
 - **Paired devices** — the host screen lists every device paired with that host
-  (`openmosh-hook devices list`): name, paired date, a stale push endpoint and which one is
+  (`falconer-hook devices list`): name, paired date, a stale push endpoint and which one is
   *this phone*. *Revoke* asks for confirmation, then for your fingerprint, face or screen lock,
-  and runs `openmosh-hook devices revoke`. Revoking this phone warns first that Falconer loses
+  and runs `falconer-hook devices revoke`. Revoking this phone warns first that Falconer loses
   access to that host.
 - **App lock** — optional, off by default (*Settings → Lock Falconer*). When on, Falconer asks
   for user verification when it opens and after more than 60 s in the background (timed on the
@@ -90,10 +121,14 @@ AI coding agents, with end-to-end encrypted push notifications and one-tap appro
   has no fingerprint, face or screen lock).
 - **Inbox** — encrypted pushes are decrypted on the phone; approve, deny or reply from the inbox
   or from a notification (which opens a confirm screen; nothing is sent from the lock screen).
-  Approval requests show the command or file being approved.
+  Approval requests show the command or file being approved. If the reply was typed into the
+  agent but the Enter key did not go through, the app says so and does not type it again.
+- **Web notifications** — for iOS, macOS or a browser, the Falconer Notifications web app shows a
+  code; paste it under *Settings → Web notifications*. The app shows which push service the code
+  points at and that it replaces the current destination before your hosts start using it.
 - **Notification hours** — an app-wide window (it may cross midnight) and one per host with
   notifications on. Outside it events still reach the inbox, without sound or a notification.
-- **Uploads** — pick an image or file, upload it over SFTP to `~/.openmosh/uploads/` and paste
+- **Uploads** — pick an image or file, upload it over SFTP to `~/.falconer/uploads/` and paste
   the path at the cursor.
 - **Home** — greets you, says which computer is waiting for an answer and puts the newest
   request in a big card you can open with one thumb; below are your computers with *Terminal*
@@ -129,23 +164,29 @@ downloaded at runtime.
 
 ## Security properties
 
+The threat model, how to report a vulnerability and the supported versions are in
+[`SECURITY.md`](./SECURITY.md). In short: the paired phone gets a shell on the computer, so the
+phone is protected (biometric-bound keys, app lock, no screenshots, no backups), and everything
+between the two is pinned and end-to-end encrypted.
+
 | Property | How |
 |---|---|
 | Host key pinning, no override | The Rust core aborts the handshake unless the server key matches the pinned `SHA256:` fingerprint. The mismatch screen has no "continue" button. |
-| Keys | Ed25519 generated on the device. SSH private keys are encrypted under an Android Keystore key created with user authentication required (`flutter_secure_storage` `AndroidOptions.biometric`, `enforceBiometrics`, `requireBiometricsPerOperation`): the hardware refuses to decrypt them without a fresh biometric or screen-lock prompt, on every new connection. A screen lock is therefore required, and Android 9+. Keys stored by earlier builds (Keystore-wrapped but not auth-bound) are found at startup and moved to the bound store right after the next successful user verification (or on their first unlock, whichever comes first); new keys are only ever written to the bound store. The push key is not auth-bound because the background engine decrypts notifications without a prompt; it can only read notifications. Import takes a pasted key or a key file from the system picker, plain or passphrase-protected (decrypted by the Rust core; the passphrase is not kept). The private key is never displayed unless revealed in the import field, and never copied; the picker's cached copy is deleted, and the clipboard is cleared (`clearPrimaryClip`) when the import dialog closes, whether the key was imported or the dialog was cancelled. Copied public keys and terminal text are marked `EXTRA_IS_SENSITIVE`. |
+| Keys | Ed25519 generated on the device. SSH private keys are encrypted under an Android Keystore key created with user authentication required (`flutter_secure_storage` `AndroidOptions.biometric`, `enforceBiometrics`, `requireBiometricsPerOperation`): the hardware refuses to decrypt them without a fresh biometric or screen-lock prompt, on every new connection. A screen lock is therefore required, and Android 9+. Keys stored by earlier builds (Keystore-wrapped but not auth-bound) are found at startup and moved to the bound store right after the next successful user verification (or on their first unlock, whichever comes first); new keys are only ever written to the bound store. The push key is not auth-bound because the background engine decrypts notifications without a prompt; it can only read notifications. Import takes a pasted key or a key file from the system picker, plain or passphrase-protected (decrypted by the Rust core; the passphrase is not kept). The private key is never displayed unless revealed in the import field, and never copied; the picker's cached copy is deleted, and the clipboard is cleared (`clearPrimaryClip`) when the import dialog closes, whether the key was imported or the dialog was cancelled. Copied public keys and terminal text (the selection bar and the Ctrl+Shift+C / Cmd+C shortcut) are marked `EXTRA_IS_SENSITIVE`. |
 | Push E2EE | X25519 + HKDF-SHA256 + XChaCha20-Poly1305, decrypted in pure Dart. Bodies with a wrong `kid`, version or tag are discarded. Verified against the hook's shared test vectors. |
 | Push replay | A decrypted push is dropped when its `ts` is more than 24 h old or more than 5 min in the future, or when the inbox already holds that event id with the same or a later `seq` (pushes can arrive out of order, so there is no per-host high-water mark). Resolved pushes reuse the event id with a new `seq`. The inbox sync over SSH reads from its own cursor (the hook's `last_seq`), so it still brings in anything dropped or lost. |
 | Device revocation | Paired devices are listed and revoked in the app (SEC-11); the hook removes the `authorized_keys` line and the push key together. Revoking needs a confirmation and a user verification. |
 | App lock | Optional: user verification on a cold start and after more than 60 s in the background, measured on the boot clock (`elapsedRealtime`: it counts deep sleep, and changing the phone's clock cannot skip it). While locked the app content is offstage (not painted, not in accessibility) and `FLAG_SECURE` still blocks screenshots. |
-| Live terminals | A terminal that is already connected (kept by "Keep sessions connected" or reusing an open connection) is shown only after user verification, unless the user was verified in the last 5 minutes; a refusal goes back. Pastes (chat, paths, the Paste shortcut, text shortcuts) drop ESC, C0 except tab/LF/CR, and C1 before bracketed paste, so pasted text cannot end the paste early. |
+| Live terminals | A terminal that is already connected (kept by "Keep sessions connected" or reusing an open connection) is shown only after user verification, unless the user was verified in the last 5 minutes; a refusal goes back. Pastes (chat, paths, the Paste key, Ctrl+V / Cmd+V on a hardware keyboard, text shortcuts) drop ESC, C0 except tab/LF/CR, and C1 before bracketed paste, so pasted text cannot end the paste early. |
 | On screen | Host addresses, public keys and fingerprints are masked (`100.••.••.67`, `SHA256:ab••••••yz`) until an eye button reveals them; the reveal resets when the screen is left. Host-provided text (event titles and summaries, agent titles, paths, project and device names) is stripped of bidi, zero-width and control characters, and cut text ends in `…`. Event and device ids must be b64u. |
 | Lock screen | Previews off by default: notifications say only `<host>: <agent> needs you`. Every notification is `VISIBILITY_PRIVATE`, so a secure lock screen shows Android's redacted version, never the host alias. |
 | Screens | `FLAG_SECURE` on the whole app, always: `MainActivity.onCreate` sets it before the first frame and no screen clears it (no screenshots, screen recording or recents thumbnail of the terminal, keys, pairing, inbox or answer screens). |
 | Backups | `allowBackup="false"`, backup and data-extraction rules exclude everything. |
+| External links | Blocked. The app registers no URL scheme or link handler, ignores any start route another app passes (`MainActivity.getInitialRoute`, go_router `overridePlatformDefaultLocation`, `FlutterDeepLinkingEnabled=false` on iOS and macOS) and always opens at home. Answers and Web Push codes never come from a URL: only the app's own notification buttons can preselect Approve or Deny (and the answer still needs user verification), and a Web Push code is accepted only when pasted in the app. |
 | Voice | Speech is decoded on the phone by sherpa-onnx; audio stays in memory and is never written to storage or sent. The microphone permission is requested only when the mic is tapped with a downloaded model. Models come over HTTPS only from an explicit tap. Built-in models are their int8 files from Hugging Face mirrors of the sherpa-onnx releases, each URL pinned to a commit and each file to its size and SHA-256; Android's DownloadManager fetches them into the app's external files folder, and each file is hashed natively while it is copied into private storage, so nothing is loaded from the shared folder and a mismatch deletes everything. If the app was closed mid-download, opening the voice settings finishes or cleans up that download, never starts a new one. A custom archive is checked against its SHA-256 (and size) before it is unpacked, in a background isolate, into a staging folder that refuses absolute paths, `..` and links. Files are renamed into place only when complete; partial or failed downloads are deleted. Custom models need an HTTPS URL and a SHA-256. The model is loaded on first use and freed after 2 minutes idle. |
-| Network | No HTTP calls from the app except speech model downloads the user starts. `network_security_config` refuses cleartext except `*.ts.net` (domain configs cannot express the 100.64.0.0/10 range; SSH and pairing use raw TCP inside the tailnet anyway). Pairing refuses codes whose address is outside 100.64.0.0/10. |
+| Network | The app needs the tailnet to reach a host. No HTTP calls from the app except speech model downloads the user starts. `network_security_config` refuses cleartext except `*.ts.net` (domain configs cannot express the 100.64.0.0/10 range; SSH and pairing use raw TCP inside the tailnet anyway). Pairing refuses codes whose address is outside 100.64.0.0/10. |
 | Pairing input | QR codes and host replies are untrusted: IPv4 octets must be plain decimal, device ids must be b64u (at most 64 characters), host-sent aliases are limited to 64 characters and stripped of control, bidi, zero-width and separator characters, and a reply that is not UTF-8 is refused. Code expiry and single use are enforced by the host, which rejects late or reused codes. The pairing TCP exchange has one 120 s deadline (the host asks its user to confirm) and a 16 KiB reply cap. |
-| Hook calls | The SSH exec request is always the constant `sh -s`, so the host's login shell (bash, fish, csh…) never parses app-built text. The script goes on the channel's stdin, then EOF: every argument of the `openmosh-hook` command is single-quoted (POSIX), and request JSON for `pair-ssh` is piped in with a quoted `printf '%s' '…' \| …`. |
+| Hook calls | The SSH exec request is always the constant `sh -s`, so the host's login shell (bash, fish, csh…) never parses app-built text. The script goes on the channel's stdin, then EOF: every argument of the `falconer-hook` command is single-quoted (POSIX), and request JSON for `pair-ssh` is piped in with a quoted `printf '%s' '…' \| …`. |
 | Uploads | Random hex prefix, names reduced to `[A-Za-z0-9._-]`, 50 MB limit, directory `0700`, files `0600`. Picked files copied into the app cache (by the app or by `file_picker`) are deleted after the upload, whether it succeeded or failed. |
 | No third parties | No Firebase/FCM, Google Play services, ML Kit, analytics or crash SDKs. QR scanning uses zxing-cpp (`flutter_zxing`). Logging goes through a redacting logger. |
 
@@ -156,14 +197,10 @@ downloaded at runtime.
 Installs and checks everything needed to build and run the app, then installs it on your phone.
 
 ```sh
-# While the repository is private (needs `gh auth login`)
-bash <(gh api -H 'Accept: application/vnd.github.raw' repos/lesquel/falconer-app/contents/scripts/install.sh)
-
-# Once it is public
 curl -fsSL https://raw.githubusercontent.com/lesquel/falconer-app/main/scripts/install.sh | bash
 ```
 
-The installer clones the repo into `~/openmosh-app` (`OPENMOSH_DIR` to change it; an existing
+The installer clones the repo into `~/falconer-app` (`OPENMOSH_DIR` to change it; an existing
 clone is fast-forwarded) and runs `scripts/setup.sh`. From a clone, run `scripts/setup.sh`
 directly. It checks every item, asks one confirmation, fixes what is missing, waits for the
 device, then builds and installs.
@@ -223,7 +260,7 @@ Generated files are committed: `lib/shared/bridge/**`, `rust/src/frb_generated.r
 ### Shared crypto vectors
 
 The wire-contract tests read `test/fixtures/vectors/{push_v1,pair_v1}.json`, copied from
-`openmosh-hook` (`hook/tests/vectors/`). When the hook regenerates them, copy them again:
+`falconer-hook` (`hook/tests/vectors/`). When the hook regenerates them, copy them again:
 
 ```sh
 cp ../hook/tests/vectors/push_v1.json ../hook/tests/vectors/pair_v1.json test/fixtures/vectors/
@@ -236,13 +273,14 @@ If the files are missing the vector tests are skipped with `vectors pending`.
 1. Install Tailscale on the host and the phone, signed in with the **same Tailscale account**.
 2. Install a UnifiedPush distributor on the phone, for example **ntfy** (F-Droid or GitHub
    releases), and open it once. Optional: without one the phone pairs with notifications off.
-3. Install `openmosh-hook` on the host (see the hook's README) and run:
+3. Install `falconer-hook` on the host (see the hook's README) and run:
    ```sh
-   openmosh-hook pair
+   falconer-hook pair
    ```
-4. In the app: **Hosts → Pair with QR** (or *Scan pairing code* on the empty home), scan the QR, check the host address, choose
-   a name for the phone and tap **Pair**, then answer `y` on the host within 60 s. The code is
-   single-use and expires after 5 minutes.
+4. In the app: **Hosts → Pair with QR** (or *Scan pairing code* on the empty home), scan the QR
+   (or paste the link shown on the host), check the host address, choose a name for the phone and
+   tap **Pair**, then answer `y` on the host when it asks. The code is single-use and expires
+   after 5 minutes.
 5. Open the host and tap **Open Herdr**, **Shell** or **Load sessions**. The first connection asks for your
    fingerprint/PIN.
 
@@ -253,6 +291,20 @@ fingerprint with `ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub` on the host,
 ## Architecture
 
 Clean Architecture by feature. See [`ARCHITECTURE.md`](./ARCHITECTURE.md).
+
+## Legacy names
+
+The project was first called OpenMosh. A few identifiers keep that name for compatibility with
+installed apps and paired hosts: the Dart package (`openmosh`), the Android application id
+(`dev.openmosh.openmosh`) and platform channels (`dev.openmosh/*`), the pairing link scheme
+(`openmosh://pair`), the installer's `OPENMOSH_DIR` variable, and the fallback to an
+`openmosh-hook` binary on hosts that have not been updated to `falconer-hook`.
+
+## Contributing
+
+Bug reports, ideas and pull requests are welcome. Read [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+and the [Code of Conduct](./CODE_OF_CONDUCT.md). Report security problems privately as described
+in [`SECURITY.md`](./SECURITY.md), never in a public issue.
 
 ## License
 
