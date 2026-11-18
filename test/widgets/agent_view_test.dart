@@ -409,7 +409,11 @@ void main() {
   });
 
   testWidgets('a long history builds only the paragraphs on screen, newest first', (t) async {
-    repo.screen = PaneScreen(lines: [for (var i = 0; i < 300; i++) ...['para $i', '']]);
+    repo.screen = PaneScreen(
+      lines: [
+        for (var i = 0; i < 300; i++) ...['para $i', ''],
+      ],
+    );
     await pump(t);
     expect(find.text('para 299'), findsOneWidget);
     final built = find.textContaining('para ', skipOffstage: false).evaluate().length;

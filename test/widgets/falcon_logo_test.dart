@@ -5,14 +5,17 @@ import 'package:openmosh/shared/ui/atoms/falcon_logo.dart';
 import 'package:openmosh/shared/ui/molecules/themed_falcon.dart';
 
 void main() {
-  testWidgets('falcon logo renders the bundled artwork at the requested size with a screen-reader label', (t) async {
-    await t.pumpWidget(const MaterialApp(home: Center(child: FalconLogo(size: 120))));
-    expect(t.getSize(find.byType(FalconLogo)), const Size(120, 120));
-    expect(find.bySemanticsLabel('Falconer logo'), findsOneWidget);
-    final image = t.widget<Image>(find.byType(Image)).image as AssetImage;
-    expect(image.assetName, FalconLogo.asset);
-    expect(t.takeException(), isNull);
-  });
+  testWidgets(
+    'falcon logo renders the bundled artwork at the requested size with a screen-reader label',
+    (t) async {
+      await t.pumpWidget(const MaterialApp(home: Center(child: FalconLogo(size: 120))));
+      expect(t.getSize(find.byType(FalconLogo)), const Size(120, 120));
+      expect(find.bySemanticsLabel('Falconer logo'), findsOneWidget);
+      final image = t.widget<Image>(find.byType(Image)).image as AssetImage;
+      expect(image.assetName, FalconLogo.asset);
+      expect(t.takeException(), isNull);
+    },
+  );
 
   testWidgets('decorative falcon is hidden from screen readers', (t) async {
     await t.pumpWidget(const MaterialApp(home: Center(child: FalconLogo(semanticLabel: null))));

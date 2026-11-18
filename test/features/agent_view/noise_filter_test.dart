@@ -19,17 +19,37 @@ bool Function(String) _reference(List<String> noise) {
   return (t) => t.isNotEmpty && t.length <= 160 && re.hasMatch(t);
 }
 
-String _mixed(String s) =>
-    String.fromCharCodes([for (var i = 0; i < s.length; i++) i.isEven ? s.toUpperCase().codeUnitAt(i) : s.codeUnitAt(i)]);
+String _mixed(String s) => String.fromCharCodes([
+  for (var i = 0; i < s.length; i++) i.isEven ? s.toUpperCase().codeUnitAt(i) : s.codeUnitAt(i),
+]);
 
 void main() {
-  const ids = [null, 'claude', 'codex', 'pi', 'gemini', 'kiro', 'opencode', 'copilot', 'cursor', 'amp', 'aider', 'other'];
+  const ids = [
+    null,
+    'claude',
+    'codex',
+    'pi',
+    'gemini',
+    'kiro',
+    'opencode',
+    'copilot',
+    'cursor',
+    'amp',
+    'aider',
+    'other',
+  ];
 
   for (final id in ids) {
     test('isNoise answers like the case-insensitive regex for ${id ?? 'shell'}', () {
       final detector = detectorFor(id);
       final ref = _reference(detector.noise);
-      final fragments = [..._common, ...detector.noise, 'accept edits on', 'context left', 'tokens:'];
+      final fragments = [
+        ..._common,
+        ...detector.noise,
+        'accept edits on',
+        'context left',
+        'tokens:',
+      ];
       final samples = <String>[
         '',
         'plain agent text',
