@@ -21,13 +21,12 @@ import '../features/voice/presentation/containers/voice_settings_container.dart'
 import '../features/webpush/presentation/containers/webpush_container.dart';
 import '../l10n/l10n.dart';
 import '../shared/hook/domain/hook_command.dart';
+import '../shared/domain/route_id.dart';
 import 'home_shell.dart';
-
-final _id = RegExp(r'^[A-Za-z0-9_-]{1,128}$');
 
 String? _guardIds(GoRouterState s) {
   for (final v in s.pathParameters.values) {
-    if (!_id.hasMatch(v)) return '/';
+    if (!isRouteId(v)) return '/';
   }
   return null;
 }

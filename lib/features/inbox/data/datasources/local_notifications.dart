@@ -8,6 +8,12 @@ import '../../domain/entities/inbox_event.dart';
 import '../../domain/entities/suggested_answer.dart';
 import '../../domain/repositories/inbox_ports.dart';
 import '../models/notification_content.dart';
+import '../models/notification_tag.dart';
+import '../../../../shared/domain/route_id.dart';
+
+/// What [LocalEventNotifier.show] attaches: the event route plus its tag.
+String signedNotificationPayload(NotificationTagger tagger, String hostId, String eventId) =>
+    tagger.sign(notificationPayload(hostId, eventId));
 
 typedef NotificationTap = void Function(String path, SuggestedAnswer? answer);
 
@@ -16,14 +22,42 @@ typedef NotificationTap = void Function(String path, SuggestedAnswer? answer);
 /// path, so the router never reads it from a URL.
 typedef NotificationRoute = ({String path, SuggestedAnswer? answer});
 
-NotificationRoute notificationRoute(String payload, String? actionId) => (
-  path: Uri.parse(payload).path,
-  answer: actionId == null || actionId == 'open' ? null : SuggestedAnswer(actionId),
-);
+const NotificationRoute homeRoute = (path: '/', answer: null);
+
+/// The exported launcher activity accepts a `SELECT_NOTIFICATION` intent from
+/// any app, with any `payload` and `actionId`. So a payload is routed only
+/// when [tagger] verifies it as one this install posted, and only to
+/// `/inbox/<host>/<event>`; the button's answer is honored only then.
+/// Anything else opens home with no answer.
+NotificationRoute notificationRoute(String payload, String? actionId, NotificationTagger tagger) {
+  final route = tagger.verify(payload);
+  if (route == null) return homeRoute;
+  final Uri uri;
+  try {
+    uri = Uri.parse(route);
+  } on FormatException {
+    return homeRoute;
+  }
+  final s = uri.pathSegments;
+  final valid =
+      route == uri.path &&
+      !uri.hasScheme &&
+      !uri.hasAuthority &&
+      s.length == 3 &&
+      s[0] == 'inbox' &&
+      isRouteId(s[1]) &&
+      isRouteId(s[2]);
+  if (!valid) return homeRoute;
+  return (
+    path: route,
+    answer: actionId == null || actionId == 'open' ? null : SuggestedAnswer(actionId),
+  );
+}
 
 class LocalEventNotifier implements EventNotifier {
-  LocalEventNotifier(this._plugin);
+  LocalEventNotifier(this._plugin, this._tagger);
   final FlutterLocalNotificationsPlugin _plugin;
+  final NotificationTagger _tagger;
 
   Future<void> requestPermission() async {
     await _plugin
@@ -42,7 +76,7 @@ class LocalEventNotifier implements EventNotifier {
     final d = await _plugin.getNotificationAppLaunchDetails();
     final r = d?.notificationResponse;
     if (d?.didNotificationLaunchApp != true || r?.payload == null) return null;
-    return notificationRoute(r!.payload!, r.actionId);
+    return notificationRoute(r!.payload!, r.actionId, _tagger);
   }
 
   static const channelId = 'agent_events';
@@ -53,7 +87,10 @@ class LocalEventNotifier implements EventNotifier {
     requestSoundPermission: false,
   );
 
-  static Future<FlutterLocalNotificationsPlugin> init({NotificationTap? onTap}) async {
+  static Future<FlutterLocalNotificationsPlugin> init(
+    NotificationTagger tagger, {
+    NotificationTap? onTap,
+  }) async {
     final plugin = FlutterLocalNotificationsPlugin();
     await plugin.initialize(
       settings: const InitializationSettings(
@@ -62,7 +99,7 @@ class LocalEventNotifier implements EventNotifier {
         iOS: _darwinSettings,
         macOS: _darwinSettings,
       ),
-      onDidReceiveNotificationResponse: (r) => _route(r, onTap),
+      onDidReceiveNotificationResponse: (r) => _route(r, tagger, onTap),
     );
     await plugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
@@ -77,10 +114,9 @@ class LocalEventNotifier implements EventNotifier {
     return plugin;
   }
 
-  static void _route(NotificationResponse r, NotificationTap? onTap) {
-    final p = r.payload;
-    if (p == null || onTap == null) return;
-    final route = notificationRoute(p, r.actionId);
+  static void _route(NotificationResponse r, NotificationTagger tagger, NotificationTap? onTap) {
+    if (onTap == null) return;
+    final route = notificationRoute(r.payload ?? '', r.actionId, tagger);
     onTap(route.path, route.answer);
   }
 
@@ -99,7 +135,7 @@ class LocalEventNotifier implements EventNotifier {
       id: notificationId(e.hostId, e.id),
       title: content.title,
       body: content.body,
-      payload: notificationPayload(e.hostId, e.id),
+      payload: signedNotificationPayload(_tagger, e.hostId, e.id),
       notificationDetails: NotificationDetails(android: androidDetails(actions)),
     );
   }

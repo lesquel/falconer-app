@@ -5,6 +5,7 @@ library;
 import '../features/hosts/data/repositories/drift_host_repository.dart';
 import '../features/inbox/data/datasources/local_notifications.dart';
 import '../features/inbox/data/datasources/unifiedpush_datasource.dart';
+import '../features/inbox/data/models/notification_tag.dart';
 import '../features/inbox/data/models/push_crypto.dart';
 import '../features/inbox/data/repositories/crypto_push_opener.dart';
 import '../features/inbox/data/repositories/drift_inbox_repository.dart';
@@ -28,7 +29,13 @@ final class PushRuntime {
   static Future<PushRuntime> start({NotificationTap? onTap}) async {
     final db = AppDatabase.open();
     final storage = SecureKeyStorage();
-    final notifier = LocalEventNotifier(await LocalEventNotifier.init(onTap: onTap));
+    // Both engines load the same per-install key from the push namespace,
+    // so a tap verifies what the background engine posted.
+    final tagger = await NotificationTagger.load(storage);
+    final notifier = LocalEventNotifier(
+      await LocalEventNotifier.init(tagger, onTap: onTap),
+      tagger,
+    );
     final endpoints = UnifiedPushDatasource((
       read: () => storage.readPush(_endpointKey),
       write: (v) => storage.writePush(_endpointKey, v),
