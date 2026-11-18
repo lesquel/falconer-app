@@ -1185,7 +1185,7 @@
   "herdrWorkspaceGone": "This workspace is no longer open.",
   "herdrPickWorkspace": "Pick a workspace to see its terminals.",
   "webPushTitle": "Web notifications (iOS / browser)",
-  "webPushExplain": "Install the Falconer Notifications web app, enable notifications there and send the code here.",
+  "webPushExplain": "Install the Falconer Notifications web app, enable notifications there, then copy its code and paste it here. Links that open the app are not accepted.",
   "webPushStatusOff": "Not set",
   "webPushStatusOn": "Active via {service}",
   "@webPushStatusOn": {
@@ -1203,6 +1203,15 @@
   "webPushScreenTitle": "Web notifications",
   "webPushConfirmBody": "Your paired hosts will use this registration to notify this device through the web app.",
   "webPushServiceLabel": "Push service",
+  "webPushDestination": "Notifications will be sent to {service}.",
+  "@webPushDestination": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "webPushReplaces": "This replaces where your paired hosts send web notifications. Continue only if you copied this code from your own Falconer Notifications web app.",
   "webPushSending": "Sending to your hosts…",
   "webPushNoHosts": "No paired hosts yet. Pair a host and it will receive this automatically.",
   "webPushHostDelivered": "{host}: delivered",

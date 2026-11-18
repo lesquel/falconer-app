@@ -1544,7 +1544,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get webPushExplain =>
-      'Instala la web app Falconer Notifications, activa las notificaciones allí y envía el código aquí.';
+      'Instala la web app Falconer Notifications, activa las notificaciones allí, copia su código y pégalo aquí. No se aceptan enlaces que abran la app.';
 
   @override
   String get webPushStatusOff => 'Sin configurar';
@@ -1578,6 +1578,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get webPushServiceLabel => 'Servicio push';
+
+  @override
+  String webPushDestination(String service) {
+    return 'Las notificaciones se enviarán a $service.';
+  }
+
+  @override
+  String get webPushReplaces =>
+      'Esto reemplaza el destino al que tus equipos vinculados envían las notificaciones web. Continúa solo si copiaste este código de tu propia web app Falconer Notifications.';
 
   @override
   String get webPushSending => 'Enviando a tus equipos…';

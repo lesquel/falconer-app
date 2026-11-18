@@ -2742,7 +2742,7 @@ abstract class AppLocalizations {
   /// No description provided for @webPushExplain.
   ///
   /// In en, this message translates to:
-  /// **'Install the Falconer Notifications web app, enable notifications there and send the code here.'**
+  /// **'Install the Falconer Notifications web app, enable notifications there, then copy its code and paste it here. Links that open the app are not accepted.'**
   String get webPushExplain;
 
   /// No description provided for @webPushStatusOff.
@@ -2804,6 +2804,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Push service'**
   String get webPushServiceLabel;
+
+  /// No description provided for @webPushDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications will be sent to {service}.'**
+  String webPushDestination(String service);
+
+  /// No description provided for @webPushReplaces.
+  ///
+  /// In en, this message translates to:
+  /// **'This replaces where your paired hosts send web notifications. Continue only if you copied this code from your own Falconer Notifications web app.'**
+  String get webPushReplaces;
 
   /// No description provided for @webPushSending.
   ///

@@ -20,8 +20,9 @@ IconData webPushHostIcon(WebPushHostStatus s) => switch (s) {
   WebPushHostStatus.hookTooOld => Icons.system_update_alt,
 };
 
-/// Confirmation screen for a registration link: push service only (never
-/// the keys), the confirm button, then the per-host results.
+/// Confirmation screen for a pasted registration code: the push service host
+/// it points at (never the keys), a warning that it replaces the current
+/// destination, the confirm button, then the per-host results.
 class WebPushView extends StatelessWidget {
   const WebPushView({
     super.key,
@@ -72,6 +73,18 @@ class WebPushView extends StatelessWidget {
             ),
           ),
           if (sent == null) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                l.webPushDestination(serviceHost!),
+                key: const Key('webpush_destination'),
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(l.webPushReplaces, key: const Key('webpush_replaces')),
+            ),
             Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(l.webPushConfirmBody)),
             FilledButton(
               key: const Key('webpush_confirm'),

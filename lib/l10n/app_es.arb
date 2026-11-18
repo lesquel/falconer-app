@@ -441,7 +441,7 @@
   "herdrWorkspaceGone": "Este workspace ya no está abierto.",
   "herdrPickWorkspace": "Elige un workspace para ver sus terminales.",
   "webPushTitle": "Notificaciones web (iOS / navegador)",
-  "webPushExplain": "Instala la web app Falconer Notifications, activa las notificaciones allí y envía el código aquí.",
+  "webPushExplain": "Instala la web app Falconer Notifications, activa las notificaciones allí, copia su código y pégalo aquí. No se aceptan enlaces que abran la app.",
   "webPushStatusOff": "Sin configurar",
   "webPushStatusOn": "Activas mediante {service}",
   "@webPushStatusOn": {
@@ -459,6 +459,15 @@
   "webPushScreenTitle": "Notificaciones web",
   "webPushConfirmBody": "Tus equipos vinculados usarán este registro para notificar a este dispositivo mediante la web app.",
   "webPushServiceLabel": "Servicio push",
+  "webPushDestination": "Las notificaciones se enviarán a {service}.",
+  "@webPushDestination": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "webPushReplaces": "Esto reemplaza el destino al que tus equipos vinculados envían las notificaciones web. Continúa solo si copiaste este código de tu propia web app Falconer Notifications.",
   "webPushSending": "Enviando a tus equipos…",
   "webPushNoHosts": "Aún no hay equipos vinculados. Vincula uno y lo recibirá automáticamente.",
   "webPushHostDelivered": "{host}: entregado",
