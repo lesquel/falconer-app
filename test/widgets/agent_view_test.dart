@@ -252,10 +252,8 @@ void main() {
 
     final tool = find.byKey(const Key('text-tool-3'));
     expect(tool, findsOneWidget);
-    final code = t.widget<SelectableText>(
-      find.descendant(of: tool, matching: find.byType(SelectableText)),
-    );
-    expect(code.style?.fontFamily, 'monospace');
+    expect(find.descendant(of: tool, matching: find.text('Command')), findsOneWidget);
+    expect(find.descendant(of: tool, matching: find.byIcon(Icons.terminal)), findsOneWidget);
   });
 
   testWidgets('a plain terminal opens graphic too, titled Terminal', (t) async {
@@ -328,6 +326,8 @@ void main() {
       ],
     );
     await t.tap(find.byTooltip('Attach images or files'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('Attach images or files').last);
     await t.pumpAndSettle();
     await t.tap(find.text('File'));
     await t.pumpAndSettle();

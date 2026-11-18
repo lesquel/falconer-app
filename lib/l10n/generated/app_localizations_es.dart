@@ -1452,6 +1452,35 @@ class AppLocalizationsEs extends AppLocalizations {
       'Se muestra el último estado; intentando conectar con Herdr de nuevo.';
 
   @override
+  String get agentViewCommand => 'Comando';
+
+  @override
+  String get agentViewEdit => 'Edición';
+
+  @override
+  String get agentViewStateRunning => 'En curso';
+
+  @override
+  String get agentViewStateSucceeded => 'Correcto';
+
+  @override
+  String get agentViewStateFailed => 'Falló';
+
+  @override
+  String get agentViewShowLess => 'Mostrar menos';
+
+  @override
+  String agentViewShowMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Mostrar $count líneas más',
+      one: 'Mostrar 1 línea más',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get agentViewLoadEarlier => 'Cargar anteriores';
 
   @override

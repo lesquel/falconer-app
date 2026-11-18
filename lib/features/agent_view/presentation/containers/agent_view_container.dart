@@ -211,6 +211,7 @@ class _AgentViewContainerState extends ConsumerState<AgentViewContainer>
         return AgentScreenView(
           // A pane without an agent is a plain terminal.
           title: screen == null ? widget.paneId : screen.agent ?? context.l10n.herdrShellPane,
+          subtitle: widget.session,
           status: screen?.status ?? HerdrStatus.unknown,
           blocks: _ctrl.blocks,
           loaded: screen != null,
@@ -233,6 +234,7 @@ class _AgentViewContainerState extends ConsumerState<AgentViewContainer>
             attachments: List.unmodifiable(_attachments),
             busy: _sending || _uploading,
             autofocus: false,
+            compact: true,
             onChanged: (t) => _draft = t,
             onSend: (t) => unawaited(_send(t)),
             onAttach: () => unawaited(_attach()),

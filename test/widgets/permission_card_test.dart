@@ -72,7 +72,7 @@ void main() {
     final cardBottom = t.getBottomLeft(card).dy;
     expect(cardBottom, lessThanOrEqualTo(t.getTopLeft(find.byKey(const Key('composer'))).dy));
     expect(cardBottom, lessThanOrEqualTo(t.getTopLeft(find.byKey(const Key('agent-key-esc'))).dy));
-    expect(find.text('claude needs your permission'), findsOneWidget);
+    expect(find.text('Claude Code needs your permission'), findsOneWidget);
     expect(find.text('Do you want to proceed?'), findsOneWidget);
   });
 
@@ -92,7 +92,7 @@ void main() {
         ]),
       ],
     );
-    expect(find.text('claude is asking'), findsOneWidget);
+    expect(find.text('Claude Code is asking'), findsOneWidget);
     expect(find.byKey(const Key('agent-permission-detail')), findsNothing);
   });
 
@@ -121,14 +121,14 @@ void main() {
           (button(i) as ButtonStyleButton).style?.backgroundColor?.resolve(const {});
       Color? fg(int i) =>
           (button(i) as ButtonStyleButton).style?.foregroundColor?.resolve(const {});
-      expect(bg(0), c.accent);
-      expect(bg(1), isNot(c.accent));
-      expect(fg(2), c.danger);
+      expect(bg(0), c.warning);
+      expect(bg(1), isNot(c.warning));
+      expect(fg(2), c.foreground);
       double ratio(Color a, Color b) => contrastRatio(a.toARGB32(), b.toARGB32());
       expect(ratio(fg(0)!, bg(0)!), greaterThanOrEqualTo(4.5));
       expect(ratio(fg(1)!, bg(1)!), greaterThanOrEqualTo(4.5));
-      expect(ratio(fg(2)!, c.surface), greaterThanOrEqualTo(4.5));
-      expect(ratio(fg(3)!, c.surface), greaterThanOrEqualTo(4.5));
+      expect(ratio(fg(2)!, c.warningSurface), greaterThanOrEqualTo(4.5));
+      expect(ratio(fg(3)!, c.warningSurface), greaterThanOrEqualTo(4.5));
       for (var i = 0; i < 4; i++) {
         expect(t.getSize(find.byKey(Key('choice-$i'))).height, greaterThanOrEqualTo(48));
       }
@@ -157,6 +157,46 @@ void main() {
     expect(s.length, lessThanOrEqualTo(45));
     expect(s, endsWith('…'));
     expect(s, startsWith("Yes, and don't ask again"));
+  });
+
+  testWidgets('short allow and deny sit side by side and keep their own keys', (t) async {
+    final sent = <List<String>>[];
+    await pump(
+      t,
+      blocks: const [
+        ChoiceBlock('Allow this action?', [
+          ChoiceOption('Yes', ['y'], true, ChoiceKind.allow),
+          ChoiceOption('Always', ['t'], false, ChoiceKind.allowAlways),
+          ChoiceOption('No', ['n'], false, ChoiceKind.deny),
+        ]),
+      ],
+      onChoice: (keys) async {
+        sent.add(keys);
+        return null;
+      },
+    );
+    final allow = find.byKey(const Key('choice-0'));
+    final deny = find.byKey(const Key('choice-2'));
+    expect(t.getTopLeft(allow).dy, t.getTopLeft(deny).dy);
+    expect(t.getTopLeft(allow).dx, lessThan(t.getTopLeft(deny).dx));
+    await t.tap(deny);
+    await t.pump();
+    expect(sent, [
+      ['n'],
+    ]);
+  });
+
+  testWidgets('long labels stay stacked, never side by side', (t) async {
+    await pump(t);
+    expect(
+      t.getTopLeft(find.byKey(const Key('choice-0'))).dy,
+      lessThan(t.getTopLeft(find.byKey(const Key('choice-2'))).dy),
+    );
+  });
+
+  test('the key hint is removed from the question', () {
+    expect(choiceQuestion('Allow this action? [y/n/t]:'), 'Allow this action?');
+    expect(choiceQuestion('Use [a] or [b]?'), 'Use [a] or [b]?');
   });
 
   testWidgets("the agent's current option is marked", (t) async {

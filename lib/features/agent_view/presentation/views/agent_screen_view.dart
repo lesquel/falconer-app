@@ -7,13 +7,30 @@ import '../../../../shared/ui/tokens/mosh_colors.dart';
 import '../../../herdr/domain/entities/herdr_snapshot.dart';
 import '../../../herdr/presentation/views/herdr_status.dart';
 import '../../domain/entities/screen_block.dart';
+import '../../domain/usecases/agent_entries.dart';
+import 'agent_entry_views.dart';
 import 'permission_card.dart';
 
-export 'permission_card.dart' show shortChoiceLabel;
+export 'permission_card.dart' show choiceQuestion, shortChoiceLabel;
 
-/// Graphic view of an agent's pane: text as readable cards, a menu the agent
-/// waits on as big buttons, and a composer for the agent's input line.
-/// Purely presentational.
+/// The product name of an agent id Herdr reports; other titles stay as is.
+String agentDisplayName(String id) => switch (id.toLowerCase()) {
+  'claude' => 'Claude Code',
+  'codex' => 'Codex',
+  'gemini' => 'Gemini CLI',
+  'cursor' => 'Cursor',
+  'copilot' => 'GitHub Copilot',
+  'kiro' => 'Kiro',
+  'opencode' => 'OpenCode',
+  'aider' => 'Aider',
+  'amp' => 'Amp',
+  'pi' => 'Pi',
+  _ => id,
+};
+
+/// Graphic view of an agent's pane: each kind of output drawn differently, a
+/// menu the agent waits on as big buttons, and a composer for the agent's
+/// input line. Purely presentational.
 class AgentScreenView extends StatelessWidget {
   const AgentScreenView({
     super.key,
@@ -25,6 +42,7 @@ class AgentScreenView extends StatelessWidget {
     required this.onTerminalMode,
     required this.composer,
     this.status = HerdrStatus.unknown,
+    this.subtitle,
     this.error,
     this.onBack,
     this.onEnter,
@@ -34,6 +52,9 @@ class AgentScreenView extends StatelessWidget {
   });
 
   final String title;
+
+  /// Second header line: the Herdr session.
+  final String? subtitle;
   final HerdrStatus status;
   final List<ScreenBlock> blocks;
 
@@ -61,6 +82,7 @@ class AgentScreenView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = MoshColors.of(context);
+    final name = agentDisplayName(title);
     final draft = blocks.whereType<InputBlock>().map((b) => b.draft.trim()).firstOrNull ?? '';
     // The menu the agent waits on is docked above the composer, not in the
     // scrolling list (the parser emits at most one, at the bottom).
@@ -107,8 +129,8 @@ class AgentScreenView extends StatelessWidget {
           final i = shown.length - 1 - index;
           final b = shown[i];
           return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: _TextCard(b.text, role: b.role, key: Key('text-${b.role.name}-$i')),
+            padding: const EdgeInsets.only(bottom: 10),
+            child: AgentEntryView(entryFor(b), key: Key('text-${b.role.name}-$i')),
           );
         },
       );
@@ -116,30 +138,48 @@ class AgentScreenView extends StatelessWidget {
     return SafeArea(
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
-            child: Row(
-              children: [
-                if (onBack != null) ...[
-                  CircleIconButton(icon: Icons.chevron_left, tooltip: l.back, onPressed: onBack),
+          SizedBox(
+            height: 60,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 4, 0),
+              child: Row(
+                children: [
+                  if (onBack != null) ...[
+                    CircleIconButton(icon: Icons.chevron_left, tooltip: l.back, onPressed: onBack),
+                    const SizedBox(width: 10),
+                  ],
+                  _Monogram(name),
                   const SizedBox(width: 10),
-                ],
-                Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                        ),
+                        if (subtitle != null)
+                          Text(
+                            subtitle!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: c.muted, fontSize: 12.5),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-                if (loaded) HerdrStatusBadge(status),
-                IconButton(
-                  key: const Key('agent-terminal-mode'),
-                  tooltip: l.herdrTerminalMode,
-                  icon: const Icon(Icons.terminal),
-                  onPressed: onTerminalMode,
-                ),
-              ],
+                  if (loaded) _StatusPill(status),
+                  IconButton(
+                    key: const Key('agent-terminal-mode'),
+                    tooltip: l.herdrTerminalMode,
+                    icon: const Icon(Icons.terminal),
+                    onPressed: onTerminalMode,
+                  ),
+                ],
+              ),
             ),
           ),
           if (loaded && error != null)
@@ -155,7 +195,7 @@ class AgentScreenView extends StatelessWidget {
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 640),
                   child: PermissionCard(
-                    agent: title,
+                    agent: name,
                     block: choice,
                     onChoice:
                         onChoice ??
@@ -190,61 +230,63 @@ class AgentScreenView extends StatelessWidget {
   }
 }
 
-/// Output that looks like code, a table or a tree keeps its columns.
-bool looksLikeCode(String text) {
-  final lines = text.split('\n');
-  return lines.any(
-    (l) =>
-        l.startsWith('  ') ||
-        RegExp(r'[{};]\s*$|^\s*[$#>] |[│├└─┌┐┘]|^\s*(\d+\s*[|:]|[+-]{1}\s)').hasMatch(l),
-  );
-}
-
-/// A paragraph by who wrote it: the user's prompt as a right-aligned accent
-/// bubble, the agent's reply as a left card, a tool run as a monospace card.
-class _TextCard extends StatelessWidget {
-  const _TextCard(this.text, {super.key, required this.role});
-  final String text;
-  final TextRole role;
+/// The agent's initial on a tile.
+class _Monogram extends StatelessWidget {
+  const _Monogram(this.name);
+  final String name;
 
   @override
   Widget build(BuildContext context) {
     final c = MoshColors.of(context);
-    const mono = TextStyle(fontFamily: 'monospace', fontSize: 13, height: 1.3);
-    const prose = TextStyle(fontSize: 15, height: 1.35);
-    Widget card(Color color, TextStyle style, BorderRadius radius) => Material(
-      color: color,
-      borderRadius: radius,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: SelectableText(text, style: style),
+    return ExcludeSemantics(
+      child: Container(
+        width: 36,
+        height: 36,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(color: c.surfaceHigh, borderRadius: BorderRadius.circular(10)),
+        child: Text(
+          name.isEmpty ? '?' : name.characters.first.toUpperCase(),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+        ),
       ),
     );
-    final radius = BorderRadius.circular(MoshRadii.key);
-    const tail = Radius.circular(4);
-    return switch (role) {
-      TextRole.user => Padding(
-        padding: const EdgeInsets.only(left: 48),
-        child: Align(
-          alignment: Alignment.centerRight,
-          child: card(
-            c.accent,
-            prose.copyWith(color: c.onAccent),
-            radius.copyWith(bottomRight: tail),
-          ),
-        ),
-      ),
-      TextRole.agent => Padding(
-        padding: const EdgeInsets.only(right: 24),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: looksLikeCode(text)
-              ? card(c.surfaceHigh, mono, radius)
-              : card(c.surface, prose, radius.copyWith(bottomLeft: tail)),
-        ),
-      ),
-      TextRole.tool => card(c.surfaceHigh, mono, radius),
+  }
+}
+
+/// The agent's state with an icon and a label, never color alone.
+class _StatusPill extends StatelessWidget {
+  const _StatusPill(this.status);
+  final HerdrStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = MoshColors.of(context);
+    final (IconData icon, Color fg, Color? bg) = switch (status) {
+      HerdrStatus.blocked => (Icons.notifications_active, c.onWarning, c.warning),
+      HerdrStatus.working => (Icons.autorenew, c.foreground, c.surfaceHigh),
+      HerdrStatus.done => (Icons.check, c.foreground, c.surfaceHigh),
+      _ => (Icons.radio_button_unchecked, c.muted, null),
     };
+    return Container(
+      height: 28,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(14),
+        border: bg == null ? Border.all(color: c.outline) : null,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: fg),
+          const SizedBox(width: 5),
+          Text(
+            HerdrStatusBadge.label(context.l10n, status),
+            style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w700),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -262,11 +304,17 @@ class _KeysRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 3),
         child: Tooltip(
           message: tooltip,
-          child: OutlinedButton(
+          child: TextButton(
             key: Key('agent-key-$name'),
-            style: OutlinedButton.styleFrom(
+            style: TextButton.styleFrom(
               minimumSize: const Size.fromHeight(44),
               padding: EdgeInsets.zero,
+              foregroundColor: MoshColors.of(context).muted,
+              textStyle: const TextStyle(
+                fontFamily: 'Manrope',
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             onPressed: onPressed ?? () => onKeys([name]),
             child: child,

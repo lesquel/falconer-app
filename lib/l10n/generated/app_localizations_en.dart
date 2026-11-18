@@ -1445,6 +1445,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get herdrOutOfDate => 'Showing the last state; trying to reach Herdr again.';
 
   @override
+  String get agentViewCommand => 'Command';
+
+  @override
+  String get agentViewEdit => 'Edit';
+
+  @override
+  String get agentViewStateRunning => 'Running';
+
+  @override
+  String get agentViewStateSucceeded => 'Succeeded';
+
+  @override
+  String get agentViewStateFailed => 'Failed';
+
+  @override
+  String get agentViewShowLess => 'Show less';
+
+  @override
+  String agentViewShowMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Show $count more lines',
+      one: 'Show 1 more line',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get agentViewLoadEarlier => 'Load earlier';
 
   @override

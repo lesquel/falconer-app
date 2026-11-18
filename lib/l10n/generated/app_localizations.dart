@@ -2601,6 +2601,48 @@ abstract class AppLocalizations {
   /// **'Showing the last state; trying to reach Herdr again.'**
   String get herdrOutOfDate;
 
+  /// No description provided for @agentViewCommand.
+  ///
+  /// In en, this message translates to:
+  /// **'Command'**
+  String get agentViewCommand;
+
+  /// No description provided for @agentViewEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get agentViewEdit;
+
+  /// No description provided for @agentViewStateRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get agentViewStateRunning;
+
+  /// No description provided for @agentViewStateSucceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Succeeded'**
+  String get agentViewStateSucceeded;
+
+  /// No description provided for @agentViewStateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get agentViewStateFailed;
+
+  /// No description provided for @agentViewShowLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get agentViewShowLess;
+
+  /// No description provided for @agentViewShowMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Show 1 more line} other{Show {count} more lines}}'**
+  String agentViewShowMore(int count);
+
   /// No description provided for @agentViewLoadEarlier.
   ///
   /// In en, this message translates to:

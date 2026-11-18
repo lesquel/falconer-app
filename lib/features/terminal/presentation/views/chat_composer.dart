@@ -21,6 +21,7 @@ class ChatComposer extends StatefulWidget {
     this.busy = false,
     this.micBuilder,
     this.autofocus = true,
+    this.compact = false,
   });
 
   final String initialText;
@@ -38,6 +39,9 @@ class ChatComposer extends StatefulWidget {
 
   /// The terminal opens the composer to type at once; the agent view does not.
   final bool autofocus;
+
+  /// One slim row for the agent view: paste moves into the `+` menu.
+  final bool compact;
 
   /// Builds the mic button; it calls the given function with dictated text.
   final Widget Function(ValueChanged<String> insert)? micBuilder;
@@ -92,10 +96,121 @@ class _ChatComposerState extends State<ChatComposer> {
     widget.onChanged('');
   }
 
+  Widget _compact(BuildContext context) {
+    final c = MoshColors.of(context);
+    final l = context.l10n;
+    final attach = widget.onAttach;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(6, 6, 10, 0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (widget.attachments.isNotEmpty)
+            SizedBox(
+              height: 72,
+              child: ListView.separated(
+                padding: const EdgeInsets.fromLTRB(8, 8, 4, 4),
+                scrollDirection: Axis.horizontal,
+                itemCount: widget.attachments.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
+                itemBuilder: (_, i) => _Thumb(
+                  attachment: widget.attachments[i],
+                  onRemove: () => widget.onRemoveAttachment(i),
+                ),
+              ),
+            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              PopupMenuButton<_ComposerAction>(
+                key: const Key('chat-more'),
+                tooltip: l.chatAttach,
+                icon: Icon(Icons.add, color: c.muted),
+                onSelected: (action) => switch (action) {
+                  _ComposerAction.attach => attach?.call(),
+                  _ComposerAction.paste => _paste(),
+                },
+                itemBuilder: (_) => [
+                  if (attach != null)
+                    PopupMenuItem(
+                      value: _ComposerAction.attach,
+                      enabled: !widget.busy,
+                      child: Text(l.chatAttach),
+                    ),
+                  PopupMenuItem(
+                    key: const Key('chat-paste'),
+                    value: _ComposerAction.paste,
+                    child: Text(l.paste),
+                  ),
+                ],
+              ),
+              Expanded(
+                child: Container(
+                  constraints: const BoxConstraints(minHeight: 44),
+                  padding: const EdgeInsets.only(left: 14, right: 4),
+                  decoration: BoxDecoration(
+                    color: c.surface,
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          key: const Key('chat-input'),
+                          controller: _text,
+                          autofocus: widget.autofocus,
+                          minLines: 1,
+                          maxLines: 6,
+                          keyboardType: TextInputType.multiline,
+                          textCapitalization: TextCapitalization.sentences,
+                          onChanged: widget.onChanged,
+                          decoration: InputDecoration(
+                            hintText: l.chatHint,
+                            isDense: true,
+                            filled: false,
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                      ?widget.micBuilder?.call(_dictated),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              IconButton.filled(
+                tooltip: l.chatSend,
+                style: IconButton.styleFrom(
+                  backgroundColor: c.accent,
+                  foregroundColor: c.onAccent,
+                  fixedSize: const Size(44, 44),
+                  minimumSize: const Size(44, 44),
+                ),
+                icon: widget.busy
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.arrow_upward),
+                onPressed: widget.busy ? null : _send,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = MoshColors.of(context);
     final l = context.l10n;
+    if (widget.compact) return _compact(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 8, 10, 0),
       child: Material(
@@ -180,6 +295,8 @@ class _ChatComposerState extends State<ChatComposer> {
     );
   }
 }
+
+enum _ComposerAction { attach, paste }
 
 class _Thumb extends StatelessWidget {
   const _Thumb({required this.attachment, required this.onRemove});

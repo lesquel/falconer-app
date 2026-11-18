@@ -24,6 +24,14 @@ String shortChoiceLabel(String label, {int max = choiceLabelChars}) {
 /// comes (the menu did not change) they enable again after this.
 const choiceResendAfter = Duration(seconds: 10);
 
+/// Longest labels that still fit side by side on a phone.
+const _rowLabelChars = 14;
+
+final _keyHint = RegExp(r'\s*\[[a-zA-Z](?:/[a-zA-Z])+\]:?\s*$');
+
+/// [question] without its trailing `[y/n/t]:` key hint; the buttons answer it.
+String choiceQuestion(String question) => question.replaceFirst(_keyHint, '');
+
 /// The menu the agent waits on, docked above the composer: who asks, the
 /// question, the command or file it is about, and one button per answer.
 /// A tap sends the option's keys once; every button stays disabled until a
@@ -92,16 +100,30 @@ class _PermissionCardState extends State<PermissionCard> {
     final block = widget.block;
     final permission = block.options.any((o) => o.kind != ChoiceKind.other);
     final detail = block.detail;
+    Widget button(int i) => _ChoiceButton(
+      index: i,
+      option: block.options[i],
+      sending: _sending == i,
+      onPressed: _sending == null ? () => unawaited(_choose(i)) : null,
+    );
+    final allow = block.options.indexWhere((o) => o.kind == ChoiceKind.allow);
+    final deny = block.options.indexWhere((o) => o.kind == ChoiceKind.deny);
+    final paired =
+        allow >= 0 &&
+        deny >= 0 &&
+        MediaQuery.textScalerOf(context).scale(1) <= 1.3 &&
+        block.options[allow].label.length <= _rowLabelChars &&
+        block.options[deny].label.length <= _rowLabelChars;
     return Container(
       key: const Key('agent-permission-card'),
       margin: const EdgeInsets.fromLTRB(12, 4, 12, 4),
       decoration: BoxDecoration(
-        color: c.surface,
-        borderRadius: BorderRadius.circular(MoshRadii.card),
-        border: Border.all(color: c.accent, width: 1.5),
+        color: c.warningSurface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: c.warning, width: 2),
       ),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -110,7 +132,7 @@ class _PermissionCardState extends State<PermissionCard> {
                 Icon(
                   permission ? Icons.shield_outlined : Icons.help_outline,
                   size: 18,
-                  color: c.accent,
+                  color: c.warning,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -118,7 +140,11 @@ class _PermissionCardState extends State<PermissionCard> {
                     permission
                         ? l.agentViewNeedsPermission(widget.agent)
                         : l.agentViewIsAsking(widget.agent),
-                    style: TextStyle(color: c.muted, fontSize: 13, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                      color: c.foreground,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ],
@@ -127,8 +153,8 @@ class _PermissionCardState extends State<PermissionCard> {
             Semantics(
               header: true,
               child: Text(
-                block.question,
-                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, height: 1.25),
+                choiceQuestion(block.question),
+                style: TextStyle(fontSize: 14, height: 1.3, color: c.foreground),
               ),
             ),
             if (detail != null) ...[
@@ -137,11 +163,12 @@ class _PermissionCardState extends State<PermissionCard> {
                 key: const Key('agent-permission-detail'),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
-                  color: c.surfaceHigh,
-                  borderRadius: BorderRadius.circular(12),
+                  color: c.background,
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: SelectableText(
                   detail,
+                  minLines: 1,
                   maxLines: 6,
                   style: TextStyle(
                     fontFamily: 'monospace',
@@ -153,16 +180,20 @@ class _PermissionCardState extends State<PermissionCard> {
               ),
             ],
             const SizedBox(height: 12),
-            for (final (i, o) in block.options.indexed)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: _ChoiceButton(
-                  index: i,
-                  option: o,
-                  sending: _sending == i,
-                  onPressed: _sending == null ? () => unawaited(_choose(i)) : null,
-                ),
-              ),
+            for (final (i, _) in block.options.indexed)
+              if (paired && i == allow)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Expanded(child: button(allow)),
+                      const SizedBox(width: 8),
+                      Expanded(child: button(deny)),
+                    ],
+                  ),
+                )
+              else if (!paired || i != deny)
+                Padding(padding: const EdgeInsets.only(bottom: 8), child: button(i)),
           ],
         ),
       ),
@@ -192,12 +223,12 @@ class _ChoiceButton extends StatelessWidget {
       ChoiceKind.allow => Icons.check,
       ChoiceKind.allowAlways => Icons.done_all,
       ChoiceKind.deny => Icons.close,
-      ChoiceKind.other => Icons.chevron_right,
+      ChoiceKind.other => option.selected ? Icons.radio_button_checked : Icons.radio_button_off,
     };
     final (Color? bg, Color fg) = switch (option.kind) {
-      ChoiceKind.allow => (c.accent, c.onAccent),
-      ChoiceKind.allowAlways => (c.surfaceHigh, c.foreground),
-      ChoiceKind.deny => (null, c.danger),
+      ChoiceKind.allow => (c.warning, c.onWarning),
+      ChoiceKind.allowAlways => (c.background, c.foreground),
+      ChoiceKind.deny => (null, c.foreground),
       ChoiceKind.other => (null, c.foreground),
     };
     final Widget icon = sending
@@ -205,7 +236,7 @@ class _ChoiceButton extends StatelessWidget {
             dimension: 18,
             child: CircularProgressIndicator(strokeWidth: 2, color: fg),
           )
-        : Icon(iconData, size: 20);
+        : Icon(iconData, size: 20, color: onPressed == null ? c.muted : fg);
     final label = Row(
       children: [
         Expanded(child: Text(short, maxLines: 2, overflow: TextOverflow.ellipsis)),
@@ -223,8 +254,8 @@ class _ChoiceButton extends StatelessWidget {
     );
     final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(MoshRadii.key));
     const padding = EdgeInsets.symmetric(horizontal: 16, vertical: 12);
-    const size = Size(double.infinity, 52);
-    const text = TextStyle(fontSize: 15, fontWeight: FontWeight.w700);
+    const size = Size(double.infinity, 48);
+    const text = TextStyle(fontFamily: 'Manrope', fontSize: 15, fontWeight: FontWeight.w700);
     final disabledFg = c.muted;
     final key = Key('choice-$index');
     final Widget button = switch (option.kind) {
@@ -253,9 +284,10 @@ class _ChoiceButton extends StatelessWidget {
           shape: shape,
           alignment: Alignment.centerLeft,
           textStyle: text,
+          backgroundColor: Colors.transparent,
           foregroundColor: fg,
           disabledForegroundColor: disabledFg,
-          side: BorderSide(color: onPressed == null ? c.outline : fg, width: 1.5),
+          side: BorderSide(color: onPressed == null ? c.outline : c.muted, width: 1.5),
         ),
         onPressed: onPressed,
         icon: icon,
