@@ -18,6 +18,20 @@
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>openmosh</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>openmosh</string>
+			</array>
+		</dict>
+	</array>
+	<!-- openmosh:// only launches the app at home: deep linking stays off. -->
 	<key>FlutterDeepLinkingEnabled</key>
 	<false/>
 	<key>CFBundleVersion</key>

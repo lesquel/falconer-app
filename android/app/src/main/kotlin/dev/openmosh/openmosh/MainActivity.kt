@@ -28,7 +28,8 @@ class MainActivity : FlutterFragmentActivity() {
 
     // External links are blocked: the exported launcher activity would
     // otherwise hand an intent's `route` extra to Flutter as the initial
-    // route, even with deep linking off. The app always starts at home.
+    // route, even with deep linking off. The app always starts at home, also
+    // when an openmosh:// link (a Web Push notification tap) launches it.
     override fun getInitialRoute(): String = "/"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {

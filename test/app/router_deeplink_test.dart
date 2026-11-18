@@ -36,6 +36,21 @@ void main() {
     expect(router.routeInformationProvider.value.uri.toString(), '/');
   });
 
+  testWidgets('an openmosh:// link only opens the app at home', (t) async {
+    for (final link in [
+      'openmosh:///inbox',
+      'openmosh:///inbox/h1/ev1?action=allow',
+      'openmosh:///webpush?d=abc',
+      'openmosh://pair?c=abc',
+      'openmosh:///settings',
+    ]) {
+      t.binding.platformDispatcher.defaultRouteNameTestValue = link;
+      final router = buildRouter();
+      expect(router.routeInformationProvider.value.uri.toString(), '/', reason: link);
+      router.dispose();
+    }
+  });
+
   testWidgets('an approve or deny answer in the URL is never preselected', (t) async {
     await t.pumpWidget(const SizedBox());
     final context = t.element(find.byType(SizedBox));
